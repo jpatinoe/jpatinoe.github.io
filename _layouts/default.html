@@ -23,6 +23,14 @@
 
         <p>{{ site.description | default: site.github.project_tagline }}</p>
 
+        <div class="personal-info">
+          <p>📍 Auckland, New Zealand</p>
+          <p>🎓 <a href="https://www.auckland.ac.nz" target="_blank">University of Auckland</a></p>
+          <p>✉️ <a href="mailto:j.patino@auckland.ac.nz">Email me</a></p>
+          <p>🔗 <a href="https://orcid.org/0000-0002-2147-5406" target="_blank">ORCID</a></p>
+          <p>👤 <a href="https://profiles.auckland.ac.nz/j-patino" target="_blank">Profile</a></p>
+        </div>
+
         {% if site.github.is_project_page %}
         <p class="view"><a href="{{ site.github.repository_url }}">View the Project on GitHub <small>{{ site.github.repository_nwo }}</small></a></p>
         {% endif %}
@@ -38,6 +46,8 @@
           <li><a href="{{ site.github.repository_url }}">View On <strong>GitHub</strong></a></li>
         </ul>
         {% endif %}
+
+        
 
         <nav>
           <ul>
