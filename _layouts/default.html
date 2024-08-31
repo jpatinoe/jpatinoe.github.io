@@ -39,11 +39,11 @@
         </ul>
         {% endif %}
         
-        <!-- Add Navigation Menu Here -->
+       <!-- Navigation -->
         <nav>
           <ul>
             {% for page in site.pages %}
-              {% if page.title %}
+              {% if page.path in site.header_pages %}
                 <li><a href="{{ page.url | relative_url }}">{{ page.title }}</a></li>
               {% endif %}
             {% endfor %}
