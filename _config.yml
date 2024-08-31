@@ -4,3 +4,9 @@ description: This is my personal website
 theme: jekyll-theme-minimal
 
 github_username: jpatinoe
+
+header_pages:
+  - index.md
+  - about.md
+  - projects.md
+  - contact.md
