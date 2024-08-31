@@ -1,5 +1,7 @@
 utitle: J's website
 description: This is my personal and professional website
-theme: jekyll-theme-minimal
+remote_theme: "mmistakes/minimal-mistakes
+plugins:
+- jekyll-remote-theme
 
 github_username: jpatinoe
