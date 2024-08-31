@@ -6,7 +6,7 @@ theme: jekyll-theme-minimal
 github_username: jpatinoe
 
 header_pages:
-  - a-index.md
+  - index.md
   - b-about.md
   - c-projects.md
   - d-contact.md
