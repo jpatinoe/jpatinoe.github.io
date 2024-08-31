@@ -7,7 +7,7 @@ permalink: /projects/
 ## Projects
 
 ### Current Work
-I am currently working on my **PhD thesis** titled *"Transitions to Wild Chaos in a Four-Dimensional Lorenz-like System"* at the *University of Auckland*. This research explores the intricate dynamics and chaos in higher-dimensional systems given by a system of differential equations. You can check my posters [here](https://auckland.figshare.com/authors/Juan_Patino_Echeverria/12040190), they show some reults of my research.
+I am currently working on my **PhD thesis** titled *"Transitions to Wild Chaos in a Four-Dimensional Lorenz-like System"* under the supervision of Professors [Hinke Osinga](https://www.math.auckland.ac.nz/~hinke/) and [Bernd Krauskopf](https://www.math.auckland.ac.nz/~berndk/) at the *University of Auckland*. This research explores the intricate dynamics and chaos in higher-dimensional systems given by a system of differential equations. You can check my posters [here](https://auckland.figshare.com/authors/Juan_Patino_Echeverria/12040190), they show some reults of my research.
 
 You can also check out my 3-Minute Thesis Competition video below:
 
