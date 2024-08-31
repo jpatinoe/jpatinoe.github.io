@@ -14,7 +14,7 @@ You can also check out my 3-Minute Thesis Competition video below:
 <div class="video-container">
 <iframe width="560" height="315" src="https://www.youtube.com/embed/WCe56C2lkiY?si=UBBADr402NKsvgLU" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 </div>
-
+<br><br>
 ### Previous Research
 - **Summer Research Scholarship**, *Victoria University of Wellington*  
   Collaborated with [Brendan Harding](https://people.wgtn.ac.nz/brendan.harding/publications) in **Fluid Dynamics**, focusing on understanding **bifurcation phenomena** in inertial particle focusing in fluid flow through spiral ducts: dynamics, and particle separation.
