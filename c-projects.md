@@ -7,10 +7,15 @@ permalink: /projects/
 ## Projects
 
 ### Current Work
-I am currently working on my **PhD thesis** titled *"Transitions to Wild Chaos in a Four-Dimensional Lorenz-like System"* at the *University of Auckland*. This research explores the intricate dynamics and chaos in higher-dimensional systems given by a system of differential equations. Below is a poster that summarises some reults of my research:
+I am currently working on my **PhD thesis** titled *"Transitions to Wild Chaos in a Four-Dimensional Lorenz-like System"* at the *University of Auckland*. This research explores the intricate dynamics and chaos in higher-dimensional systems given by a system of differential equations. You can check my posters [here](https://auckland.figshare.com/authors/Juan_Patino_Echeverria/12040190), they show some reults of my research.
 
-![Thesis Poster](https://jpatinoe.github.io/jpatinoe.github.io/Poster%20Ireland%20Final.jpg)
-[Click here to view the full poster (PDF)](https://jpatinoe.github.io/jpatinoe.github.io/Poster%20Ireland%20Final.pdf)
+You can also check out my 3-Minute Thesis Competition video below:
+
+<div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; max-width: 100%; height: auto;">
+  <iframe src="https://www.youtube.com/watch?v=WCe56C2lkiY" frameborder="0" allowfullscreen style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></iframe>
+</div>
+
+
 
 ### Previous Research
 - **Summer Research Scholarship**, *Victoria University of Wellington*  
