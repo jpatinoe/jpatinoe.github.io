@@ -5,8 +5,6 @@ title: Home
 
 # Welcome to my website
 
-![Github Profile Picture](https://github.com/jpatinoe.png)
-
 Hello! I'm Juan, and this is my personal website.
 
 ## About me 
