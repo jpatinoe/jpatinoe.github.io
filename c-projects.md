@@ -24,5 +24,5 @@ You can also check out my 3-Minute Thesis Competition video below:
   Worked under the supervision of [Mark McGuinness](https://people.wgtn.ac.nz/mark.mcguinness) on a project investigating **synchronisation phenomena** in coupled oscillators.
 
 ### Additional Projects
-Prior to my mathematics research, I developed and coordinated an online teaching project called **Ingooz**, aimed at helping university students connect with qualified tutors from across Latin America.
+Prior to my mathematics research, I developed and coordinated an online teaching project called [**Ingooz**](https://www.ingooz.com), aimed at helping university students connect with qualified tutors from across Latin America.
 
