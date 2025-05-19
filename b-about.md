@@ -20,6 +20,7 @@ permalink: /about/
 - **Graduate Teaching Assistant**, *Universidad Argentina de la Empresa*, Argentina
 
 ### Awards
+- *Red Sock Award for best poster presentation*, *SIAM* (2025)
 - *T.M. Cherry Prize for best student presentation*, *ANZIAM* (2025)
 - *ANZIAM Prize for best poster presentation*, *Joint meeting of the NZMS, AustMS and AMS* (2024)
 - *Aitken Prize for best student presenntation*, *New Zealand Mathematical Society* (2023)
