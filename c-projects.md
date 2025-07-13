@@ -8,7 +8,7 @@ permalink: /projects/
 
 ### Publications
 #### Preprints
-Patiño-Echeverría J, Krauskopf B and Osinga H M 2025 Global bifurcation structure of a four-dimensional Lorenz-like system with a wild chaotic attractor [*Preprint*]{https://www.math.auckland.ac.nz/~hinke/preprints/pko_4DLorenz_preprint.pdf}, University of Auckland 
+Patiño-Echeverría J, Krauskopf B and Osinga H M 2025 Global bifurcation structure of a four-dimensional Lorenz-like system with a wild chaotic attractor [*Preprint*](https://www.math.auckland.ac.nz/~hinke/preprints/pko_4DLorenz_preprint.pdf), University of Auckland 
 
 
 ### Current Work
