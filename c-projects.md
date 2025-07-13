@@ -6,6 +6,11 @@ permalink: /projects/
 
 ## Projects
 
+### Publications
+#### Preprints
+Patiño-Echeverría J, Krauskopf B and Osinga H M 2025 Global bifurcation structure of a four-dimensional Lorenz-like system with a wild chaotic attractor [*Preprint*]{https://www.math.auckland.ac.nz/~hinke/preprints/pko_4DLorenz_preprint.pdf}, University of Auckland 
+
+
 ### Current Work
 I am currently working on my **PhD thesis** titled *"Transitions to Wild Chaos in a Four-Dimensional Lorenz-like System"* under the supervision of Professors [Hinke Osinga](https://www.math.auckland.ac.nz/~hinke/) and [Bernd Krauskopf](https://www.math.auckland.ac.nz/~berndk/) at the *University of Auckland*. This research explores the intricate dynamics and chaos in higher-dimensional systems given by a system of differential equations. You can check my posters [here](https://auckland.figshare.com/authors/Juan_Patino_Echeverria/12040190), they show some results of my research.
 ![Lorenz Attractor](4D Wild Chaotic Attractor.gif)
