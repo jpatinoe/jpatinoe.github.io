@@ -24,8 +24,8 @@ My research is in **dynamical systems**: I study how deterministic equations can
 </div>
 
 ### Selected highlights
-- **Preprint (2025):** *Global bifurcation structure of a four-dimensional Lorenz-like system with a wild chaotic attractor* — see **Projects**.
-- **Awards:** A couple of best student talks / poster awards (see **About**).
+- **Preprint (2025):** *Global bifurcation structure of a four-dimensional Lorenz-like system with a wild chaotic attractor* — see [**Projects**](https://jpatinoe.github.io/projects/).
+- **Awards:** A couple of best student talks / poster awards - see [**About**](https://jpatinoe.github.io/about/).
 - **Teaching:** Currently teaching two courses: Differential Equations and Methods in Applied Mathematics.
 
 ### Outside maths
