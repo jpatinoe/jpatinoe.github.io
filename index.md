@@ -9,14 +9,10 @@ I’m **Juan Patiño-Echeverría**, currently a **Professional Teaching Fellow**
 
 My research is in **dynamical systems**: I study how deterministic equations can produce behaviour that looks unpredictable, and how we can compute the mechanisms behind that transition to chaos. My PhD thesis is titled **“Transitions to Wild Chaos in a Four-Dimensional Lorenz-like System”**, supervised by Professors [Hinke Osinga](https://www.math.auckland.ac.nz/~hinke/) and [Bernd Krauskopf](https://www.math.auckland.ac.nz/~berndk/).
 
-<div class="grid two">
+<div class="grid one">
   <div class="card">
-    <strong>What I work on</strong><br>
+    <strong>Research Interests</strong><br>
     <span class="subtle">Chaos, bifurcations, nonlinear dynamics, numerical continuation, scientific computing.</span>
-  </div>
-  <div class="card">
-    <strong>How I work with</strong><br>
-    <span class="subtle">AUTO, MATLAB, Julia,  with a focus on reproducible computation and clear visualisation.</span>
   </div>
 </div>
 
