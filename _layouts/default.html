@@ -1,113 +1,290 @@
 <!DOCTYPE html>
-<html lang="{{ site.lang | default: "en-US" }}">
+<html lang="{{ site.lang | default: "en" }}">
   <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
 
     {% seo %}
     <link rel="stylesheet" href="{{ "/assets/css/style.css?v=" | append: site.github.build_revision | relative_url }}">
-    <!--[if lt IE 9]>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.min.js"></script>
-    <![endif]-->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
     {% include head-custom.html %}
 
     <style>
-      .video-container {
+      :root{
+        --bg: #fbfbfc;
+        --panel: #ffffff;
+        --text: #111827;
+        --muted: #6b7280;
+        --border: rgba(17, 24, 39, 0.10);
+        --shadow: 0 10px 30px rgba(17, 24, 39, 0.08);
+        --accent: #2563eb; /* tasteful modern blue */
+        --accent-soft: rgba(37, 99, 235, 0.12);
+        --maxw: 980px;
+        --radius: 14px;
+      }
+
+      @media (prefers-color-scheme: dark){
+        :root{
+          --bg: #0b1220;
+          --panel: #0f172a;
+          --text: #e5e7eb;
+          --muted: #9ca3af;
+          --border: rgba(229, 231, 235, 0.12);
+          --shadow: 0 12px 40px rgba(0,0,0,0.35);
+          --accent: #60a5fa;
+          --accent-soft: rgba(96, 165, 250, 0.16);
+        }
+      }
+
+      html, body { background: var(--bg); color: var(--text); }
+      body {
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+        line-height: 1.6;
+      }
+
+      /* Override minimal theme wrapper a bit */
+      .wrapper{
+        max-width: var(--maxw);
+        margin: 0 auto;
+        padding: 28px 18px;
+      }
+
+      header{
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 18px 18px 12px 18px;
+        box-shadow: var(--shadow);
+      }
+
+      header h1{
+        font-size: 1.35rem;
+        letter-spacing: -0.02em;
+        margin-bottom: 6px;
+      }
+
+      header p{
+        margin: 6px 0;
+        color: var(--muted);
+      }
+
+      a{ color: var(--accent); }
+      a:hover{ text-decoration: underline; }
+
+      .avatar{
+        border-radius: 999px;
+        width: 120px;
+        height: 120px;
+        object-fit: cover;
+        border: 1px solid var(--border);
+        box-shadow: 0 8px 18px rgba(0,0,0,0.10);
+      }
+
+      .meta{
+        margin-top: 10px;
+        padding-top: 10px;
+        border-top: 1px solid var(--border);
+      }
+
+      .meta p{
+        margin: 6px 0;
+        display: flex;
+        gap: 10px;
+        align-items: center;
+      }
+
+      .chip-row{
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 10px;
+      }
+
+      .chip{
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        border: 1px solid var(--border);
+        background: linear-gradient(180deg, var(--panel), rgba(255,255,255,0.0));
+        padding: 6px 10px;
+        border-radius: 999px;
+        font-size: 0.92rem;
+        color: var(--muted);
+      }
+
+      nav{
+        margin-top: 14px;
+        padding-top: 12px;
+        border-top: 1px solid var(--border);
+      }
+
+      nav ul{
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: grid;
+        gap: 6px;
+      }
+
+      nav a{
+        display: block;
+        padding: 8px 10px;
+        border-radius: 10px;
+        text-decoration: none;
+        border: 1px solid transparent;
+      }
+
+      nav a:hover{
+        background: var(--accent-soft);
+        border-color: var(--border);
+        text-decoration: none;
+      }
+
+      nav a.active{
+        background: var(--accent-soft);
+        border-color: var(--border);
+        font-weight: 600;
+      }
+
+      section{
+        margin-top: 16px;
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 18px;
+        box-shadow: var(--shadow);
+      }
+
+      section h2{
+        margin-top: 0.2rem;
+        letter-spacing: -0.02em;
+      }
+
+      section h3{
+        margin-top: 1.3rem;
+      }
+
+      .card{
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 14px 14px;
+        background: rgba(255,255,255,0.02);
+      }
+
+      .grid{
+        display: grid;
+        gap: 12px;
+      }
+      @media (min-width: 820px){
+        .grid.two{ grid-template-columns: 1fr 1fr; }
+      }
+
+      .subtle{
+        color: var(--muted);
+      }
+
+      .figure{
+        margin-top: 10px;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: rgba(0,0,0,0.02);
+        padding: 10px;
+      }
+
+      .figure img{
+        display: block;
+        width: 100%;
+        height: auto;
+        border-radius: 10px;
+      }
+
+      .video-container{
         position: relative;
-        padding-bottom: 56.25%; /* 16:9 aspect ratio */
+        padding-bottom: 56.25%;
         height: 0;
         overflow: hidden;
         max-width: 100%;
-        background: #000; /* optional, to give a background color while loading */
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: #000;
       }
-
-      .video-container iframe {
+      .video-container iframe{
         position: absolute;
-        top: 0;
-        left: 0;
+        top: 0; left: 0;
         width: 100%;
         height: 100%;
         border: 0;
       }
-      .personal-info p {
-        margin: 5px 0; /* Reduced spacing between lines */
-        padding: 0;
+
+      footer{
+        margin-top: 14px;
+        color: var(--muted);
+        font-size: 0.92rem;
+        text-align: center;
       }
 
-      .personal-info a {
-        color: #007acc; /* Customize link color */
-        text-decoration: none;
-      }
-
-      .personal-info a:hover {
-        text-decoration: underline;
+      /* Make paragraphs a little narrower for readability */
+      section p, section li{
+        max-width: 70ch;
       }
     </style>
-    
   </head>
+
   <body>
     <div class="wrapper">
       <header>
-        <h1><a href="{{ "/" | absolute_url }}">{{ site.title | default: site.github.repository_name }}</a></h1>
+        <h1><a href="{{ "/" | relative_url }}">{{ site.title | default: site.github.repository_name }}</a></h1>
 
         {% if site.logo %}
-          <img src="{{ site.logo | relative_url }}" alt="Logo" style="border-radius: 50%; width: 150px; height: 150px;" />
+          <img class="avatar" src="{{ site.logo | relative_url }}" alt="Portrait / avatar" />
         {% endif %}
 
         <p>{{ site.description | default: site.github.project_tagline }}</p>
 
-        <div class="personal-info">
-          <p>📍 Auckland, New Zealand</p>
-          <p>✉️ <a href="mailto:j.patino@auckland.ac.nz">Email me</a></p>
-          <p>🔗 <a href="https://orcid.org/0000-0002-2147-5406" target="_blank">ORCID</a></p>
-          <p>🎓 <a href="https://scholar.google.com/citations?user=61JP7bIAAAAJ&hl=en&authuser=1" target="_blank">Google Scholar</a></p>
-          <p> <i class="fa-brands fa-linkedin"></i>&nbsp; <a href="https://www.linkedin.com/in/jpatinoe/" target="_blank">LinkedIn</a></p>
-          <p>👤 <a href="https://profiles.auckland.ac.nz/j-patino" target="_blank">UoA Profile</a></p>
+        <div class="chip-row">
+          <span class="chip">📍 Auckland, New Zealand</span>
+          <span class="chip">🧮 Dynamical systems</span>
+          <span class="chip">🌀 Chaos & bifurcations</span>
         </div>
 
-        {% if site.github.is_project_page %}
-        <p class="view"><a href="{{ site.github.repository_url }}">View the Project on GitHub <small>{{ site.github.repository_nwo }}</small></a></p>
-        {% endif %}
+        <div class="meta">
+          <p>✉️ <a href="mailto:j.patino@auckland.ac.nz">j.patino@auckland.ac.nz</a></p>
+          <p>🔗 <a href="https://orcid.org/0000-0002-2147-5406" target="_blank" rel="noopener">ORCID</a></p>
+          <p>🎓 <a href="https://scholar.google.com/citations?user=61JP7bIAAAAJ&hl=en&authuser=1" target="_blank" rel="noopener">Google Scholar</a></p>
+          <p><i class="fa-brands fa-linkedin"></i>&nbsp; <a href="https://www.linkedin.com/in/jpatinoe/" target="_blank" rel="noopener">LinkedIn</a></p>
+          <p>👤 <a href="https://profiles.auckland.ac.nz/j-patino" target="_blank" rel="noopener">University profile</a></p>
+          <p>💻 <a href="https://github.com/jpatinoe" target="_blank" rel="noopener">GitHub</a></p>
+        </div>
 
-        {% if site.github.is_user_page %}
-        <p class="view"><a href="{{ site.github.owner_url }}">View My GitHub Profile</a></p>
-        {% endif %}
-
-        {% if site.show_downloads %}
-        <ul class="downloads">
-          <li><a href="{{ site.github.zip_url }}">Download <strong>ZIP File</strong></a></li>
-          <li><a href="{{ site.github.tar_url }}">Download <strong>TAR Ball</strong></a></li>
-          <li><a href="{{ site.github.repository_url }}">View On <strong>GitHub</strong></a></li>
-        </ul>
-        {% endif %}
-
-        
-
-<nav>
-  <ul>
-    <li><a href="{{ "/" | relative_url }}">Home</a></li> <!-- Ensure home is always there -->
-    {% for page in site.pages %}
-      {% if page.title and page.url != "/" %}
-        <li><a href="{{ page.url | relative_url }}">{{ page.title }}</a></li>
-      {% endif %}
-    {% endfor %}
-  </ul>
-</nav>
-
-        
+        <nav aria-label="Site navigation">
+          <ul>
+            {% assign current = page.url | relative_url %}
+            {% for p in site.header_pages %}
+              {% assign nav_page = site.pages | where: "path", p | first %}
+              {% if nav_page %}
+                {% assign nav_url = nav_page.url | relative_url %}
+                <li>
+                  <a href="{{ nav_url }}" class="{% if nav_url == current %}active{% endif %}">
+                    {{ nav_page.title }}
+                  </a>
+                </li>
+              {% endif %}
+            {% endfor %}
+          </ul>
+        </nav>
       </header>
+
       <section>
         {{ content }}
       </section>
+
       <footer>
-        {% if site.github.is_project_page %}
-        <p>This project is maintained by <a href="{{ site.github.owner_url }}">{{ site.github.owner_name }}</a></p>
-        {% endif %}
-        
+        <span class="subtle">© {{ "now" | date: "%Y" }} {{ site.title }} · Built with GitHub Pages</span>
       </footer>
     </div>
+
     <script src="{{ "/assets/js/scale.fix.js" | relative_url }}"></script>
   </body>
 </html>
