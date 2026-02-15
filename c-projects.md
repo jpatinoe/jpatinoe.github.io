@@ -6,17 +6,11 @@ permalink: /projects/
 
 ## Projects
 
-<div class="grid two">
+<div class="grid one">
   <div class="card">
     <strong>Research (PhD)</strong><br>
     <span class="subtle">
-      Wild chaos, global bifurcations, invariant manifolds, and computational classification tools.
-    </span>
-  </div>
-  <div class="card">
-    <strong>Computing</strong><br>
-    <span class="subtle">
-      AUTO + MATLAB + Julia workflows, with an emphasis on reproducible pipelines and clear figures.
+      Wild chaos, global bifurcations, invariant manifolds, and numerical continuation.
     </span>
   </div>
 </div>
