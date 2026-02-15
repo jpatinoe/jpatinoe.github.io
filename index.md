@@ -27,6 +27,7 @@ My research is in **dynamical systems**: I study how deterministic equations can
   </div>
 </div>
 
+
 ### Selected highlights
 - **Preprint (2025):** *Global bifurcation structure of a four-dimensional Lorenz-like system with a wild chaotic attractor* — see **Projects**.
 - **Awards:** A couple of best student talks / poster awards (see **About**).
