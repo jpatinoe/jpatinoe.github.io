@@ -6,16 +6,16 @@ permalink: /about/
 
 ## About
 
-I’m a mathematician working in **dynamical systems**, with an emphasis on **computation**, **bifurcation structure**, and the geometry of chaos.
+I’m a mathematician working in **dynamical systems**, with an emphasis on numerical computation, bifurcation analysis, and the geometry of chaos.
 
 ### Education
-- **PhD (Mathematics)**, *University of Auckland*, New Zealand (in progress)  
+- **PhD (Mathematics)**, *University of Auckland*, New Zealand (awaiting oral examination)  
 - **Master in Higher Education**, *University of Palermo*, Argentina  
 - **BSc (Hons, First Class) Applied Mathematics**, *Victoria University of Wellington*, New Zealand  
 
 ### Current role
 - **Professional Teaching Fellow**, *University of Auckland*  
-  (teaching + course development, with a focus on clear explanations and good learning design)
+  (teaching + course development. MATHS260 (Differential Equations) and MATHS362 (Methods in Applied Mathematics))
 
 ### Previous academic roles
 - **Graduate Teaching Assistant**, *University of Auckland*, New Zealand  
