@@ -11,225 +11,210 @@
 
     {% include head-custom.html %}
 
-    <style>
-      :root{
-        --bg: #fbfbfc;
-        --panel: #ffffff;
-        --text: #111827;
-        --muted: #6b7280;
-        --border: rgba(17, 24, 39, 0.10);
-        --shadow: 0 10px 30px rgba(17, 24, 39, 0.08);
-        --accent: #2563eb; /* tasteful modern blue */
-        --accent-soft: rgba(37, 99, 235, 0.12);
-        --maxw: 980px;
-        --radius: 14px;
-      }
+<style>
+  :root{
+    --bg: #faf9f6;          /* super light cream */
+    --panel: #ffffff;       /* cards */
+    --text: #111827;
+    --muted: #6b7280;
+    --border: rgba(17, 24, 39, 0.08);
+    --shadow: 0 8px 25px rgba(0, 0, 0, 0.04);
+    --accent: #0b3c5d;      /* navy */
+    --accent-hover: #174a75;
+    --accent-soft: rgba(11, 60, 93, 0.06);
+    --maxw: 980px;
+    --radius: 14px;
+  }
 
-      @media (prefers-color-scheme: dark){
-        :root{
-          --bg: #0b1220;
-          --panel: #0f172a;
-          --text: #e5e7eb;
-          --muted: #9ca3af;
-          --border: rgba(229, 231, 235, 0.12);
-          --shadow: 0 12px 40px rgba(0,0,0,0.35);
-          --accent: #60a5fa;
-          --accent-soft: rgba(96, 165, 250, 0.16);
-        }
-      }
+  html, body { 
+    background: var(--bg); 
+    color: var(--text); 
+  }
 
-      html, body { background: var(--bg); color: var(--text); }
-      body {
-        font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
-        line-height: 1.6;
-      }
+  body {
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+    line-height: 1.6;
+  }
 
-      /* Override minimal theme wrapper a bit */
-      .wrapper{
-        max-width: var(--maxw);
-        margin: 0 auto;
-        padding: 28px 18px;
-      }
+  .wrapper{
+    max-width: var(--maxw);
+    margin: 0 auto;
+    padding: 32px 18px;
+  }
 
-      header{
-        background: var(--panel);
-        border: 1px solid var(--border);
-        border-radius: var(--radius);
-        padding: 18px 18px 12px 18px;
-        box-shadow: var(--shadow);
-      }
+  header{
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 20px 14px 20px;
+    box-shadow: var(--shadow);
+  }
 
-      header h1{
-        font-size: 1.35rem;
-        letter-spacing: -0.02em;
-        margin-bottom: 6px;
-      }
+  header h1{
+    font-size: 1.35rem;
+    letter-spacing: -0.02em;
+    margin-bottom: 6px;
+  }
 
-      header p{
-        margin: 6px 0;
-        color: var(--muted);
-      }
+  header p{
+    margin: 6px 0;
+    color: var(--muted);
+  }
 
-      a{ color: var(--accent); }
-      a:hover{ text-decoration: underline; }
+  a{ 
+    color: var(--accent); 
+    text-decoration: none;
+  }
 
-      .avatar{
-        border-radius: 999px;
-        width: 120px;
-        height: 120px;
-        object-fit: cover;
-        border: 1px solid var(--border);
-        box-shadow: 0 8px 18px rgba(0,0,0,0.10);
-      }
+  a:hover{ 
+    color: var(--accent-hover);
+    text-decoration: underline; 
+  }
 
-      .meta{
-        margin-top: 10px;
-        padding-top: 10px;
-        border-top: 1px solid var(--border);
-      }
+  .avatar{
+    border-radius: 999px;
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    border: 1px solid var(--border);
+  }
 
-      .meta p{
-        margin: 6px 0;
-        display: flex;
-        gap: 10px;
-        align-items: center;
-      }
+  .meta{
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border);
+  }
 
-      .chip-row{
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-        margin-top: 10px;
-      }
+  .meta p{
+    margin: 6px 0;
+  }
 
-      .chip{
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        border: 1px solid var(--border);
-        background: linear-gradient(180deg, var(--panel), rgba(255,255,255,0.0));
-        padding: 6px 10px;
-        border-radius: 999px;
-        font-size: 0.92rem;
-        color: var(--muted);
-      }
+  .chip-row{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+  }
 
-      nav{
-        margin-top: 14px;
-        padding-top: 12px;
-        border-top: 1px solid var(--border);
-      }
+  .chip{
+    border: 1px solid var(--border);
+    background: var(--bg);
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-size: 0.9rem;
+    color: var(--muted);
+  }
 
-      nav ul{
-        list-style: none;
-        padding: 0;
-        margin: 0;
-        display: grid;
-        gap: 6px;
-      }
+  nav{
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+  }
 
-      nav a{
-        display: block;
-        padding: 8px 10px;
-        border-radius: 10px;
-        text-decoration: none;
-        border: 1px solid transparent;
-      }
+  nav ul{
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 6px;
+  }
 
-      nav a:hover{
-        background: var(--accent-soft);
-        border-color: var(--border);
-        text-decoration: none;
-      }
+  nav a{
+    display: block;
+    padding: 8px 10px;
+    border-radius: 10px;
+    border: 1px solid transparent;
+  }
 
-      nav a.active{
-        background: var(--accent-soft);
-        border-color: var(--border);
-        font-weight: 600;
-      }
+  nav a:hover{
+    background: var(--accent-soft);
+    border-color: var(--border);
+    text-decoration: none;
+  }
 
-      section{
-        margin-top: 16px;
-        background: var(--panel);
-        border: 1px solid var(--border);
-        border-radius: var(--radius);
-        padding: 18px;
-        box-shadow: var(--shadow);
-      }
+  nav a.active{
+    background: var(--accent-soft);
+    border-color: var(--border);
+    font-weight: 600;
+  }
 
-      section h2{
-        margin-top: 0.2rem;
-        letter-spacing: -0.02em;
-      }
+  section{
+    margin-top: 18px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 22px;
+    box-shadow: var(--shadow);
+  }
 
-      section h3{
-        margin-top: 1.3rem;
-      }
+  section h2{
+    margin-top: 0.2rem;
+    letter-spacing: -0.02em;
+  }
 
-      .card{
-        border: 1px solid var(--border);
-        border-radius: 12px;
-        padding: 14px 14px;
-        background: rgba(255,255,255,0.02);
-      }
+  .card{
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px;
+    background: var(--panel);
+  }
 
-      .grid{
-        display: grid;
-        gap: 12px;
-      }
-      @media (min-width: 820px){
-        .grid.two{ grid-template-columns: 1fr 1fr; }
-      }
+  .grid{
+    display: grid;
+    gap: 12px;
+  }
 
-      .subtle{
-        color: var(--muted);
-      }
+  @media (min-width: 820px){
+    .grid.two{ grid-template-columns: 1fr 1fr; }
+  }
 
-      .figure{
-        margin-top: 10px;
-        border-radius: 12px;
-        border: 1px solid var(--border);
-        background: rgba(0,0,0,0.02);
-        padding: 10px;
-      }
+  .subtle{
+    color: var(--muted);
+  }
 
-      .figure img{
-        display: block;
-        width: 100%;
-        height: auto;
-        border-radius: 10px;
-      }
+  .figure{
+    margin-top: 12px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    padding: 10px;
+    background: var(--panel);
+  }
 
-      .video-container{
-        position: relative;
-        padding-bottom: 56.25%;
-        height: 0;
-        overflow: hidden;
-        max-width: 100%;
-        border-radius: 12px;
-        border: 1px solid var(--border);
-        background: #000;
-      }
-      .video-container iframe{
-        position: absolute;
-        top: 0; left: 0;
-        width: 100%;
-        height: 100%;
-        border: 0;
-      }
+  .figure img{
+    width: 100%;
+    border-radius: 10px;
+  }
 
-      footer{
-        margin-top: 14px;
-        color: var(--muted);
-        font-size: 0.92rem;
-        text-align: center;
-      }
+  .video-container{
+    position: relative;
+    padding-bottom: 56.25%;
+    height: 0;
+    overflow: hidden;
+    max-width: 100%;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+  }
 
-      /* Make paragraphs a little narrower for readability */
-      section p, section li{
-        max-width: 70ch;
-      }
-    </style>
+  .video-container iframe{
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+
+  footer{
+    margin-top: 16px;
+    color: var(--muted);
+    font-size: 0.9rem;
+    text-align: center;
+  }
+
+  section p, section li{
+    max-width: 70ch;
+  }
+</style>
+
   </head>
 
   <body>
@@ -245,17 +230,17 @@
 
         <div class="chip-row">
           <span class="chip">📍 Auckland, New Zealand</span>
-          <span class="chip">🧮 Dynamical systems</span>
-          <span class="chip">🌀 Chaos & bifurcations</span>
+          <span class="chip">Dynamical systems</span>
+          <span class="chip">Chaos & bifurcations</span>
         </div>
 
         <div class="meta">
           <p>✉️ <a href="mailto:j.patino@auckland.ac.nz">j.patino@auckland.ac.nz</a></p>
-          <p>🔗 <a href="https://orcid.org/0000-0002-2147-5406" target="_blank" rel="noopener">ORCID</a></p>
-          <p>🎓 <a href="https://scholar.google.com/citations?user=61JP7bIAAAAJ&hl=en&authuser=1" target="_blank" rel="noopener">Google Scholar</a></p>
-          <p><i class="fa-brands fa-linkedin"></i>&nbsp; <a href="https://www.linkedin.com/in/jpatinoe/" target="_blank" rel="noopener">LinkedIn</a></p>
-          <p>👤 <a href="https://profiles.auckland.ac.nz/j-patino" target="_blank" rel="noopener">University profile</a></p>
-          <p>💻 <a href="https://github.com/jpatinoe" target="_blank" rel="noopener">GitHub</a></p>
+          <p><a href="https://www.linkedin.com/in/jpatinoe/" target="_blank" rel="noopener">LinkedIn</a></p>
+          <p><a href="https://scholar.google.com/citations?user=61JP7bIAAAAJ&hl=en&authuser=1" target="_blank" rel="noopener">Google Scholar</a></p>
+          <p><a href="https://orcid.org/0000-0002-2147-5406" target="_blank" rel="noopener">ORCID</a></p>
+          <p><a href="https://github.com/jpatinoe" target="_blank" rel="noopener">GitHub</a></p>
+          <p><a href="https://profiles.auckland.ac.nz/j-patino" target="_blank" rel="noopener">University profile</a></p>
         </div>
 
         <nav aria-label="Site navigation">
@@ -279,10 +264,6 @@
       <section>
         {{ content }}
       </section>
-
-      <footer>
-        <span class="subtle">© {{ "now" | date: "%Y" }} {{ site.title }} · Built with GitHub Pages</span>
-      </footer>
     </div>
 
     <script src="{{ "/assets/js/scale.fix.js" | relative_url }}"></script>
