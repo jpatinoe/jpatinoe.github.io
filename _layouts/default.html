@@ -54,11 +54,13 @@
     font-size: 1.35rem;
     letter-spacing: -0.02em;
     margin-bottom: 6px;
+    text-align: center;
   }
 
   header p{
     margin: 6px 0;
     color: var(--muted);
+    text-align: center;
   }
 
   a{ 
@@ -77,6 +79,11 @@
     height: 120px;
     object-fit: cover;
     border: 1px solid var(--border);
+  }
+  /* Centre the avatar under the name */
+  header .avatar{
+    display: block;
+    margin: 12px auto 8px auto;  /* top | left/right | bottom */
   }
 
   .meta{
@@ -266,7 +273,7 @@
         </div>
 
         <div class="meta">
-          <p>✉️ <a href="mailto:j.patino@auckland.ac.nz">j.patino@auckland.ac.nz</a></p>
+          <p>✉️ <a href="mailto:j.patino@auckland.ac.nz">Email me</a></p>
           <p><a href="https://www.linkedin.com/in/jpatinoe/" target="_blank" rel="noopener">LinkedIn</a></p>
           <p><a href="https://scholar.google.com/citations?user=61JP7bIAAAAJ&hl=en&authuser=1" target="_blank" rel="noopener">Google Scholar</a></p>
           <p><a href="https://orcid.org/0000-0002-2147-5406" target="_blank" rel="noopener">ORCID</a></p>
