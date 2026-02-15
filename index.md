@@ -3,14 +3,37 @@ layout: default
 title: Home
 ---
 
-## Hello! Welcome to my website.
+## Kia ora — I’m Juan.
 
-I'm Juan Patino-Echeverria, a PhD student in Mathematics at the University of Auckland in New Zealand. I'm currently working on my thesis titled **"Transitions to Wild Chaos in a Four-Dimensional Lorenz-like System"** under the supervision of Professors [Hinke Osinga](https://www.math.auckland.ac.nz/~hinke/) and [Bernd Krauskopf](https://www.math.auckland.ac.nz/~berndk/). My research is supported by a University of Auckland Doctoral Scholarship. My research field is the broad area of dynamical systems, particularly in exploring higher-dimensional forms of chaos in vector fields. I am interested in nonlinear dynamics, bifurcation theory, and numerical continuation, which are the cornerstones of my work.
+I’m **Juan Patiño-Echeverría**, a **Professional Teaching Fellow** (and PhD candidate) in Mathematics at the **University of Auckland**.
 
-I primarily use AUTO, MATLAB, and Julia for my computational work. While I'm deeply interested in coding, I wouldn't call myself an expert (yet 😉). However, I'm always eager to learn and improve my skills. In addition to my research, I also work as a Graduate Teaching Assistant at the University of Auckland, where I enjoy helping students navigate the beauty of mathematics.
+My research lives in **dynamical systems**: I study how deterministic equations can produce behaviour that looks unpredictable — and how we can **compute** the mechanisms behind that transition to chaos. My PhD thesis is titled **“Transitions to Wild Chaos in a Four-Dimensional Lorenz-like System”**, supervised by Professors [Hinke Osinga](https://www.math.auckland.ac.nz/~hinke/) and [Bernd Krauskopf](https://www.math.auckland.ac.nz/~berndk/).
 
-When not immersed in mathematics, I am passionate about sports, particularly triathlon and open-water swimming. Music is another big part of my life, and I have a habit of making lists that I fully intend to complete one day!
+<div class="grid two">
+  <div class="card">
+    <strong>What I work on</strong><br>
+    <span class="subtle">Chaos, bifurcations, nonlinear dynamics, numerical continuation, scientific computing.</span>
+  </div>
+  <div class="card">
+    <strong>How I work</strong><br>
+    <span class="subtle">AUTO, MATLAB, Julia — with a focus on reproducible computation and clear visualisation.</span>
+  </div>
+</div>
+
+<div class="figure">
+  <img src="{{ "/attractor.gif" | relative_url }}" alt="Animated figure: wild chaotic attractor (4D Lorenz-like system)">
+  <div class="subtle" style="margin-top:8px;">
+    A small glimpse of the kind of geometry I spend my days thinking about.
+  </div>
+</div>
+
+### Selected highlights
+- **Preprint (2025):** *Global bifurcation structure of a four-dimensional Lorenz-like system with a wild chaotic attractor* — see **Projects**.
+- **Awards:** multiple best student talk / poster awards (see **About**).
+- **Teaching:** I enjoy making difficult ideas feel learnable — and I care a lot about clarity.
+
+### Outside maths
+Triathlon and open-water swimming keep me honest. I also like writing small programs to automate boring tasks, and I maintain ambitious lists I fully intend to finish one day.
 
 ## Contact
-
-You can reach me at [j.patino@auckland.ac.nz](mailto:jpatino@auckland.ac.nz)
+Email is best: [j.patino@auckland.ac.nz](mailto:j.patino@auckland.ac.nz)
