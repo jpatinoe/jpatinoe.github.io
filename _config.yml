@@ -1,10 +1,14 @@
-title: J. Patino-Echeverria
+title: Juan Patiño-Echeverría
 logo: https://github.com/jpatinoe.png
-description: PhD Student in Mathematics
+description: Dynamical systems • chaos • computation
 theme: jekyll-theme-minimal
 
 github_username: jpatinoe
 
+# Nice URLs
+permalink: pretty
+
+# Navigation order (we will render this explicitly in the layout)
 header_pages:
   - index.md
   - b-about.md
