@@ -167,7 +167,7 @@
     display: grid;
     gap: 12px;
   }
-
+  
   @media (min-width: 820px){
     .grid.two{ grid-template-columns: 1fr 1fr; }
   }
@@ -218,8 +218,36 @@
   section p, section li{
     max-width: 70ch;
   }
+
+  /* --- Layout: two columns on desktop, stacked on mobile --- */
+@media (min-width: 820px){
+  .wrapper{
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 18px;
+    align-items: start;
+  }
+
+  header{
+    position: sticky;
+    top: 18px;
+    max-height: calc(100vh - 36px);
+    overflow: auto; /* <-- this makes the sidebar scroll */
+  }
+
+  section{
+    margin-top: 0; /* because grid gap handles spacing */
+  }
+}
+  nav{
+  max-height: 45vh;
+  overflow: auto;
+  padding-right: 6px; /* room for scrollbar */
+}
+
 </style>
 
+    
   </head>
 
   <body>
