@@ -3,11 +3,11 @@ layout: default
 title: Home
 ---
 
-## Kia ora — I’m Juan.
+## Kia ora!
 
-I’m **Juan Patiño-Echeverría**, a **Professional Teaching Fellow** (and PhD candidate) in Mathematics at the **University of Auckland**.
+I’m **Juan Patiño-Echeverría**, currently a **Professional Teaching Fellow** (and PhD candidate) in Mathematics at the **University of Auckland**.
 
-My research lives in **dynamical systems**: I study how deterministic equations can produce behaviour that looks unpredictable — and how we can **compute** the mechanisms behind that transition to chaos. My PhD thesis is titled **“Transitions to Wild Chaos in a Four-Dimensional Lorenz-like System”**, supervised by Professors [Hinke Osinga](https://www.math.auckland.ac.nz/~hinke/) and [Bernd Krauskopf](https://www.math.auckland.ac.nz/~berndk/).
+My research is in **dynamical systems**: I study how deterministic equations can produce behaviour that looks unpredictable, and how we can compute the mechanisms behind that transition to chaos. My PhD thesis is titled **“Transitions to Wild Chaos in a Four-Dimensional Lorenz-like System”**, supervised by Professors [Hinke Osinga](https://www.math.auckland.ac.nz/~hinke/) and [Bernd Krauskopf](https://www.math.auckland.ac.nz/~berndk/).
 
 <div class="grid two">
   <div class="card">
@@ -15,8 +15,8 @@ My research lives in **dynamical systems**: I study how deterministic equations 
     <span class="subtle">Chaos, bifurcations, nonlinear dynamics, numerical continuation, scientific computing.</span>
   </div>
   <div class="card">
-    <strong>How I work</strong><br>
-    <span class="subtle">AUTO, MATLAB, Julia — with a focus on reproducible computation and clear visualisation.</span>
+    <strong>How I work with</strong><br>
+    <span class="subtle">AUTO, MATLAB, Julia,  with a focus on reproducible computation and clear visualisation.</span>
   </div>
 </div>
 
@@ -29,8 +29,8 @@ My research lives in **dynamical systems**: I study how deterministic equations 
 
 ### Selected highlights
 - **Preprint (2025):** *Global bifurcation structure of a four-dimensional Lorenz-like system with a wild chaotic attractor* — see **Projects**.
-- **Awards:** multiple best student talk / poster awards (see **About**).
-- **Teaching:** I enjoy making difficult ideas feel learnable — and I care a lot about clarity.
+- **Awards:** A couple of best student talks / poster awards (see **About**).
+- **Teaching:** Currently teaching two courses: Differential Equations and Methods in Applied Mathematics.
 
 ### Outside maths
 Triathlon and open-water swimming keep me honest. I also like writing small programs to automate boring tasks, and I maintain ambitious lists I fully intend to finish one day.
