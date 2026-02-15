@@ -4,24 +4,28 @@ title: About
 permalink: /about/
 ---
 
-## About Me
+## About
+
+I’m a mathematician working in **dynamical systems**, with an emphasis on **computation**, **bifurcation structure**, and the geometry of chaos.
 
 ### Education
-- **PhD Student** in Mathematics, *University of Auckland*, New Zealand (currently)
-- **Master in Higher Education**, *University of Palermo*, Argentina
-- **Bachelor of Science** with *First Class Honours*, *Victoria University of Wellington*, New Zealand
+- **PhD (Mathematics)**, *University of Auckland*, New Zealand (in progress)  
+- **Master in Higher Education**, *University of Palermo*, Argentina  
+- **BSc (Hons, First Class) Applied Mathematics**, *Victoria University of Wellington*, New Zealand  
 
-### Current Position
-- **Graduate Teaching Assistant**, *University of Auckland*, New Zealand (currently)
+### Current role
+- **Professional Teaching Fellow**, *University of Auckland*  
+  (teaching + course development, with a focus on clear explanations and good learning design)
 
-### Previous Positions
-- **Graduate Teaching Assistant**, *Victoria University of Wellington*, New Zealand
-- **Graduate Teaching Assistant**, *University of Buenos Aires*, Argentina
-- **Graduate Teaching Assistant**, *Universidad Argentina de la Empresa*, Argentina
+### Previous academic roles
+- **Graduate Teaching Assistant**, *University of Auckland*, New Zealand  
+- **Graduate Teaching Assistant**, *Victoria University of Wellington*, New Zealand  
+- **Graduate Teaching Assistant**, *University of Buenos Aires*, Argentina  
+- **Graduate Teaching Assistant**, *Universidad Argentina de la Empresa*, Argentina  
 
-### Awards
-- *Red Sock Award for best poster presentation*, *SIAM* (2025)
-- *T.M. Cherry Prize for best student presentation*, *ANZIAM* (2025)
-- *ANZIAM Prize for best poster presentation*, *Joint meeting of the NZMS, AustMS and AMS* (2024)
-- *Aitken Prize for best student presenntation*, *New Zealand Mathematical Society* (2023)
+### Awards & support
+- *Red Sock Award for Best Poster Presentation*, *SIAM* (2025)  
+- *T. M. Cherry Prize for Best Student Presentation*, *ANZIAM* (2025)  
+- *ANZIAM Prize for Best Poster Presentation*, *Joint Meeting of the NZMS, AustMS and AMS* (2024)  
+- *Aitken Prize for Best Student Presentation*, *New Zealand Mathematical Society* (2023)  
 - *University of Auckland Doctoral Scholarship* (2022)
