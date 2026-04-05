@@ -4,199 +4,429 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-
     {% seo %}
     <link rel="stylesheet" href="{{ "/assets/css/style.css?v=" | append: site.github.build_revision | relative_url }}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
     {% include head-custom.html %}
 
 <style>
-  :root{
-    --bg: #faf9f6;          /* super light cream */
-    --panel: #ffffff;       /* cards */
-    --text: #111827;
-    --muted: #6b7280;
-    --border: rgba(17, 24, 39, 0.08);
-    --shadow: 0 8px 25px rgba(0, 0, 0, 0.04);
-    --accent: #0b3c5d;      /* navy */
-    --accent-hover: #174a75;
-    --accent-soft: rgba(11, 60, 93, 0.06);
-    --maxw: 980px;
-    --radius: 14px;
+  :root {
+    --bg:           #f7f4ee;
+    --panel:        #ffffff;
+    --text:         #111827;
+    --muted:        #6b7280;
+    --hint:         #9ca3af;
+    --border:       rgba(17, 24, 39, 0.09);
+    --accent:       #c8873a;
+    --accent-soft:  rgba(200, 135, 58, 0.07);
+    --accent-line:  rgba(200, 135, 58, 0.3);
+    --maxw:         980px;
+    --radius:       16px;
+    --font-serif:   'Instrument Serif', Georgia, serif;
+    --font-sans:    'Geist', system-ui, -apple-system, sans-serif;
+    --font-mono:    'Geist Mono', 'Fira Mono', monospace;
   }
 
-  html, body { 
-    background: var(--bg); 
-    color: var(--text); 
+  *, *::before, *::after { box-sizing: border-box; }
+
+  html, body {
+    background: var(--bg);
+    color: var(--text);
+    margin: 0;
+    padding: 0;
   }
 
   body {
-    font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
-    line-height: 1.6;
+    font-family: var(--font-sans);
+    font-weight: 400;
+    font-size: 15px;
+    line-height: 1.65;
   }
 
-  .wrapper{
+  /* ── Wrapper ── */
+  .wrapper {
     max-width: var(--maxw);
     margin: 0 auto;
-    padding: 32px 18px;
+    padding: 28px 18px 48px;
   }
-  
-  header{
+
+  @media (min-width: 820px) {
+    .wrapper {
+      display: grid;
+      grid-template-columns: 290px 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+  }
+
+  /* ── Sidebar / Header ── */
+  header {
     background: var(--panel);
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    padding: 20px 20px 14px 20px;
-    box-shadow: var(--shadow);
+    padding: 24px 20px 20px;
   }
 
-  header h1{
-    font-size: 1.35rem;
-    letter-spacing: -0.02em;
-    margin-bottom: 6px;
+  @media (min-width: 820px) {
+    header {
+      position: sticky;
+      top: 18px;
+      max-height: calc(100vh - 36px);
+      overflow-y: auto;
+    }
+  }
+
+  .avatar {
+    display: block;
+    width: 88px;
+    height: 88px;
+    border-radius: 999px;
+    object-fit: cover;
+    border: 1px solid var(--border);
+    margin: 0 auto 16px;
+  }
+
+  header h1 {
+    font-family: var(--font-serif);
+    font-size: 1.45rem;
+    font-weight: 400;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
     text-align: center;
+    margin: 0 0 4px;
   }
 
-  header p{
-    margin: 6px 0;
-    color: var(--muted);
-  }
-
-  a{ 
-    color: var(--accent); 
+  header h1 a {
+    color: var(--text);
     text-decoration: none;
   }
 
-  a:hover{ 
-    color: var(--accent-hover);
-    text-decoration: underline; 
-  }
-
-  .avatar{
-    border-radius: 999px;
-    width: 120px;
-    height: 120px;
-    object-fit: cover;
-    border: 1px solid var(--border);
-  }
-  /* Centre the avatar under the name */
-  header .avatar{
-    display: block;
-    margin: 12px auto 8px auto;  /* top | left/right | bottom */
-  }
-
-  .meta{
-    margin-top: 10px;
-    padding-top: 10px;
-    border-top: 1px solid var(--border);
-  }
-
-  .meta p{
-    margin: 6px 0;
-  }
-
-  .chip-row{
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-top: 10px;
-  }
-
-  .chip{
-    border: 1px solid var(--border);
-    background: var(--bg);
-    padding: 6px 10px;
-    border-radius: 999px;
-    font-size: 0.9rem;
+  .sidebar-role {
+    font-size: 13px;
     color: var(--muted);
+    text-align: center;
+    line-height: 1.5;
+    margin: 0 0 14px;
   }
 
-  nav{
-    margin-top: 14px;
-    padding-top: 12px;
-    border-top: 1px solid var(--border);
+  .sidebar-desc {
+    font-size: 13px;
+    color: var(--muted);
+    text-align: center;
+    margin: 0 0 12px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border);
   }
 
-  nav ul{
+  .location-chip {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 14px;
+  }
+
+  .location-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 999px;
+    background: var(--accent);
+    flex-shrink: 0;
+  }
+
+  /* ── Sidebar links ── */
+  .meta {
+    margin: 0 0 14px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .meta p { margin: 0; }
+
+  .meta a, .meta-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 8px;
+    border-radius: 8px;
+    font-size: 13px;
+    color: #374151;
+    text-decoration: none;
+    transition: background 0.15s;
+  }
+
+  .meta a:hover {
+    background: var(--bg);
+    color: var(--text);
+    text-decoration: none;
+  }
+
+  .meta-icon {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+    color: var(--accent);
+    stroke: var(--accent);
+  }
+
+  /* ── Nav ── */
+  nav {
+    margin-top: 0;
+    padding-top: 0;
+    border-top: none;
+  }
+
+  nav ul {
     list-style: none;
     padding: 0;
     margin: 0;
     display: grid;
-    gap: 6px;
+    gap: 2px;
   }
 
-  nav a{
+  nav a {
     display: block;
-    padding: 8px 10px;
-    border-radius: 10px;
+    padding: 8px 8px;
+    border-radius: 8px;
+    font-size: 13px;
+    color: #374151;
+    text-decoration: none;
+    font-weight: 400;
+    transition: background 0.15s;
     border: 1px solid transparent;
   }
 
-  nav a:hover{
-    background: var(--accent-soft);
-    border-color: var(--border);
+  nav a:hover {
+    background: var(--bg);
+    color: var(--text);
     text-decoration: none;
   }
 
-  nav a.active{
+  nav a.active {
+    color: var(--accent);
+    font-weight: 500;
     background: var(--accent-soft);
-    border-color: var(--border);
-    font-weight: 600;
   }
 
-  section{
-    margin-top: 18px;
+  /* ── Main section ── */
+  section {
     background: var(--panel);
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    padding: 22px;
-    box-shadow: var(--shadow);
+    padding: 28px 28px 36px;
+    margin-top: 18px;
   }
 
-  section h2{
-    margin-top: 0.2rem;
+  @media (min-width: 820px) {
+    section { margin-top: 0; }
+  }
+
+  /* ── Typography in section ── */
+  section h2 {
+    font-family: var(--font-serif);
+    font-size: 2rem;
+    font-weight: 400;
+    line-height: 1.2;
     letter-spacing: -0.02em;
+    margin: 0 0 6px;
+    color: var(--text);
   }
 
-  section h3{
-    margin-top: 32px;
-}
-  
-  .card{
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 14px;
-    background: var(--panel);
+  section h3 {
+    font-family: var(--font-sans);
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--hint);
+    margin: 24px 0 10px;
   }
 
-  .grid{
-    display: grid;
-    gap: 12px;
-  }
-  
-  @media (min-width: 820px){
-    .grid.two{ grid-template-columns: 1fr 1fr; }
-  }
-
-  .subtle{
+  section h4 {
+    font-size: 0.85rem;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
     color: var(--muted);
+    margin: 20px 0 8px;
   }
 
-  .figure{
-    margin: 20px 0 28px 0;  /* top | right | bottom | left */
-    border-radius: 12px;
+  section p {
+    font-size: 14px;
+    color: #374151;
+    max-width: 62ch;
+    margin: 0 0 10px;
+  }
+
+  section ul, section ol {
+    padding-left: 1.2em;
+    margin: 0 0 12px;
+  }
+
+  section li {
+    font-size: 14px;
+    color: #374151;
+    margin-bottom: 6px;
+    max-width: 62ch;
+  }
+
+  section strong { font-weight: 500; color: var(--text); }
+
+  section hr {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 22px 0;
+  }
+
+  /* ── Links ── */
+  a {
+    color: var(--accent);
+    text-decoration: none;
+    border-bottom: 1px solid var(--accent-line);
+  }
+
+  a:hover {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+    text-decoration: none;
+  }
+
+  header a, nav a, .meta a { border-bottom: none; }
+
+  /* ── Greeting / label ── */
+  .page-greeting {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 10px;
+    display: block;
+  }
+
+  .section-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--hint);
+    margin-bottom: 10px;
+    display: block;
+  }
+
+  /* ── Cards / grid ── */
+  .card {
     border: 1px solid var(--border);
-    padding: 12px;
+    border-radius: 12px;
+    padding: 14px 16px;
     background: var(--panel);
-}
-
-
-  .figure img{
-    width: 100%;
-    border-radius: 10px;
+    font-size: 14px;
   }
 
-  .video-container{
+  .grid { display: grid; gap: 12px; }
+
+  .grid.one  { grid-template-columns: minmax(0, 1fr); }
+
+  @media (min-width: 640px) {
+    .grid.two { grid-template-columns: 1fr 1fr; }
+  }
+
+  .subtle { color: var(--muted); }
+
+  /* ── Figure ── */
+  .figure {
+    margin: 20px 0 24px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 14px 10px;
+  }
+
+  .figure img {
+    width: 100%;
+    border-radius: 8px;
+    display: block;
+  }
+
+  .figure .subtle {
+    margin-top: 8px;
+    font-size: 13px;
+    font-family: var(--font-serif);
+    font-style: italic;
+    text-align: center;
+  }
+
+  /* ── Thesis pull-quote ── */
+  .thesis-pull, blockquote {
+    border-left: 2px solid var(--accent);
+    padding: 8px 14px;
+    margin: 16px 0;
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-size: 1rem;
+    color: #374151;
+    line-height: 1.55;
+    border-radius: 0;
+  }
+
+  /* ── Tags ── */
+  .chip-row, .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    margin: 12px 0;
+  }
+
+  .chip, .tag {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 4px 9px;
+    color: var(--muted);
+    letter-spacing: 0.03em;
+  }
+
+  /* ── Highlights list ── */
+  .highlights-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .highlights-list li {
+    display: flex;
+    gap: 14px;
+    padding: 11px 0;
+    border-bottom: 1px solid rgba(17,24,39,0.07);
+    font-size: 14px;
+    align-items: baseline;
+    max-width: none;
+    margin: 0;
+  }
+
+  .highlights-list li:last-child { border-bottom: none; }
+
+  .hl-year {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--accent);
+    min-width: 42px;
+    padding-top: 2px;
+    flex-shrink: 0;
+    letter-spacing: 0.05em;
+  }
+
+  .hl-text { flex: 1; color: #374151; line-height: 1.55; }
+  .hl-text em { font-style: italic; color: var(--muted); }
+
+  /* ── Video ── */
+  .video-container {
     position: relative;
     padding-bottom: 56.25%;
     height: 0;
@@ -204,80 +434,80 @@
     max-width: 100%;
     border-radius: 12px;
     border: 1px solid var(--border);
+    margin: 16px 0;
   }
 
-  .video-container iframe{
+  .video-container iframe {
     position: absolute;
     top: 0; left: 0;
-    width: 100%;
-    height: 100%;
+    width: 100%; height: 100%;
     border: 0;
   }
 
-  footer{
+  /* ── Footer ── */
+  footer {
     margin-top: 16px;
-    color: var(--muted);
-    font-size: 0.9rem;
+    color: var(--hint);
+    font-size: 12px;
     text-align: center;
+    font-family: var(--font-mono);
   }
-
-  section p, section li{
-    max-width: 70ch;
-  }
-
-  /* --- Layout: two columns on desktop, stacked on mobile --- */
-@media (min-width: 820px){
-  .wrapper{
-    display: grid;
-    grid-template-columns: 320px 1fr;
-    gap: 18px;
-    align-items: start;
-  }
-
-  header{
-    position: sticky;
-    top: 18px;
-    max-height: calc(100vh - 36px);
-    overflow: auto; /* <-- this makes the sidebar scroll */
-  }
-
-  section{
-    margin-top: 0; /* because grid gap handles spacing */
-  }
-}
-  nav{
-  max-height: 45vh;
-  overflow: auto;
-  padding-right: 6px; /* room for scrollbar */
-}
-
 </style>
 
-    
   </head>
-
   <body>
     <div class="wrapper">
+
       <header>
-        <h1><a href="{{ "/" | relative_url }}">{{ site.title | default: site.github.repository_name }}</a></h1>
-
         {% if site.logo %}
-          <img class="avatar" src="{{ site.logo | relative_url }}" alt="Portrait / avatar" />
+          <img class="avatar" src="{{ site.logo | relative_url }}" alt="Portrait" />
         {% endif %}
+        <h1><a href="{{ "/" | relative_url }}">{{ site.title | default: site.github.repository_name }}</a></h1>
+        <p class="sidebar-role">PhD &middot; Professional Teaching Fellow<br>University of Auckland</p>
+        <p class="sidebar-desc">{{ site.description | default: site.github.project_tagline }}</p>
 
-        <p>{{ site.description | default: site.github.project_tagline }}</p>
-
-        <div class="chip-row">
-          <span class="chip">📍 Auckland, New Zealand</span>
+        <div class="location-chip">
+          <span class="location-dot"></span>
+          Auckland, New Zealand
         </div>
 
         <div class="meta">
-          <p>✉️ <a href="mailto:j.patino@auckland.ac.nz">Email me</a></p>
-          <p><a href="https://www.linkedin.com/in/jpatinoe/" target="_blank" rel="noopener">LinkedIn</a></p>
-          <p><a href="https://scholar.google.com/citations?user=61JP7bIAAAAJ&hl=en&authuser=1" target="_blank" rel="noopener">Google Scholar</a></p>
-          <p><a href="https://orcid.org/0000-0002-2147-5406" target="_blank" rel="noopener">ORCID</a></p>
-          <p><a href="https://github.com/jpatinoe" target="_blank" rel="noopener">GitHub</a></p>
-          <p><a href="https://profiles.auckland.ac.nz/j-patino" target="_blank" rel="noopener">University profile</a></p>
+          <p>
+            <a href="mailto:j.patino@auckland.ac.nz">
+              <svg class="meta-icon" viewBox="0 0 16 16" fill="none" stroke-width="1.4" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="4" width="12" height="9" rx="1.5"/><path d="M2 5l6 4.5L14 5"/></svg>
+              Email
+            </a>
+          </p>
+          <p>
+            <a href="https://scholar.google.com/citations?user=61JP7bIAAAAJ&hl=en&authuser=1" target="_blank" rel="noopener">
+              <svg class="meta-icon" viewBox="0 0 16 16" fill="none" stroke-width="1.4" xmlns="http://www.w3.org/2000/svg"><circle cx="8" cy="8" r="6"/><path d="M5.5 6h5M8 4v8"/></svg>
+              Google Scholar
+            </a>
+          </p>
+          <p>
+            <a href="https://orcid.org/0000-0002-2147-5406" target="_blank" rel="noopener">
+              <svg class="meta-icon" viewBox="0 0 16 16" fill="none" stroke-width="1.4" xmlns="http://www.w3.org/2000/svg"><circle cx="8" cy="8" r="6"/><path d="M6 5.5v5M8 5.5c2 0 3 1 3 2.5s-1 2.5-3 2.5"/></svg>
+              ORCID
+            </a>
+          </p>
+          <p>
+            <a href="https://www.linkedin.com/in/jpatinoe/" target="_blank" rel="noopener">
+              <svg class="meta-icon" viewBox="0 0 16 16" fill="none" stroke-width="1.4" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="2" width="12" height="12" rx="2"/><path d="M5.5 7v4M5.5 5.5v.01M8 11V8.5c0-1 .5-1.5 1.5-1.5s1.5.5 1.5 1.5V11"/></svg>
+              LinkedIn
+            </a>
+          </p>
+          <p>
+            <a href="https://profiles.auckland.ac.nz/j-patino" target="_blank" rel="noopener">
+              <svg class="meta-icon" viewBox="0 0 16 16" fill="none" stroke-width="1.4" xmlns="http://www.w3.org/2000/svg"><circle cx="8" cy="5.5" r="2"/><path d="M3 14c0-2.761 2.239-5 5-5s5 2.239 5 5"/></svg>
+              University profile
+            </a>
+          </p>
+          <p>
+            <a href="https://github.com/jpatinoe" target="_blank" rel="noopener">
+              <svg class="meta-icon" viewBox="0 0 16 16" fill="none" stroke-width="1.4" xmlns="http://www.w3.org/2000/svg"><path d="M8 2C4.686 2 2 4.686 2 8c0 2.651 1.718 4.9 4.104 5.692.3.056.41-.13.41-.287v-1.006c-1.669.363-2.02-.806-2.02-.806-.273-.695-.667-.88-.667-.88-.545-.372.041-.365.041-.365.602.042.919.618.919.618.535.917 1.403.652 1.745.499.054-.388.209-.652.38-.801-1.332-.151-2.733-.666-2.733-2.965 0-.655.234-1.19.618-1.61-.062-.152-.268-.762.059-1.587 0 0 .504-.161 1.65.615A5.75 5.75 0 018 5.978c.51.002 1.022.069 1.501.202 1.145-.776 1.648-.615 1.648-.615.328.825.122 1.435.06 1.587.385.42.617.955.617 1.61 0 2.305-1.404 2.812-2.74 2.96.215.185.407.55.407 1.108v1.642c0 .159.108.346.413.287C12.284 12.898 14 10.65 14 8c0-3.314-2.686-6-6-6z" stroke="none" fill="currentColor"/></svg>
+              GitHub
+            </a>
+          </p>
         </div>
 
         <nav aria-label="Site navigation">
@@ -301,8 +531,8 @@
       <section>
         {{ content }}
       </section>
-    </div>
 
+    </div>
     <script src="{{ "/assets/js/scale.fix.js" | relative_url }}"></script>
   </body>
 </html>
