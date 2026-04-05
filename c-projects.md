@@ -20,7 +20,7 @@ permalink: /projects/
 
 <span class="section-label">Publications</span>
 
-#### Preprints
+### Preprints
 
 - **Patiño-Echeverría, Krauskopf & Osinga (2025)**
   *Global bifurcation structure of a four-dimensional Lorenz-like system with a wild chaotic attractor.*
