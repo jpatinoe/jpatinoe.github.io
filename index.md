@@ -3,9 +3,9 @@ layout: default
 title: Home
 ---
 
-## Kia ora!
+<span class="page-greeting">Kia ora — welcome</span>
 
-I'm **Juan Patiño-Echeverría**, a mathematician and **Professional Teaching Fellow** at the **University of Auckland**, where I recently completed my PhD in Mathematics.
+I'm **Juan Patiño-Echeverría**, a mathematician and **Professional Teaching Fellow** at the **University of Auckland**. I recently completed my PhD in Mathematics — more on that below.
 
 My research is in **dynamical systems**: I study how deterministic equations can produce behaviour that looks genuinely unpredictable, and how we can compute the geometric mechanisms behind that transition to chaos.
 
@@ -23,21 +23,31 @@ My research is in **dynamical systems**: I study how deterministic equations can
   </div>
 </div>
 
-### Selected highlights
-
-- **PhD thesis (2026):** *Transitions to Wild Chaos in a Four-Dimensional Lorenz-like Vector Field* — supervised by Professors [Hinke Osinga](https://www.math.auckland.ac.nz/~hinke/) and [Bernd Krauskopf](https://www.math.auckland.ac.nz/~berndk/).
-- **Preprint (2025):** *Global bifurcation structure of a four-dimensional Lorenz-like system with a wild chaotic attractor* — see [**Projects**](projects/).
-- **Awards (2023–2025):** Best student talk and best poster prizes at SIAM, ANZIAM, NZMS and joint meetings — see [**About**](about/).
-- **Teaching:** Currently teaching Differential Equations (MATHS260) and Methods in Applied Mathematics (MATHS362).
+<span class="section-label">Selected highlights</span>
 
 <ul class="highlights-list">
-  <li><span class="hl-year">2025</span><span class="hl-text">...</span></li>
+  <li>
+    <span class="hl-year">2026</span>
+    <span class="hl-text">PhD thesis: <em href="https://hdl.handle.net/2292/75030">Transitions to Wild Chaos in a Four-Dimensional Lorenz-like System</em> — supervised by Professors <a href="https://www.math.auckland.ac.nz/~hinke/">Hinke Osinga</a> and <a href="https://www.math.auckland.ac.nz/~berndk/">Bernd Krauskopf</a>.</span>
+  </li>
+  <li>
+    <span class="hl-year">2025</span>
+    <span class="hl-text">Preprint: <em>Global bifurcation structure of a four-dimensional Lorenz-like system with a wild chaotic attractor</em> — see <a href="projects/">Projects →</a></span>
+  </li>
+  <li>
+    <span class="hl-year">2023–25</span>
+    <span class="hl-text">Best student talk and best poster prizes at SIAM, ANZIAM, NZMS and joint meetings — see <a href="about/">About →</a></span>
+  </li>
+  <li>
+    <span class="hl-year">Now</span>
+    <span class="hl-text">Teaching <em>Differential Equations</em> (MATHS260) and <em>Methods in Applied Mathematics</em> (MATHS362).</span>
+  </li>
 </ul>
 
 ### Outside maths
 
 Triathlon and open-water swimming keep me honest. I also like writing small programs to automate boring tasks, and I maintain ambitious reading lists I fully intend to finish one day.
 
-## Contact
+### Contact
 
 Email is best: [j.patino@auckland.ac.nz](mailto:j.patino@auckland.ac.nz)
