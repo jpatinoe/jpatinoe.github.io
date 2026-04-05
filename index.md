@@ -5,7 +5,7 @@ title: Home
 
 <span class="page-greeting">Kia ora — welcome</span>
 
-I'm **Juan Patiño-Echeverría**, a mathematician and **Professional Teaching Fellow** at the **University of Auckland**. I recently completed my PhD in Mathematics — more on that below.
+I'm **Juan Patiño-Echeverría**, a mathematician and Professional Teaching Fellow at the University of Auckland.
 
 My research is in **dynamical systems**: I study how deterministic equations can produce behaviour that looks genuinely unpredictable, and how we can compute the geometric mechanisms behind that transition to chaos.
 
