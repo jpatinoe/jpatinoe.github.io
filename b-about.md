@@ -9,25 +9,33 @@ permalink: /about/
 
 I'm a mathematician working in **dynamical systems**, with an emphasis on numerical computation, bifurcation analysis, and the geometry of chaos. I recently completed my PhD at the University of Auckland, where I continue as a Professional Teaching Fellow.
 
-### Education
+<hr>
+
+<span class="section-label">Education</span>
 
 - **PhD (Mathematics)**, *University of Auckland*, New Zealand (2026)
 - **Master in Higher Education**, *University of Palermo*, Argentina
 - **BSc (Hons, First Class) Applied Mathematics**, *Victoria University of Wellington*, New Zealand
 
-### Current role
+<hr>
+
+<span class="section-label">Current role</span>
 
 - **Professional Teaching Fellow**, *University of Auckland*
   Teaching and course development: MATHS260 (Differential Equations) and MATHS362 (Methods in Applied Mathematics).
 
-### Previous academic roles
+<hr>
+
+<span class="section-label">Previous academic roles</span> 
 
 - **Graduate Teaching Assistant**, *University of Auckland*, New Zealand
 - **Graduate Teaching Assistant**, *Victoria University of Wellington*, New Zealand
 - **Graduate Teaching Assistant**, *University of Buenos Aires*, Argentina
 - **Graduate Teaching Assistant**, *Universidad Argentina de la Empresa*, Argentina
 
-### Awards & support
+<hr>
+
+<span class="section-label">Awards & support</span>
 
 - *Red Sock Award for Best Poster Presentation*, SIAM Conference on Applications of Dynamical Systems (2025)
 - *T. M. Cherry Prize for Best Student Presentation*, ANZIAM (2025)
