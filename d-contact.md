@@ -4,7 +4,7 @@ title: Contact
 permalink: /contact/
 ---
 
-## Contact
+<span class="page-greeting">Contact</span>
 
 Email is best: [j.patino@auckland.ac.nz](mailto:j.patino@auckland.ac.nz)
 
