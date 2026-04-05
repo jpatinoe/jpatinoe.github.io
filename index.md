@@ -23,6 +23,8 @@ My research is in **dynamical systems**: I study how deterministic equations can
   </div>
 </div>
 
+<hr>
+
 <span class="section-label">Selected highlights</span>
 
 <ul class="highlights-list">
@@ -44,10 +46,14 @@ My research is in **dynamical systems**: I study how deterministic equations can
   </li>
 </ul>
 
-### Outside maths
+<hr>
+
+<span class="section-label">Outside maths</span>
 
 Triathlon and open-water swimming keep me honest. I also like writing small programs to automate boring tasks, and I maintain ambitious reading lists I fully intend to finish one day.
 
-### Contact
+<hr>
+
+<span class="section-label">Contact</span>
 
 Email is best: [j.patino@auckland.ac.nz](mailto:j.patino@auckland.ac.nz)
