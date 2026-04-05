@@ -9,11 +9,12 @@ I'm **Juan Patiño-Echeverría**, a mathematician and **Professional Teaching Fe
 
 My research is in **dynamical systems**: I study how deterministic equations can produce behaviour that looks genuinely unpredictable, and how we can compute the geometric mechanisms behind that transition to chaos.
 
-<div class="grid one">
-  <div class="card">
-    <strong>Research interests</strong><br>
-    <span class="subtle">Chaos, bifurcations, nonlinear dynamics, numerical continuation, scientific computing.</span>
-  </div>
+<div class="tags">
+  <span class="tag">chaos</span>
+  <span class="tag">bifurcations</span>
+  <span class="tag">nonlinear dynamics</span>
+  <span class="tag">numerical continuation</span>
+  <span class="tag">scientific computing</span>
 </div>
 
 <div class="figure">
@@ -56,4 +57,4 @@ Triathlon and open-water swimming keep me honest. I also like writing small prog
 
 <span class="section-label">Contact</span>
 
-Email is best: [j.patino@auckland.ac.nz](mailto:j.patino@auckland.ac.nz)
+<span class="section-label">Email:</span> [j.patino@auckland.ac.nz](mailto:j.patino@auckland.ac.nz)
