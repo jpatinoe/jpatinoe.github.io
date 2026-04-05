@@ -4,7 +4,8 @@ title: About
 permalink: /about/
 ---
 
-## About
+<span class="page-greeting">About</span>
+
 
 I'm a mathematician working in **dynamical systems**, with an emphasis on numerical computation, bifurcation analysis, and the geometry of chaos. I recently completed my PhD at the University of Auckland, where I continue as a Professional Teaching Fellow.
 
