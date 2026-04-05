@@ -55,6 +55,6 @@ Triathlon and open-water swimming keep me honest. I also like writing small prog
 
 <hr>
 
-<span class="section-label">Contact</span>
+<span class="section-label">Contact Email:</span>
 
-<span class="section-label">Email:</span> [j.patino@auckland.ac.nz](mailto:j.patino@auckland.ac.nz)
+[j.patino@auckland.ac.nz](mailto:j.patino@auckland.ac.nz)
