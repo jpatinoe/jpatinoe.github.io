@@ -8,9 +8,8 @@ permalink: /contact/
 
 Email is best: [j.patino@auckland.ac.nz](mailto:j.patino@auckland.ac.nz)
 
-If you’re in Auckland and want to chat (research, teaching, coding, careers), feel free to reach out. I’m always happy to grab a coffee.
+If you're in Auckland and want to chat — research, teaching, scientific computing, careers in mathematics — feel free to reach out. Always happy to grab a coffee.
 
-More background:
 - [University of Auckland profile](https://profiles.auckland.ac.nz/j-patino)
 - [Google Scholar](https://scholar.google.com/citations?user=61JP7bIAAAAJ&hl=en&authuser=1)
 - [ORCID](https://orcid.org/0000-0002-2147-5406)
