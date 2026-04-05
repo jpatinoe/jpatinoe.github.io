@@ -25,7 +25,7 @@ permalink: /projects/
 
 ### PhD thesis
 
-My thesis, **"Transitions to Wild Chaos in a Four-Dimensional Lorenz-like System"** (University of Auckland, 2025), studies how high-dimensional ODEs can produce robust chaotic behaviour, and how global bifurcations organise that behaviour in parameter space. Supervised by Professors [Hinke Osinga](https://www.math.auckland.ac.nz/~hinke/) and [Bernd Krauskopf](https://www.math.auckland.ac.nz/~berndk/).
+My thesis, [**"Transitions to Wild Chaos in a Four-Dimensional Lorenz-like Vector Field"** (University of Auckland, 2026)](https://hdl.handle.net/2292/75030), studies how high-dimensional ODEs can produce robust chaotic behaviour, and how global bifurcations organise that behaviour in parameter space. Supervised by Professors [Hinke Osinga](https://www.math.auckland.ac.nz/~hinke/) and [Bernd Krauskopf](https://www.math.auckland.ac.nz/~berndk/).
 
 - Posters and research snapshots: [Figshare profile](https://auckland.figshare.com/authors/Juan_Patino_Echeverria/12040190)
 
