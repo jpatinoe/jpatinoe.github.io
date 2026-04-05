@@ -28,7 +28,7 @@ My research is in **dynamical systems**: I study how deterministic equations can
 <ul class="highlights-list">
   <li>
     <span class="hl-year">2026</span>
-    <span class="hl-text">PhD thesis: <em href="https://hdl.handle.net/2292/75030">Transitions to Wild Chaos in a Four-Dimensional Lorenz-like System</em> — supervised by Professors <a href="https://www.math.auckland.ac.nz/~hinke/">Hinke Osinga</a> and <a href="https://www.math.auckland.ac.nz/~berndk/">Bernd Krauskopf</a>.</span>
+    <span class="hl-text">PhD thesis: <a href="https://hdl.handle.net/2292/75030"><em>Transitions to Wild Chaos in a Four-Dimensional Lorenz-like System</em></a> — supervised by Professors <a href="https://www.math.auckland.ac.nz/~hinke/">Hinke Osinga</a> and <a href="https://www.math.auckland.ac.nz/~berndk/">Bernd Krauskopf</a>.</span>
   </li>
   <li>
     <span class="hl-year">2025</span>
