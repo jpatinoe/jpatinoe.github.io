@@ -30,6 +30,10 @@ My research is in **dynamical systems**: I study how deterministic equations can
 - **Awards (2023–2025):** Best student talk and best poster prizes at SIAM, ANZIAM, NZMS and joint meetings — see [**About**](about/).
 - **Teaching:** Currently teaching Differential Equations (MATHS260) and Methods in Applied Mathematics (MATHS362).
 
+<ul class="highlights-list">
+  <li><span class="hl-year">2025</span><span class="hl-text">...</span></li>
+</ul>
+
 ### Outside maths
 
 Triathlon and open-water swimming keep me honest. I also like writing small programs to automate boring tasks, and I maintain ambitious reading lists I fully intend to finish one day.
