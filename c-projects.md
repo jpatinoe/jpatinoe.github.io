@@ -16,7 +16,9 @@ permalink: /projects/
   </div>
 </div>
 
-### Publications
+<hr>
+
+<span class="section-label">Publications</span>
 
 #### Preprints
 
@@ -37,7 +39,9 @@ My thesis, [**"Transitions to Wild Chaos in a Four-Dimensional Lorenz-like Vecto
   </div>
 </div>
 
-#### 3-Minute Thesis
+<hr>
+
+<span class="section-label">3 Minutes thesis</span>
 
 <div class="video-container">
   <iframe
@@ -48,7 +52,9 @@ My thesis, [**"Transitions to Wild Chaos in a Four-Dimensional Lorenz-like Vecto
     allowfullscreen></iframe>
 </div>
 
-### Previous research
+<hr>
+
+<span class="section-label">Previous research</span>
 
 - **Summer Research Scholarship**, *Victoria University of Wellington*
   Worked with [Brendan Harding](https://people.wgtn.ac.nz/brendan.harding/publications) on fluid dynamics — specifically bifurcation phenomena related to inertial particle focusing and separation in spiral-duct flows.
@@ -56,6 +62,8 @@ My thesis, [**"Transitions to Wild Chaos in a Four-Dimensional Lorenz-like Vecto
 - **Honours project**, *Victoria University of Wellington*
   Supervised by [Mark McGuinness](https://people.wgtn.ac.nz/mark.mcguinness). Investigated synchronisation in coupled oscillators.
 
-### Additional project
+<hr>
 
-Before starting my PhD, I founded and ran an online teaching initiative: [Ingooz](https://www.ingooz.com) (2018–2020), connecting university students with tutors across Latin America.
+<span class="section-label">Additional project</span>
+
+Before starting my PhD, I founded and ran an online teaching initiative, [Ingooz](https://www.ingooz.com) (2018–2020), that connected university students with tutors across Latin America.
