@@ -4,7 +4,8 @@ title: Projects
 permalink: /projects/
 ---
 
-## Projects
+<span class="page-greeting">Projects</span>
+
 
 <div class="grid one">
   <div class="card">
