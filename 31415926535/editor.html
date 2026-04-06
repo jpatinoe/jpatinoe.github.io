@@ -486,11 +486,30 @@ function escapeJs(s) { return s.replace(/\\/g,'\\\\').replace(/"/g,'\\"').replac
 
 function copyCode() {
   const code = document.getElementById('output-code').textContent;
-  navigator.clipboard.writeText(code).then(() => {
-    const btn = document.querySelector('.copy-btn');
+  const btn = document.querySelector('.copy-btn');
+
+  const finish = () => {
     btn.textContent = 'Copied!';
     setTimeout(() => btn.textContent = 'Copy to clipboard', 2000);
-  });
+  };
+
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(code).then(finish).catch(() => fallbackCopy(code, finish));
+  } else {
+    fallbackCopy(code, finish);
+  }
+}
+
+function fallbackCopy(text, callback) {
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0;pointer-events:none';
+  document.body.appendChild(ta);
+  ta.focus();
+  ta.select();
+  try { document.execCommand('copy'); callback(); }
+  catch(e) { alert('Could not copy automatically — please select the text above and copy manually (Ctrl+C / Cmd+C).'); }
+  document.body.removeChild(ta);
 }
 </script>
 </body>
