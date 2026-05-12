@@ -1,6 +1,9 @@
 title: Juan Patiño-Echeverría
+
 logo: https://github.com/jpatinoe.png
+
 description: Dynamical systems • Chaos • Scientific Computation
+
 theme: jekyll-theme-minimal
 
 github_username: jpatinoe
@@ -8,9 +11,10 @@ github_username: jpatinoe
 # Nice URLs
 permalink: pretty
 
-# Navigation order (we will render this explicitly in the layout)
+# Navigation order (rendered explicitly in the layout)
 header_pages:
   - index.md
   - b-about.md
   - c-projects.md
   - d-contact.md
+  - e-teaching.md
