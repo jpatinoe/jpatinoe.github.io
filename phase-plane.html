@@ -310,6 +310,19 @@
     <div class="nullcline-row" style="margin-top:6px;">
       <label><input type="checkbox" id="show_arrows" checked> Show vector field</label>
     </div>
+    <div class="nullcline-row" style="margin-top:6px;">
+      <label><input type="checkbox" id="uniform_arrows"> Uniform arrows (same size &amp; colour)</label>
+    </div>
+    <div style="margin-top:10px; display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+      <div>
+        <div class="eq-label" style="margin-bottom:4px;">Arrow colour</div>
+        <input type="color" id="arrow_color" value="#8899cc" style="width:100%;height:32px;padding:2px 4px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface2);cursor:pointer;" />
+      </div>
+      <div>
+        <div class="eq-label" style="margin-bottom:4px;">Background</div>
+        <input type="color" id="bg_color" value="#0a0c12" style="width:100%;height:32px;padding:2px 4px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface2);cursor:pointer;" />
+      </div>
+    </div>
   </div>
 
   <div>
@@ -406,7 +419,8 @@ gv("preset").addEventListener("change", function() {
 ["fx","fy"].forEach(id => gv(id).addEventListener("input", () => { gv("preset").value="custom"; }));
 
 // Redraw on option toggle
-["show_nullclines","show_arrows"].forEach(id => gv(id).addEventListener("change", redraw));
+["show_nullclines","show_arrows","uniform_arrows"].forEach(id => gv(id).addEventListener("change", redraw));
+["arrow_color","bg_color"].forEach(id => gv(id).addEventListener("input", redraw));
 
 // --- Parse ---
 function buildFn(expr) {
@@ -564,6 +578,8 @@ function drawVectorField() {
   const W=canvas.width, H=canvas.height;
   const cellW=W/n, cellH=H/n;
   const maxArrow=Math.min(cellW,cellH)*0.42;
+  const uniform=gv("uniform_arrows").checked;
+  const arrowColor=gv("arrow_color").value;
 
   const vecs=[];
   let maxMag=0;
@@ -580,16 +596,21 @@ function drawVectorField() {
   vecs.forEach(({wx,wy,u,v,mag})=>{
     if(maxMag===0) return;
     const t=mag/maxMag;
-    const scale=t*maxArrow;
+    // In uniform mode: all arrows same length (full cell), same color
+    const scale = uniform ? maxArrow : t*maxArrow;
     const ux=u/(mag||1), uy=v/(mag||1);
     const [cx,cy]=w2c(wx,wy);
     const ex=cx+ux*scale, ey=cy-uy*scale;
 
-    // Color: blue(low) → teal → red(high)
-    const r=Math.round(40+t*200), g=Math.round(80+t*30), b=Math.round(180-t*130);
-    const alpha=0.5+t*0.35;
-    ctx.strokeStyle=`rgba(${r},${g},${b},${alpha})`;
-    ctx.fillStyle=`rgba(${r},${g},${b},${alpha})`;
+    let color, alpha;
+    if(uniform) {
+      color=arrowColor; alpha=0.75;
+    } else {
+      const r=Math.round(40+t*200), g=Math.round(80+t*30), b=Math.round(180-t*130);
+      color=`rgb(${r},${g},${b})`; alpha=0.5+t*0.35;
+    }
+    ctx.strokeStyle=color; ctx.fillStyle=color;
+    ctx.globalAlpha=alpha;
     ctx.lineWidth=1;
 
     ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(ex,ey); ctx.stroke();
@@ -602,6 +623,7 @@ function drawVectorField() {
       ctx.lineTo(ex-hs*Math.cos(angle+0.45),ey+hs*Math.sin(angle+0.45));
       ctx.closePath(); ctx.fill();
     }
+    ctx.globalAlpha=1;
   });
 }
 
@@ -636,7 +658,8 @@ function integrate(x0,y0) {
 }
 
 // --- Draw single trajectory ---
-function paintTraj(traj, idx) {
+function paintTraj(traj, idx, bgColor) {
+  bgColor = bgColor || gv("bg_color").value;
   const color=TRAJ_COLORS[idx%TRAJ_COLORS.length];
 
   function drawPts(pts) {
@@ -660,7 +683,7 @@ function paintTraj(traj, idx) {
   ctx.globalAlpha=1;
   ctx.beginPath(); ctx.arc(sx,sy,5,0,Math.PI*2);
   ctx.fillStyle=color; ctx.fill();
-  ctx.strokeStyle="#0f1117"; ctx.lineWidth=1.5; ctx.stroke();
+  ctx.strokeStyle=bgColor; ctx.lineWidth=1.5; ctx.stroke();
   ctx.restore();
 }
 
@@ -668,11 +691,13 @@ function paintTraj(traj, idx) {
 function redraw() {
   resizeCanvas();
   if(!parseFns()) return;
+  const bgColor=gv("bg_color").value;
+  gv("canvas-wrap").style.background=bgColor;
   ctx.clearRect(0,0,canvas.width,canvas.height);
   drawAxes();
   if(gv("show_nullclines").checked) drawNullclines();
   if(gv("show_arrows").checked) drawVectorField();
-  trajs.forEach((t,i)=>paintTraj(t,i));
+  trajs.forEach((t,i)=>paintTraj(t,i,bgColor));
 }
 
 // --- Trajectory management ---
