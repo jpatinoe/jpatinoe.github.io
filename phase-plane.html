@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Phase Plane Explorer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400;600&family=Lora:wght@400;600&family=Source+Sans+3:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #181c27;
+    --surface2: #1f2435;
+    --border: #2c3148;
+    --border2: #3a4060;
+    --accent: #5b8dee;
+    --accent2: #7c6ef5;
+    --text: #e8eaf2;
+    --text2: #8b91aa;
+    --text3: #555d7a;
+    --success: #4ecb8d;
+    --warn: #f0a050;
+    --danger: #e05c5c;
+    --traj-colors: #5b8dee, #4ecb8d, #f0a050, #e05c5c, #b07af5, #5cd8d8, #f0d060, #e07cb0;
+    --font-ui: 'Source Sans 3', sans-serif;
+    --font-mono: 'Source Code Pro', monospace;
+    --font-display: 'Lora', serif;
+    --radius: 8px;
+    --radius-lg: 12px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-ui);
+    font-size: 14px;
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    grid-template-rows: auto 1fr;
+  }
+
+  header {
+    grid-column: 1 / -1;
+    padding: 14px 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    background: var(--surface);
+  }
+
+  header h1 {
+    font-family: var(--font-display);
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--text);
+    letter-spacing: -0.02em;
+  }
+
+  header span {
+    font-size: 12px;
+    color: var(--text3);
+    font-family: var(--font-mono);
+  }
+
+  .sidebar {
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 18px 16px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .section-title {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text3);
+    margin-bottom: 8px;
+  }
+
+  select, input[type=text], input[type=number] {
+    width: 100%;
+    padding: 7px 10px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.15s;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+  select { font-family: var(--font-ui); cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%238b91aa'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; padding-right: 28px; }
+  input:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(91,141,238,0.15); }
+
+  .eq-row { display: flex; flex-direction: column; gap: 4px; margin-bottom: 10px; }
+  .eq-label {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  .range-pair { display: grid; grid-template-columns: 1fr auto 1fr; gap: 4px; align-items: center; }
+  .range-sep { text-align: center; color: var(--text3); font-size: 11px; }
+
+  .btn {
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    padding: 8px 14px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border2);
+    background: var(--surface2);
+    color: var(--text);
+    font-family: var(--font-ui);
+    font-size: 13px;
+    font-weight: 400;
+    cursor: pointer;
+    transition: background 0.12s, border-color 0.12s, transform 0.08s;
+    width: 100%;
+  }
+  .btn:hover { background: var(--border); border-color: var(--text3); }
+  .btn:active { transform: scale(0.98); }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+  .btn.primary:hover { background: #4a7de0; }
+  .btn.danger { border-color: rgba(224,92,92,0.4); color: var(--danger); }
+  .btn.danger:hover { background: rgba(224,92,92,0.1); }
+  .btn.small { padding: 6px 10px; font-size: 12px; width: auto; }
+
+  .btn-row { display: flex; gap: 8px; }
+
+  .ic-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+  .status-bar {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 7px 10px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text2);
+    min-height: 34px;
+    line-height: 1.5;
+  }
+  .status-bar.ok { color: var(--success); border-color: rgba(78,203,141,0.3); }
+  .status-bar.err { color: var(--danger); border-color: rgba(224,92,92,0.3); }
+
+  .traj-list { display: flex; flex-direction: column; gap: 4px; max-height: 160px; overflow-y: auto; }
+  .traj-item {
+    display: flex; align-items: center; gap: 8px;
+    padding: 5px 8px;
+    background: var(--surface2);
+    border-radius: var(--radius);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text2);
+  }
+  .traj-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .traj-item span { flex: 1; }
+  .traj-rm { background: none; border: none; color: var(--text3); cursor: pointer; font-size: 14px; line-height: 1; padding: 0 2px; }
+  .traj-rm:hover { color: var(--danger); }
+
+  .main-area {
+    display: flex;
+    flex-direction: column;
+    padding: 16px;
+    gap: 10px;
+    overflow: hidden;
+  }
+
+  #canvas-wrap {
+    position: relative;
+    flex: 1;
+    min-height: 0;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    border: 1px solid var(--border);
+    background: #0a0c12;
+    cursor: crosshair;
+  }
+
+  canvas { display: block; width: 100%; height: 100%; }
+
+  .canvas-hint {
+    position: absolute;
+    bottom: 12px; right: 14px;
+    font-size: 11px;
+    color: var(--text3);
+    font-family: var(--font-mono);
+    pointer-events: none;
+  }
+
+  .coord-display {
+    position: absolute;
+    top: 10px; left: 14px;
+    font-size: 11px;
+    color: var(--text3);
+    font-family: var(--font-mono);
+    pointer-events: none;
+    background: rgba(15,17,23,0.7);
+    padding: 3px 8px;
+    border-radius: 4px;
+  }
+
+  .legend-bar {
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+    padding: 8px 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 12px; color: var(--text2);
+  }
+  .legend-bar .litem { display: flex; align-items: center; gap: 5px; }
+  .legend-arrow { width: 22px; height: 2px; position: relative; }
+  .legend-arrow::after { content:''; position:absolute; right:0; top:-3px; border:4px solid transparent; border-left:6px solid currentColor; }
+
+  .sep { height: 1px; background: var(--border); margin: 2px 0; }
+
+  .nullcline-row { display: flex; align-items: center; gap: 8px; }
+  .nullcline-row label { font-size: 12px; color: var(--text2); display: flex; align-items: center; gap: 5px; cursor: pointer; }
+  input[type=checkbox] { accent-color: var(--accent); width: 14px; height: 14px; cursor: pointer; }
+
+  @media (max-width: 700px) {
+    body { grid-template-columns: 1fr; grid-template-rows: auto auto 1fr; }
+    .sidebar { border-right: none; border-bottom: 1px solid var(--border); max-height: 55vh; }
+    header { padding: 10px 14px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Phase Plane Explorer</h1>
+  <span>dx/dt = f(x,y) &nbsp;|&nbsp; dy/dt = g(x,y) &nbsp;|&nbsp; RK4</span>
+</header>
+
+<aside class="sidebar">
+
+  <div>
+    <div class="section-title">Preset system</div>
+    <select id="preset">
+      <option value="custom">— custom —</option>
+      <option value="pendulum" selected>Nonlinear pendulum</option>
+      <option value="vdp">Van der Pol oscillator</option>
+      <option value="lotka">Lotka-Volterra (predator-prey)</option>
+      <option value="saddle">Saddle point</option>
+      <option value="spiral_in">Stable spiral</option>
+      <option value="spiral_out">Unstable spiral</option>
+      <option value="center">Centre (harmonic oscillator)</option>
+      <option value="duffing">Duffing oscillator</option>
+      <option value="fitzhugh">FitzHugh-Nagumo (neuron)</option>
+      <option value="bvp">BVP oscillator</option>
+    </select>
+  </div>
+
+  <div>
+    <div class="section-title">Equations</div>
+    <div class="eq-row">
+      <div class="eq-label">dx/dt =</div>
+      <input type="text" id="fx" value="y" spellcheck="false" />
+    </div>
+    <div class="eq-row">
+      <div class="eq-label">dy/dt =</div>
+      <input type="text" id="fy" value="-sin(x)" spellcheck="false" />
+    </div>
+    <div style="font-size:11px;color:var(--text3);line-height:1.5;margin-top:4px;">
+      Use: <code style="color:var(--text2);">sin cos tan exp ln sqrt abs pi x y</code>
+    </div>
+  </div>
+
+  <div>
+    <div class="section-title">View window</div>
+    <div style="display:grid;gap:6px;">
+      <div style="display:flex;align-items:center;gap:6px;">
+        <span style="font-size:11px;color:var(--text2);min-width:16px;font-family:var(--font-mono);">x</span>
+        <div class="range-pair" style="flex:1;">
+          <input type="number" id="xmin" value="-6.3" step="0.5" />
+          <span class="range-sep">to</span>
+          <input type="number" id="xmax" value="6.3" step="0.5" />
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;">
+        <span style="font-size:11px;color:var(--text2);min-width:16px;font-family:var(--font-mono);">y</span>
+        <div class="range-pair" style="flex:1;">
+          <input type="number" id="ymin" value="-3" step="0.5" />
+          <span class="range-sep">to</span>
+          <input type="number" id="ymax" value="3" step="0.5" />
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span style="font-size:11px;color:var(--text2);">Grid</span>
+        <input type="number" id="density" value="20" min="8" max="40" style="width:60px;" />
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <div class="section-title">Options</div>
+    <div class="nullcline-row">
+      <label><input type="checkbox" id="show_nullclines"> Show nullclines</label>
+    </div>
+    <div class="nullcline-row" style="margin-top:6px;">
+      <label><input type="checkbox" id="show_arrows" checked> Show vector field</label>
+    </div>
+  </div>
+
+  <div>
+    <button class="btn primary" onclick="redraw()">▶ Draw / Update</button>
+  </div>
+
+  <div class="sep"></div>
+
+  <div>
+    <div class="section-title">Launch trajectory</div>
+    <div style="font-size:11px;color:var(--text3);margin-bottom:8px;">Click on the canvas, or enter initial condition:</div>
+    <div class="ic-row" style="margin-bottom:8px;">
+      <div>
+        <div class="eq-label" style="margin-bottom:3px;">x₀</div>
+        <input type="number" id="ic_x" value="1.0" step="0.1" />
+      </div>
+      <div>
+        <div class="eq-label" style="margin-bottom:3px;">y₀</div>
+        <input type="number" id="ic_y" value="1.0" step="0.1" />
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn" onclick="addTrajFromInput()" style="flex:1;">Launch</button>
+      <button class="btn danger small" onclick="clearTrajs()">Clear all</button>
+    </div>
+  </div>
+
+  <div>
+    <div class="section-title">Trajectories</div>
+    <div class="traj-list" id="traj-list">
+      <div style="font-size:11px;color:var(--text3);padding:4px 0;">None yet — click the canvas!</div>
+    </div>
+  </div>
+
+  <div>
+    <div class="status-bar" id="status">Ready. Draw to begin.</div>
+  </div>
+
+</aside>
+
+<main class="main-area">
+  <div id="canvas-wrap">
+    <canvas id="phase"></canvas>
+    <div class="coord-display" id="coord-display">&nbsp;</div>
+    <div class="canvas-hint">click to add trajectory</div>
+  </div>
+
+  <div class="legend-bar">
+    <span style="font-size:11px;font-weight:600;color:var(--text2);">Vector field magnitude:</span>
+    <span style="display:flex;align-items:center;gap:6px;">
+      <span style="width:40px;height:3px;background:linear-gradient(to right,#2a3a6a,#5b8dee,#e05c5c);border-radius:2px;display:inline-block;"></span>
+      <span style="font-size:11px;color:var(--text3);">low → high</span>
+    </span>
+    <span style="font-size:11px;color:var(--text3);">|</span>
+    <span class="litem" style="color:#4ecb8d;font-size:11px;">— x-nullcline (dx/dt=0)</span>
+    <span class="litem" style="color:#f0a050;font-size:11px;">— y-nullcline (dy/dt=0)</span>
+  </div>
+</main>
+
+<script>
+const PRESETS = {
+  pendulum:   { fx:"y", fy:"-sin(x)", xmin:-6.3, xmax:6.3, ymin:-3, ymax:3, label:"Nonlinear pendulum" },
+  vdp:        { fx:"y", fy:"(1 - x*x)*y - x", xmin:-4, xmax:4, ymin:-5, ymax:5, label:"Van der Pol (μ=1)" },
+  lotka:      { fx:"x*(1-y)", fy:"y*(x-1)", xmin:-0.2, xmax:3, ymin:-0.2, ymax:3, label:"Lotka-Volterra" },
+  saddle:     { fx:"x", fy:"-y", xmin:-3, xmax:3, ymin:-3, ymax:3, label:"Saddle point" },
+  spiral_in:  { fx:"-x+y", fy:"-x-y", xmin:-3, xmax:3, ymin:-3, ymax:3, label:"Stable spiral" },
+  spiral_out: { fx:"x-y", fy:"x+y", xmin:-2, xmax:2, ymin:-2, ymax:2, label:"Unstable spiral" },
+  center:     { fx:"y", fy:"-x", xmin:-3, xmax:3, ymin:-3, ymax:3, label:"Centre" },
+  duffing:    { fx:"y", fy:"x - x*x*x", xmin:-2.5, xmax:2.5, ymin:-2, ymax:2, label:"Duffing oscillator" },
+  fitzhugh:   { fx:"x - x*x*x/3 - y + 0.5", fy:"0.08*(x + 0.7 - 0.8*y)", xmin:-3, xmax:3, ymin:-2, ymax:2, label:"FitzHugh-Nagumo" },
+  bvp:        { fx:"y", fy:"-x + x*x*x/3 - y*0.5", xmin:-3, xmax:3, ymin:-3, ymax:3, label:"BVP oscillator" },
+};
+
+const TRAJ_COLORS = ["#5b8dee","#4ecb8d","#f0a050","#e05c5c","#b07af5","#5cd8d8","#f0d060","#e07cb0","#90c0a0","#c0a060"];
+
+let trajs = [];
+let fxFn = null, fyFn = null, parseOk = false;
+
+function gv(id) { return document.getElementById(id); }
+function gn(id) { return parseFloat(gv(id).value); }
+
+// --- Preset ---
+gv("preset").addEventListener("change", function() {
+  const key = this.value;
+  if (key === "custom") return;
+  const p = PRESETS[key];
+  gv("fx").value = p.fx; gv("fy").value = p.fy;
+  gv("xmin").value = p.xmin; gv("xmax").value = p.xmax;
+  gv("ymin").value = p.ymin; gv("ymax").value = p.ymax;
+  trajs = []; updateTrajList(); redraw();
+});
+
+// Switch to custom when user edits equations
+["fx","fy"].forEach(id => gv(id).addEventListener("input", () => { gv("preset").value="custom"; }));
+
+// Redraw on option toggle
+["show_nullclines","show_arrows"].forEach(id => gv(id).addEventListener("change", redraw));
+
+// --- Parse ---
+function buildFn(expr) {
+  const e = expr
+    .replace(/\^/g,"**")
+    .replace(/\bsin\b/g,"Math.sin").replace(/\bcos\b/g,"Math.cos")
+    .replace(/\btan\b/g,"Math.tan").replace(/\bexp\b/g,"Math.exp")
+    .replace(/\bln\b/g,"Math.log").replace(/\bsqrt\b/g,"Math.sqrt")
+    .replace(/\babs\b/g,"Math.abs").replace(/\bpi\b/g,"Math.PI");
+  return new Function("x","y","return ("+e+");");
+}
+
+function parseFns() {
+  try {
+    fxFn = buildFn(gv("fx").value);
+    fyFn = buildFn(gv("fy").value);
+    fxFn(0,0); fyFn(0,0);
+    parseOk = true;
+    setStatus("Equations parsed OK.", "ok");
+    return true;
+  } catch(e) {
+    parseOk = false;
+    setStatus("Equation error: " + e.message, "err");
+    return false;
+  }
+}
+
+function setStatus(msg, cls) {
+  const el = gv("status");
+  el.textContent = msg;
+  el.className = "status-bar" + (cls ? " "+cls : "");
+}
+
+// --- Canvas setup ---
+const canvas = gv("phase");
+const ctx = canvas.getContext("2d");
+
+function resizeCanvas() {
+  const wrap = gv("canvas-wrap");
+  canvas.width = wrap.clientWidth;
+  canvas.height = wrap.clientHeight;
+}
+
+// --- Coordinate transforms ---
+function w2c(wx, wy) {
+  const W=canvas.width, H=canvas.height;
+  const xmin=gn("xmin"),xmax=gn("xmax"),ymin=gn("ymin"),ymax=gn("ymax");
+  return [(wx-xmin)/(xmax-xmin)*W, (ymax-wy)/(ymax-ymin)*H];
+}
+function c2w(px, py) {
+  const W=canvas.width, H=canvas.height;
+  const xmin=gn("xmin"),xmax=gn("xmax"),ymin=gn("ymin"),ymax=gn("ymax");
+  return [xmin+px/W*(xmax-xmin), ymax-py/H*(ymax-ymin)];
+}
+
+// --- Draw axes ---
+function drawAxes() {
+  const xmin=gn("xmin"),xmax=gn("xmax"),ymin=gn("ymin"),ymax=gn("ymax");
+  ctx.save();
+  ctx.strokeStyle = "rgba(255,255,255,0.08)";
+  ctx.lineWidth = 1;
+
+  function niceStep(range, ticks) {
+    const raw=range/ticks, mag=Math.pow(10,Math.floor(Math.log10(raw))), r=raw/mag;
+    if(r<1.5) return mag; if(r<3.5) return 2*mag; if(r<7.5) return 5*mag; return 10*mag;
+  }
+
+  // Grid lines
+  const xStep=niceStep(xmax-xmin,8), yStep=niceStep(ymax-ymin,6);
+  ctx.setLineDash([1,4]);
+  for(let v=Math.ceil(xmin/xStep)*xStep; v<=xmax+1e-9; v+=xStep) {
+    const [cx] = w2c(v,0);
+    ctx.beginPath(); ctx.moveTo(cx,0); ctx.lineTo(cx,canvas.height); ctx.stroke();
+  }
+  for(let v=Math.ceil(ymin/yStep)*yStep; v<=ymax+1e-9; v+=yStep) {
+    const [,cy] = w2c(0,v);
+    ctx.beginPath(); ctx.moveTo(0,cy); ctx.lineTo(canvas.width,cy); ctx.stroke();
+  }
+  ctx.setLineDash([]);
+
+  // Axes
+  ctx.strokeStyle = "rgba(255,255,255,0.2)"; ctx.lineWidth = 1;
+  if(ymin<0&&ymax>0) { const [ax,ay]=w2c(xmin,0),[bx,by]=w2c(xmax,0); ctx.beginPath();ctx.moveTo(ax,ay);ctx.lineTo(bx,by);ctx.stroke(); }
+  if(xmin<0&&xmax>0) { const [ax,ay]=w2c(0,ymin),[bx,by]=w2c(0,ymax); ctx.beginPath();ctx.moveTo(ax,ay);ctx.lineTo(bx,by);ctx.stroke(); }
+
+  // Tick labels
+  ctx.fillStyle="rgba(255,255,255,0.3)"; ctx.font="10px 'Source Code Pro',monospace";
+  ctx.textAlign="center";
+  const [,yZeroC]=w2c(0,0);
+  const labelY = (yZeroC>20&&yZeroC<canvas.height-10) ? yZeroC+14 : canvas.height-6;
+  for(let v=Math.ceil(xmin/xStep)*xStep; v<=xmax+1e-9; v+=xStep) {
+    if(Math.abs(v)<1e-9) continue;
+    const [cx]=w2c(v,0);
+    ctx.fillText(parseFloat(v.toFixed(3)),cx,labelY);
+  }
+  ctx.textAlign="right";
+  const [xZeroC]=w2c(0,0);
+  const labelX = (xZeroC>30&&xZeroC<canvas.width-10) ? xZeroC-6 : canvas.width-4;
+  for(let v=Math.ceil(ymin/yStep)*yStep; v<=ymax+1e-9; v+=yStep) {
+    if(Math.abs(v)<1e-9) continue;
+    const [,cy]=w2c(0,v);
+    ctx.fillText(parseFloat(v.toFixed(3)),labelX,cy+4);
+  }
+  ctx.restore();
+}
+
+// --- Nullclines ---
+function drawNullclines() {
+  const xmin=gn("xmin"),xmax=gn("xmax"),ymin=gn("ymin"),ymax=gn("ymax");
+  const W=canvas.width, H=canvas.height;
+  const nx=Math.ceil(W/2), ny=Math.ceil(H/2);
+
+  const fxData=[], fyData=[];
+  for(let i=0;i<=nx;i++) {
+    fxData.push([]); fyData.push([]);
+    for(let j=0;j<=ny;j++) {
+      const wx=xmin+i/nx*(xmax-xmin), wy=ymax-j/ny*(ymax-ymin);
+      let u,v;
+      try{u=fxFn(wx,wy);}catch(e){u=NaN;}
+      try{v=fyFn(wx,wy);}catch(e){v=NaN;}
+      fxData[i].push(isFinite(u)?u:NaN);
+      fyData[i].push(isFinite(v)?v:NaN);
+    }
+  }
+
+  function marchingContour(data, color) {
+    ctx.save(); ctx.strokeStyle=color; ctx.lineWidth=1.5; ctx.globalAlpha=0.75;
+    for(let i=0;i<nx;i++) {
+      for(let j=0;j<ny;j++) {
+        const v00=data[i][j], v10=data[i+1][j], v01=data[i][j+1], v11=data[i+1][j+1];
+        if(!isFinite(v00)||!isFinite(v10)||!isFinite(v01)||!isFinite(v11)) continue;
+        const pts=[];
+        function edge(va,vb,x0,y0,x1,y1) {
+          if((va<0)!==(vb<0)) { const t=va/(va-vb); pts.push([x0+t*(x1-x0),y0+t*(y1-y0)]); }
+        }
+        edge(v00,v10,i,j,i+1,j); edge(v10,v11,i+1,j,i+1,j+1);
+        edge(v11,v01,i+1,j+1,i,j+1); edge(v01,v00,i,j+1,i,j);
+        if(pts.length>=2) {
+          const px0=pts[0][0]/nx*W, py0=pts[0][1]/ny*H;
+          const px1=pts[1][0]/nx*W, py1=pts[1][1]/ny*H;
+          ctx.beginPath(); ctx.moveTo(px0,py0); ctx.lineTo(px1,py1); ctx.stroke();
+        }
+      }
+    }
+    ctx.restore();
+  }
+  marchingContour(fxData,"#4ecb8d");
+  marchingContour(fyData,"#f0a050");
+}
+
+// --- Vector field ---
+function drawVectorField() {
+  const n=parseInt(gv("density").value)||20;
+  const xmin=gn("xmin"),xmax=gn("xmax"),ymin=gn("ymin"),ymax=gn("ymax");
+  const W=canvas.width, H=canvas.height;
+  const cellW=W/n, cellH=H/n;
+  const maxArrow=Math.min(cellW,cellH)*0.42;
+
+  const vecs=[];
+  let maxMag=0;
+  for(let i=0;i<=n;i++) for(let j=0;j<=n;j++) {
+    const wx=xmin+i/n*(xmax-xmin), wy=ymax-j/n*(ymax-ymin);
+    let u,v;
+    try{u=fxFn(wx,wy);v=fyFn(wx,wy);}catch(e){u=0;v=0;}
+    if(!isFinite(u))u=0; if(!isFinite(v))v=0;
+    const mag=Math.sqrt(u*u+v*v);
+    if(mag>maxMag) maxMag=mag;
+    vecs.push({wx,wy,u,v,mag});
+  }
+
+  vecs.forEach(({wx,wy,u,v,mag})=>{
+    if(maxMag===0) return;
+    const t=mag/maxMag;
+    const scale=t*maxArrow;
+    const ux=u/(mag||1), uy=v/(mag||1);
+    const [cx,cy]=w2c(wx,wy);
+    const ex=cx+ux*scale, ey=cy-uy*scale;
+
+    // Color: blue(low) → teal → red(high)
+    const r=Math.round(40+t*200), g=Math.round(80+t*30), b=Math.round(180-t*130);
+    const alpha=0.5+t*0.35;
+    ctx.strokeStyle=`rgba(${r},${g},${b},${alpha})`;
+    ctx.fillStyle=`rgba(${r},${g},${b},${alpha})`;
+    ctx.lineWidth=1;
+
+    ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(ex,ey); ctx.stroke();
+    if(scale>4) {
+      const hs=Math.min(5,scale*0.38);
+      const angle=Math.atan2(-(ey-cy),ex-cx);
+      ctx.beginPath();
+      ctx.moveTo(ex,ey);
+      ctx.lineTo(ex-hs*Math.cos(angle-0.45),ey+hs*Math.sin(angle-0.45));
+      ctx.lineTo(ex-hs*Math.cos(angle+0.45),ey+hs*Math.sin(angle+0.45));
+      ctx.closePath(); ctx.fill();
+    }
+  });
+}
+
+// --- RK4 ---
+function rk4(x,y,h) {
+  const k1x=fxFn(x,y), k1y=fyFn(x,y);
+  const k2x=fxFn(x+h*k1x/2,y+h*k1y/2), k2y=fyFn(x+h*k1x/2,y+h*k1y/2);
+  const k3x=fxFn(x+h*k2x/2,y+h*k2y/2), k3y=fyFn(x+h*k2x/2,y+h*k2y/2);
+  const k4x=fxFn(x+h*k3x,y+h*k3y), k4y=fyFn(x+h*k3x,y+h*k3y);
+  return [x+h*(k1x+2*k2x+2*k3x+k4x)/6, y+h*(k1y+2*k2y+2*k3y+k4y)/6];
+}
+
+function integrate(x0,y0) {
+  const xmin=gn("xmin"),xmax=gn("xmax"),ymin=gn("ymin"),ymax=gn("ymax");
+  const pad=0.08, h=0.015, steps=3000;
+  const fwd=[[x0,y0]], bwd=[[x0,y0]];
+  let x=x0,y=y0;
+  for(let i=0;i<steps;i++){
+    try{[x,y]=rk4(x,y,h);}catch(e){break;}
+    if(!isFinite(x)||!isFinite(y)) break;
+    fwd.push([x,y]);
+    if(x<xmin-pad||x>xmax+pad||y<ymin-pad||y>ymax+pad) break;
+  }
+  x=x0; y=y0;
+  for(let i=0;i<steps;i++){
+    try{[x,y]=rk4(x,y,-h);}catch(e){break;}
+    if(!isFinite(x)||!isFinite(y)) break;
+    bwd.push([x,y]);
+    if(x<xmin-pad||x>xmax+pad||y<ymin-pad||y>ymax+pad) break;
+  }
+  return {fwd,bwd,x0,y0};
+}
+
+// --- Draw single trajectory ---
+function paintTraj(traj, idx) {
+  const color=TRAJ_COLORS[idx%TRAJ_COLORS.length];
+
+  function drawPts(pts) {
+    if(pts.length<2) return;
+    ctx.beginPath();
+    const [sx,sy]=w2c(pts[0][0],pts[0][1]);
+    ctx.moveTo(sx,sy);
+    for(let i=1;i<pts.length;i++){
+      const [cx,cy]=w2c(pts[i][0],pts[i][1]);
+      ctx.lineTo(cx,cy);
+    }
+    ctx.stroke();
+  }
+
+  ctx.save();
+  ctx.strokeStyle=color; ctx.lineWidth=2; ctx.globalAlpha=0.9;
+  drawPts(traj.fwd); drawPts(traj.bwd);
+
+  // IC dot
+  const [sx,sy]=w2c(traj.x0,traj.y0);
+  ctx.globalAlpha=1;
+  ctx.beginPath(); ctx.arc(sx,sy,5,0,Math.PI*2);
+  ctx.fillStyle=color; ctx.fill();
+  ctx.strokeStyle="#0f1117"; ctx.lineWidth=1.5; ctx.stroke();
+  ctx.restore();
+}
+
+// --- Full redraw ---
+function redraw() {
+  resizeCanvas();
+  if(!parseFns()) return;
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  drawAxes();
+  if(gv("show_nullclines").checked) drawNullclines();
+  if(gv("show_arrows").checked) drawVectorField();
+  trajs.forEach((t,i)=>paintTraj(t,i));
+}
+
+// --- Trajectory management ---
+function addTraj(x0,y0) {
+  if(!parseOk) { setStatus("Fix equation errors first.","err"); return; }
+  const xmin=gn("xmin"),xmax=gn("xmax"),ymin=gn("ymin"),ymax=gn("ymax");
+  if(x0<xmin||x0>xmax||y0<ymin||y0>ymax) {
+    setStatus("Initial condition is outside the plot window.","err"); return;
+  }
+  const traj=integrate(x0,y0);
+  trajs.push(traj);
+  paintTraj(traj,trajs.length-1);
+  setStatus(`Trajectory ${trajs.length}: (${x0.toFixed(4)}, ${y0.toFixed(4)})`,"ok");
+  updateTrajList();
+}
+
+function addTrajFromInput() {
+  addTraj(parseFloat(gv("ic_x").value), parseFloat(gv("ic_y").value));
+}
+
+function removeTraj(idx) {
+  trajs.splice(idx,1);
+  updateTrajList();
+  redraw();
+}
+
+function clearTrajs() {
+  trajs=[];
+  updateTrajList();
+  redraw();
+  setStatus("Trajectories cleared.","");
+}
+
+function updateTrajList() {
+  const el=gv("traj-list");
+  if(trajs.length===0) {
+    el.innerHTML='<div style="font-size:11px;color:var(--text3);padding:4px 0;">None yet — click the canvas!</div>';
+    return;
+  }
+  el.innerHTML=trajs.map((t,i)=>`
+    <div class="traj-item">
+      <div class="traj-dot" style="background:${TRAJ_COLORS[i%TRAJ_COLORS.length]}"></div>
+      <span>(${t.x0.toFixed(3)}, ${t.y0.toFixed(3)})</span>
+      <button class="traj-rm" onclick="removeTraj(${i})" title="Remove">×</button>
+    </div>
+  `).join("");
+}
+
+// --- Canvas interaction ---
+canvas.addEventListener("click", function(e) {
+  if(!parseOk) return;
+  const rect=canvas.getBoundingClientRect();
+  const px=(e.clientX-rect.left)*canvas.width/rect.width;
+  const py=(e.clientY-rect.top)*canvas.height/rect.height;
+  const [wx,wy]=c2w(px,py);
+  gv("ic_x").value=wx.toFixed(4);
+  gv("ic_y").value=wy.toFixed(4);
+  addTraj(wx,wy);
+});
+
+canvas.addEventListener("mousemove", function(e) {
+  const rect=canvas.getBoundingClientRect();
+  const px=(e.clientX-rect.left)*canvas.width/rect.width;
+  const py=(e.clientY-rect.top)*canvas.height/rect.height;
+  const [wx,wy]=c2w(px,py);
+  gv("coord-display").textContent=`x = ${wx.toFixed(3)},  y = ${wy.toFixed(3)}`;
+});
+
+canvas.addEventListener("mouseleave", function() {
+  gv("coord-display").textContent=" ";
+});
+
+window.addEventListener("resize", redraw);
+
+// Initial draw
+parseFns();
+redraw();
+</script>
+</body>
+</html>
