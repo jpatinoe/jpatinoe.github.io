@@ -9,8 +9,17 @@ permalink: /teaching/
 Tools and interactive applets for use in lectures and/or self-study.
 All run directly in the browser — no software installation needed.
 
-### Differential equations
+<hr>
 
-| Resource | Description |
-|---|---|
-| [Phase plane explorer ↗](https://jpatinoe.github.io/phase-plane.html){:target="_blank" rel="noopener"} | Interactive vector fields and trajectories for nonlinear ODE systems. Includes RK4 integration, nullclines, and preset systems. |
+<span class="section-label">Differential equations</span>
+
+<div class="grid one">
+  <div class="card">
+    <strong><a href="https://jpatinoe.github.io/phase-plane.html" target="_blank" rel="noopener">Phase plane explorer ↗</a></strong><br>
+    <span class="subtle">
+      Interactive vector fields and trajectories for nonlinear ODE systems.
+      Includes RK4 integration, nullclines, and preset systems (pendulum, Van der Pol, Lotka-Volterra, Duffing, and more).
+      Adjustable equations, view window, and arrow style.
+    </span>
+  </div>
+</div>
