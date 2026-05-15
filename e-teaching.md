@@ -2,7 +2,6 @@
 layout: default
 title: Teaching
 permalink: /teaching/
-
 ---
 
 <span class="page-greeting">Teaching</span>
