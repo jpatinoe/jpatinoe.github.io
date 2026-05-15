@@ -1,11 +1,13 @@
 ---
 layout: default
 title: Teaching
+permalink: /teaching/
+
 ---
 
-## Teaching resources
+<span class="page-greeting">Teaching</span>
 
-Tools and interactive applets for use in lectures and self-study.
+Tools and interactive applets for use in lectures and/or self-study.
 All run directly in the browser — no software installation needed.
 
 ---
@@ -14,8 +16,7 @@ All run directly in the browser — no software installation needed.
 
 | Resource | Description |
 |---|---|
-| [Phase plane explorer ↗](https://jpatinoe.github.io/phase-plane.html){:target="_blank" rel="noopener"} | Interactive vector fields and trajectories for nonlinear ODE systems. Includes RK4 integration, nullclines, and 10 preset systems. |
+| [Phase plane explorer ↗](https://jpatinoe.github.io/phase-plane.html){:target="_blank" rel="noopener"} | Interactive vector fields and trajectories for nonlinear ODE systems. Includes RK4 integration, nullclines, and preset systems. |
 
 ---
 
-*More resources coming soon.*
