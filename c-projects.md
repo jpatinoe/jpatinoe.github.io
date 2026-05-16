@@ -64,6 +64,18 @@ My thesis, [**"Transitions to Wild Chaos in a Four-Dimensional Lorenz-like Vecto
 
 <hr>
 
+<span class="section-label">Software</span>
+
+### MAUTOLAB
+
+A MATLAB toolkit for reading, parsing, and visualising output files produced by [AUTO-07p](https://github.com/auto-07p/auto-07p) — the numerical continuation software used throughout my PhD research.
+
+AUTO produces three output file types per run (`b.*`, `d.*`, `s.*`), each in a compact but non-trivial plain-text format. MAUTOLAB provides a clean, MATLAB-native interface to all three, with both a programmatic API and interactive GUI apps for exploring bifurcation diagrams, solution trajectories, and eigenvalue/Floquet multiplier spectra.
+
+[View on GitHub](https://github.com/jpatinoe/MAUTOLAB){: .button}
+
+<hr>
+
 <span class="section-label">Additional project</span>
 
 Before starting my PhD, I founded and ran an online teaching initiative, [Ingooz](https://www.ingooz.com) (2018–2020), that connected university students with tutors across Latin America.
