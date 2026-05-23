@@ -17,13 +17,6 @@ My research is in **dynamical systems**: I study how deterministic equations can
   <span class="tag">scientific computing</span>
 </div>
 
-<div class="figure">
-  <img src="{{ "/attractor.gif" | relative_url }}" alt="Animated figure: wild chaotic attractor (4D Lorenz-like system)">
-  <div class="subtle" style="margin-top:8px;">
-    A small glimpse of the geometry I spent my PhD thinking about.
-  </div>
-</div>
-
 <hr>
 
 <span class="section-label">Selected highlights</span>
