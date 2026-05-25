@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Phase Portrait — x′ = −y, y′ = μ − 0.9y − x² − xy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0e0f0d;
+    --surface: #161814;
+    --border: rgba(255,255,255,0.08);
+    --text-primary: #e8e6df;
+    --text-muted: #7a7870;
+    --accent-blue: #4a9eff;
+    --accent-green: #3ecf8e;
+    --accent-amber: #f5a623;
+    --accent-red: #ff6b6b;
+    --traj: #3ecf8e;
+    --stable: #4a9eff;
+    --saddle: #ff6b6b;
+    --unstable: #f5a623;
+    --mono: 'DM Mono', monospace;
+    --sans: 'DM Sans', sans-serif;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text-primary);
+    font-family: var(--sans);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem 1rem;
+  }
+
+  header {
+    width: 100%;
+    max-width: 760px;
+    margin-bottom: 2rem;
+  }
+
+  .title-eq {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 300;
+    color: var(--text-muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  h1 {
+    font-family: var(--sans);
+    font-size: 22px;
+    font-weight: 500;
+    color: var(--text-primary);
+    letter-spacing: -0.02em;
+  }
+
+  .system-eq {
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 300;
+    color: var(--text-muted);
+    margin-top: 4px;
+  }
+
+  .card {
+    width: 100%;
+    max-width: 760px;
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 12px;
+  }
+
+  /* Slider section */
+  .slider-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 16px;
+  }
+
+  .slider-label {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--text-muted);
+    min-width: 24px;
+  }
+
+  .mu-value {
+    font-family: var(--mono);
+    font-size: 20px;
+    font-weight: 500;
+    color: var(--text-primary);
+    min-width: 56px;
+    letter-spacing: -0.02em;
+  }
+
+  input[type=range] {
+    -webkit-appearance: none;
+    flex: 1;
+    height: 2px;
+    background: var(--border);
+    border-radius: 1px;
+    outline: none;
+    cursor: pointer;
+    position: relative;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    background: var(--text-primary);
+    border: 2px solid var(--bg);
+    box-shadow: 0 0 0 1px rgba(255,255,255,0.15);
+    cursor: pointer;
+    transition: transform 0.1s;
+  }
+  input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.2); }
+  input[type=range]::-moz-range-thumb {
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    background: var(--text-primary);
+    border: 2px solid var(--bg);
+    cursor: pointer;
+  }
+
+  /* Regime badge */
+  .badge-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; align-items: center; }
+
+  .badge {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 400;
+    letter-spacing: 0.04em;
+    padding: 4px 10px;
+    border-radius: 6px;
+    border: 0.5px solid;
+  }
+  .badge-blue  { background: rgba(74,158,255,0.1);  color: #7db8ff; border-color: rgba(74,158,255,0.25); }
+  .badge-green { background: rgba(62,207,142,0.1);  color: #5ee0a8; border-color: rgba(62,207,142,0.25); }
+  .badge-amber { background: rgba(245,166,35,0.1);  color: #f8bb55; border-color: rgba(245,166,35,0.25); }
+  .badge-gray  { background: rgba(255,255,255,0.05); color: var(--text-muted); border-color: var(--border); }
+
+  /* Canvas */
+  canvas {
+    display: block;
+    width: 100%;
+    border-radius: 10px;
+    background: #0b0c0a;
+  }
+
+  /* Legend */
+  .legend {
+    display: flex;
+    gap: 18px;
+    flex-wrap: wrap;
+    margin-top: 12px;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+  .leg-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+  .leg-line { width: 16px; height: 2px; border-radius: 1px; display: inline-block; }
+
+  /* Description */
+  .desc-card {
+    width: 100%;
+    max-width: 760px;
+    background: transparent;
+    border: 0.5px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 18px;
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 300;
+    color: var(--text-muted);
+    line-height: 1.75;
+    letter-spacing: 0.01em;
+  }
+
+  /* Bifurcation markers on slider */
+  .slider-container { flex: 1; position: relative; }
+  .bif-marks {
+    display: flex;
+    justify-content: space-between;
+    padding: 4px 0 0;
+    position: relative;
+  }
+  .bif-mark {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text-muted);
+    position: absolute;
+    transform: translateX(-50%);
+  }
+  .bif-mark.bif-highlight { color: var(--accent-amber); }
+
+  /* FP coordinates display */
+  .fp-coords {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+
+  footer {
+    margin-top: 2rem;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: rgba(255,255,255,0.15);
+    text-align: center;
+    letter-spacing: 0.06em;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="title-eq">Planar ODE system</div>
+  <h1>Phase Portrait Explorer</h1>
+  <div class="system-eq">x′ = −y &nbsp;&nbsp; y′ = μ − 0.9y − x² − xy</div>
+</header>
+
+<div class="card">
+  <div class="slider-row">
+    <span class="slider-label">μ =</span>
+    <span class="mu-value" id="muVal">0.50</span>
+    <div class="slider-container">
+      <input type="range" id="muSlider" min="-2" max="2" step="0.01" value="0.5">
+      <div style="position:relative;height:16px;margin-top:2px;">
+        <span class="bif-mark" style="left:50%">0</span>
+        <span class="bif-mark bif-highlight" style="left:70.25%">0.81</span>
+        <span class="bif-mark" style="left:0%">−2</span>
+        <span class="bif-mark" style="left:100%">2</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="badge-row" id="badgeRow"></div>
+  <div class="fp-coords" id="fpCoords"></div>
+
+  <canvas id="pp" width="720" height="500" aria-label="Phase portrait of the dynamical system"></canvas>
+
+  <div class="legend">
+    <div class="legend-item"><span class="leg-dot" style="background:var(--stable)"></span>stable spiral/node</div>
+    <div class="legend-item"><span class="leg-dot" style="background:var(--saddle)"></span>saddle</div>
+    <div class="legend-item"><span class="leg-dot" style="background:var(--unstable)"></span>unstable spiral/node</div>
+    <div class="legend-item"><span class="leg-line" style="background:var(--traj)"></span>trajectory</div>
+  </div>
+</div>
+
+<div class="desc-card" id="descCard"></div>
+
+<footer>saddle-node bifurcation at μ=0 &nbsp;·&nbsp; hopf bifurcation at μ=0.81</footer>
+
+<script>
+const canvas = document.getElementById('pp');
+const ctx = canvas.getContext('2d');
+const W = canvas.width, H = canvas.height;
+const xmin=-2.8, xmax=2.8, ymin=-2.1, ymax=2.1;
+
+function toC(x,y){ return [(x-xmin)/(xmax-xmin)*W, (1-(y-ymin)/(ymax-ymin))*H]; }
+
+function vx(x,y,mu){ return -y; }
+function vy(x,y,mu){ return mu - 0.9*y - x*x - x*y; }
+
+function drawBackground(){
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle='#0b0c0a';
+  ctx.fillRect(0,0,W,H);
+
+  // grid lines
+  ctx.strokeStyle='rgba(255,255,255,0.05)';
+  ctx.lineWidth=0.5;
+  for(let gx=-2;gx<=2;gx++){
+    let [cx]=toC(gx,0);
+    ctx.beginPath(); ctx.moveTo(cx,0); ctx.lineTo(cx,H); ctx.stroke();
+  }
+  for(let gy=-2;gy<=2;gy++){
+    let [,cy]=toC(0,gy);
+    ctx.beginPath(); ctx.moveTo(0,cy); ctx.lineTo(W,cy); ctx.stroke();
+  }
+
+  // axes
+  ctx.strokeStyle='rgba(255,255,255,0.18)';
+  ctx.lineWidth=0.8;
+  let [ax]=toC(0,0); let [,ay]=toC(0,0);
+  ctx.beginPath(); ctx.moveTo(ax,0); ctx.lineTo(ax,H); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(0,ay); ctx.lineTo(W,ay); ctx.stroke();
+
+  // axis labels
+  ctx.fillStyle='rgba(255,255,255,0.22)';
+  ctx.font='11px DM Mono, monospace';
+  ctx.textAlign='center';
+  for(let gx=-2;gx<=2;gx++){
+    if(gx===0) continue;
+    let [cx]=toC(gx,0); ctx.fillText(gx,cx,ay+14);
+  }
+  ctx.textAlign='right';
+  for(let gy=-2;gy<=2;gy++){
+    if(gy===0) continue;
+    let [,cy]=toC(0,gy); ctx.fillText(gy,ax-6,cy+4);
+  }
+  ctx.textAlign='left';
+  ctx.fillStyle='rgba(255,255,255,0.18)';
+  ctx.fillText('x',W-14,ay-6);
+  ctx.fillText('y',ax+6,12);
+}
+
+function drawVectorField(mu){
+  const n=22;
+  for(let i=0;i<n;i++) for(let j=0;j<n;j++){
+    let wx=xmin+(xmax-xmin)*(i+0.5)/n;
+    let wy=ymin+(ymax-ymin)*(j+0.5)/n;
+    let fx=vx(wx,wy,mu), fy=vy(wx,wy,mu);
+    let mag=Math.sqrt(fx*fx+fy*fy);
+    if(mag<1e-10) continue;
+    let sc=0.08/Math.max(1,Math.pow(mag,0.45));
+    let [cx,cy]=toC(wx,wy);
+    let nx= fx/mag*sc*(xmax-xmin)/W*W;
+    let ny=-fy/mag*sc*(ymax-ymin)/H*H;
+    let len=Math.sqrt(nx*nx+ny*ny);
+    let ex=cx+nx*55, ey=cy+ny*55;
+
+    let alpha=Math.min(0.55, 0.15 + 0.4*(1-Math.exp(-mag*0.4)));
+    ctx.strokeStyle=`rgba(180,175,160,${alpha})`;
+    ctx.fillStyle=`rgba(180,175,160,${alpha})`;
+    ctx.lineWidth=0.7;
+    ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(ex,ey); ctx.stroke();
+
+    let ang=Math.atan2(ey-cy,ex-cx);
+    let hs=3.5;
+    ctx.beginPath();
+    ctx.moveTo(ex,ey);
+    ctx.lineTo(ex-hs*Math.cos(ang-0.45), ey-hs*Math.sin(ang-0.45));
+    ctx.lineTo(ex-hs*Math.cos(ang+0.45), ey-hs*Math.sin(ang+0.45));
+    ctx.closePath(); ctx.fill();
+  }
+}
+
+function rk4(x,y,mu,dt){
+  let k1x=vx(x,y,mu),         k1y=vy(x,y,mu);
+  let k2x=vx(x+dt/2*k1x,y+dt/2*k1y,mu), k2y=vy(x+dt/2*k1x,y+dt/2*k1y,mu);
+  let k3x=vx(x+dt/2*k2x,y+dt/2*k2y,mu), k3y=vy(x+dt/2*k2x,y+dt/2*k2y,mu);
+  let k4x=vx(x+dt*k3x,y+dt*k3y,mu),     k4y=vy(x+dt*k3x,y+dt*k3y,mu);
+  return [
+    x+dt/6*(k1x+2*k2x+2*k3x+k4x),
+    y+dt/6*(k1y+2*k2y+2*k3y+k4y)
+  ];
+}
+
+function drawTrajectories(mu){
+  const starts=[
+    [-2,-1.5],[-2,0],[-2,1.5],[-1,-2],[0,-2],[1,-2],[2,-1],[2,0.5],
+    [2,1.8],[1,2],[-0.5,2],[-1.5,2],[-2.5,0.5],[0.1,1.5],[-0.1,-1.5],
+    [1.5,-1.5],[-1.5,1],[-0.5,-0.5],[0.5,0.5],[2.5,-0.5],
+    [-2.5,-1],[0.3,1.8],[-0.3,-1.8],[2.2,1.2]
+  ];
+  ctx.lineWidth=1.1;
+  for(let [sx,sy] of starts){
+    let x=sx, y=sy;
+    ctx.beginPath();
+    let [cx,cy]=toC(x,y); ctx.moveTo(cx,cy);
+    let prev_x=x, prev_y=y;
+    for(let t=0;t<500;t++){
+      [x,y]=rk4(x,y,mu,0.03);
+      if(x<xmin-0.5||x>xmax+0.5||y<ymin-0.5||y>ymax+0.5) break;
+      let [px,py]=toC(x,y); ctx.lineTo(px,py);
+      if(Math.abs(vx(x,y,mu))<0.003&&Math.abs(vy(x,y,mu))<0.003) break;
+    }
+    // fade based on distance from center-ish
+    let dist=Math.sqrt(sx*sx+sy*sy);
+    let alpha=Math.min(0.85, 0.3+0.15*(3-dist));
+    ctx.strokeStyle=`rgba(62,207,142,${Math.max(0.2,alpha)})`;
+    ctx.stroke();
+  }
+}
+
+function drawFixedPoint(x,y,type){
+  let [cx,cy]=toC(x,y);
+  ctx.shadowBlur=0;
+
+  if(type==='stable'){
+    // filled circle with glow
+    ctx.shadowBlur=12; ctx.shadowColor='rgba(74,158,255,0.6)';
+    ctx.beginPath(); ctx.arc(cx,cy,7,0,Math.PI*2);
+    ctx.fillStyle='#4a9eff'; ctx.fill();
+    ctx.shadowBlur=0;
+    ctx.strokeStyle='#0e0f0d'; ctx.lineWidth=1.5; ctx.stroke();
+  } else if(type==='unstable'){
+    ctx.shadowBlur=12; ctx.shadowColor='rgba(245,166,35,0.6)';
+    ctx.beginPath(); ctx.arc(cx,cy,7,0,Math.PI*2);
+    ctx.fillStyle='#f5a623'; ctx.fill();
+    ctx.shadowBlur=0;
+    ctx.strokeStyle='#0e0f0d'; ctx.lineWidth=1.5; ctx.stroke();
+    // small inner circle to indicate unstable
+    ctx.beginPath(); ctx.arc(cx,cy,3,0,Math.PI*2);
+    ctx.fillStyle='#0e0f0d'; ctx.fill();
+  } else {
+    // saddle — open circle
+    ctx.shadowBlur=10; ctx.shadowColor='rgba(255,107,107,0.5)';
+    ctx.beginPath(); ctx.arc(cx,cy,7,0,Math.PI*2);
+    ctx.fillStyle='rgba(255,107,107,0.15)'; ctx.fill();
+    ctx.strokeStyle='#ff6b6b'; ctx.lineWidth=1.8; ctx.stroke();
+    ctx.shadowBlur=0;
+    // X mark
+    ctx.strokeStyle='#ff6b6b'; ctx.lineWidth=1.2;
+    let r=4;
+    ctx.beginPath(); ctx.moveTo(cx-r,cy-r); ctx.lineTo(cx+r,cy+r); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(cx+r,cy-r); ctx.lineTo(cx-r,cy+r); ctx.stroke();
+  }
+}
+
+function getInfo(mu){
+  if(mu < -0.005){
+    return {
+      fps:[],
+      badges:[{text:'no fixed points', cls:'badge-gray'}],
+      fpText:'',
+      desc:'No real fixed points exist (μ < 0). The system has no attractors or repellers. All trajectories are transient — the flow has no equilibrium to settle into, and orbits are globally unbounded.'
+    };
+  } else if(Math.abs(mu)<0.005){
+    return {
+      fps:[{x:0,y:0,type:'saddle'}],
+      badges:[{text:'saddle-node bifurcation', cls:'badge-amber'}],
+      fpText:'fixed point: (0, 0)',
+      desc:'μ = 0: saddle-node (fold) bifurcation. A stable node and a saddle collide and annihilate at the origin. This is the generic mechanism for creation and destruction of fixed points in a one-parameter family of vector fields.'
+    };
+  } else {
+    let s=Math.sqrt(mu);
+    let tr=-(0.9-s);
+    let stable=(mu<0.81);
+    let nearHopf=(Math.abs(mu-0.81)<0.04);
+    let type2=stable?'stable':'unstable';
+    let badges=[];
+
+    if(mu<0.81){
+      badges=[
+        {text:'stable spiral/node + saddle', cls:'badge-blue'},
+        {text:`√μ = ${s.toFixed(3)}`, cls:'badge-gray'}
+      ];
+    } else {
+      badges=[
+        {text:'unstable spiral + saddle', cls:'badge-amber'},
+        {text:'limit cycle', cls:'badge-green'},
+        {text:`√μ = ${s.toFixed(3)}`, cls:'badge-gray'}
+      ];
+    }
+
+    let desc;
+    if(nearHopf){
+      desc=`Near the Hopf bifurcation (μ = 0.81). The fixed point at (−${s.toFixed(3)}, 0) transitions from stable to unstable as the trace of the Jacobian passes through zero. A limit cycle is born, surrounding the fixed point — trajectories no longer spiral inward.`;
+    } else if(stable){
+      desc=`Two fixed points: (+${s.toFixed(3)}, 0) is a saddle; (−${s.toFixed(3)}, 0) is a stable spiral or node (tr = ${tr.toFixed(3)} < 0, det > 0). Trajectories near the stable fixed point are attracted to it. The saddle's stable/unstable manifolds organize the global phase portrait.`;
+    } else {
+      desc=`μ > 0.81: the fixed point (−${s.toFixed(3)}, 0) is now unstable (tr = ${tr.toFixed(3)} > 0). A stable limit cycle born at the Hopf bifurcation surrounds it — attracting nearby trajectories into periodic oscillation. The saddle at (+${s.toFixed(3)}, 0) persists.`;
+    }
+
+    return {
+      fps:[{x:s,y:0,type:'saddle'},{x:-s,y:0,type:type2}],
+      badges, fpText:`fixed points: (±${s.toFixed(3)}, 0)`, desc
+    };
+  }
+}
+
+function render(mu){
+  drawBackground();
+  drawVectorField(mu);
+  drawTrajectories(mu);
+
+  let info=getInfo(mu);
+  for(let fp of info.fps) drawFixedPoint(fp.x,fp.y,fp.type);
+
+  document.getElementById('muVal').textContent=mu.toFixed(2);
+  document.getElementById('fpCoords').textContent=info.fpText;
+
+  let row=document.getElementById('badgeRow');
+  row.innerHTML='';
+  for(let b of info.badges){
+    let el=document.createElement('span');
+    el.className='badge '+b.cls;
+    el.textContent=b.text;
+    row.appendChild(el);
+  }
+
+  document.getElementById('descCard').textContent=info.desc;
+}
+
+const slider=document.getElementById('muSlider');
+slider.addEventListener('input',()=>render(parseFloat(slider.value)));
+render(0.5);
+</script>
+</body>
+</html>
