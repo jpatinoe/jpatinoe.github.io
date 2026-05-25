@@ -23,3 +23,14 @@ All run directly in the browser — no software installation needed.
     </span>
   </div>
 </div>
+
+<hr>
+
+<div class="grid one">
+  <div class="card">
+    <strong><a href="https://jpatinoe.github.io/phase-portrait.html" target="_blank" rel="noopener">Hopf bifurcation example ↗</a></strong><br>
+    <span class="subtle">
+      Interactive example of a Hopf bifurcation on the plane
+    </span>
+  </div>
+</div>
