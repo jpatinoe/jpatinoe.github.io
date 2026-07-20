@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Team Allocator</title>
+<style>
+  :root{
+    --paper:#f6f8fb;
+    --surface:#ffffff;
+    --ink:#141a24;
+    --muted:#5b6675;
+    --faint:#8a94a3;
+    --line:#e2e7ee;
+    --line-strong:#c8d0db;
+    --accent:#3b5bdb;
+    --accent-soft:#eaeeff;
+    --good:#1f9d63;
+    --good-soft:#e6f6ee;
+    --warn:#c67c0a;
+    --warn-soft:#fbf1de;
+    --bad:#cf3b3b;
+    --bad-soft:#fbe9e9;
+    --mono:ui-monospace,"SF Mono","SFMono-Regular",Menlo,Consolas,monospace;
+    --sans:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --radius:10px;
+    --shadow:0 1px 2px rgba(20,26,36,.04),0 4px 16px rgba(20,26,36,.05);
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0;background:var(--paper);color:var(--ink);
+    font-family:var(--sans);font-size:15px;line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1080px;margin:0 auto;padding:32px 20px 96px}
+  header.top{margin-bottom:28px}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:600}
+  h1{font-size:30px;line-height:1.15;margin:6px 0 8px;letter-spacing:-.02em;font-weight:700}
+  .lede{color:var(--muted);max-width:62ch;margin:0}
+  .panel{
+    background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+    box-shadow:var(--shadow);padding:22px;margin-top:20px;
+  }
+  .panel > h2{
+    font-size:13px;font-family:var(--mono);letter-spacing:.1em;text-transform:uppercase;
+    color:var(--faint);margin:0 0 4px;font-weight:600;display:flex;align-items:baseline;gap:10px;
+  }
+  .panel > h2 .step{color:var(--accent)}
+  .panel .hint{color:var(--muted);font-size:13.5px;margin:0 0 16px}
+  label.f{display:block;font-size:13px;color:var(--muted);margin-bottom:5px;font-weight:500}
+  input[type=text],input[type=number],textarea,select{
+    font-family:inherit;font-size:14px;color:var(--ink);background:var(--surface);
+    border:1px solid var(--line-strong);border-radius:8px;padding:9px 11px;width:100%;
+  }
+  textarea{font-family:var(--mono);font-size:13px;line-height:1.5;resize:vertical;min-height:90px}
+  input:focus,textarea:focus,select:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:var(--accent)}
+  button{
+    font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;border-radius:8px;
+    padding:9px 15px;border:1px solid var(--line-strong);background:var(--surface);color:var(--ink);
+    transition:background .12s,border-color .12s;
+  }
+  button:hover{background:#f2f5f9}
+  button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+  button.primary:hover{background:#2f4bc4}
+  button.ghost{background:transparent;border-color:transparent;color:var(--muted);padding:6px 8px}
+  button.ghost:hover{background:#f2f5f9;color:var(--ink)}
+  button.small{padding:5px 10px;font-size:13px}
+  button:disabled{opacity:.45;cursor:not-allowed}
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+  .grow{flex:1 1 auto;min-width:0}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+  .chip{
+    display:inline-flex;align-items:center;gap:8px;background:var(--accent-soft);
+    border:1px solid #d3dcfb;border-radius:999px;padding:5px 6px 5px 13px;font-size:13.5px;font-weight:500;
+  }
+  .chip button{border:none;background:transparent;padding:2px 5px;line-height:1;color:var(--accent);border-radius:6px}
+  .chip button:hover{background:#dbe2fb}
+  .empty{color:var(--faint);font-style:italic;font-size:13.5px}
+  table{width:100%;border-collapse:collapse;font-size:14px}
+  th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line)}
+  th{font-size:11.5px;font-family:var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--faint);font-weight:600;white-space:nowrap}
+  td.skill,th.skill{text-align:center;width:1%}
+  tbody tr:hover{background:#fafbfd}
+  .check{width:20px;height:20px;accent-color:var(--accent);cursor:pointer}
+  .seg{display:inline-flex;border:1px solid var(--line-strong);border-radius:8px;overflow:hidden}
+  .seg button{border:none;border-radius:0;background:var(--surface);color:var(--muted);padding:8px 14px}
+  .seg button[aria-pressed=true]{background:var(--accent);color:#fff}
+  .seg button+button{border-left:1px solid var(--line-strong)}
+  .setup-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:end}
+  .note{font-size:12.5px;color:var(--muted);margin-top:6px}
+  .banner{border-radius:8px;padding:11px 14px;font-size:13.5px;margin-bottom:14px;display:flex;gap:9px;align-items:flex-start}
+  .banner.warn{background:var(--warn-soft);border:1px solid #f0dcae;color:#7a5306}
+  .banner.good{background:var(--good-soft);border:1px solid #bfe6cf;color:#116c42}
+  .banner b{font-weight:700}
+  .banner .ic{font-family:var(--mono);font-weight:700;flex:none}
+  .teams{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
+  .team{border:1px solid var(--line);border-radius:var(--radius);background:var(--surface);overflow:hidden}
+  .team-head{display:flex;justify-content:space-between;align-items:center;padding:11px 14px;background:#f4f6fa;border-bottom:1px solid var(--line)}
+  .team-head h3{margin:0;font-size:14px;font-weight:700}
+  .team-head .size{font-family:var(--mono);font-size:12px;color:var(--muted)}
+  .members{list-style:none;margin:0;padding:6px 0}
+  .members li{display:flex;justify-content:space-between;align-items:center;padding:5px 14px;font-size:14px;gap:8px}
+  .members li .who{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .members li select{width:auto;font-size:12px;padding:3px 6px;border-color:var(--line);color:var(--muted)}
+  .members li select{opacity:0;transition:opacity .12s}
+  .members li:hover select{opacity:1}
+  .skillbars{padding:8px 14px 14px;border-top:1px dashed var(--line)}
+  .skillbar{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;margin-top:7px}
+  .skillbar .lbl{font-size:12.5px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .dots{display:flex;gap:3px;justify-self:end;align-items:center}
+  .dot{width:9px;height:9px;border-radius:50%;background:var(--line-strong)}
+  .dot.on{background:var(--accent)}
+  .dot.gap{background:var(--warn);box-shadow:0 0 0 2px var(--warn-soft)}
+  .cnt{font-family:var(--mono);font-size:12px;color:var(--faint);min-width:20px;text-align:right}
+  .metrics{display:flex;flex-wrap:wrap;gap:22px;margin:2px 2px 18px;font-size:13.5px}
+  .metric .v{font-family:var(--mono);font-size:22px;font-weight:600;letter-spacing:-.01em}
+  .metric .k{color:var(--muted);font-size:12px}
+  .coverage-tbl td.skill{font-family:var(--mono)}
+  .pill{font-family:var(--mono);font-size:11px;padding:2px 7px;border-radius:999px;font-weight:600}
+  .pill.ok{background:var(--good-soft);color:var(--good)}
+  .pill.no{background:var(--warn-soft);color:var(--warn)}
+  .toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+  details.help{margin-top:12px;font-size:13.5px;color:var(--muted)}
+  details.help summary{cursor:pointer;color:var(--accent);font-weight:600;font-size:13px}
+  details.help p{margin:8px 0}
+  code{font-family:var(--mono);font-size:12.5px;background:#eef1f6;padding:1px 5px;border-radius:4px}
+  .colmap{display:grid;grid-template-columns:1fr auto;gap:8px 14px;align-items:center;margin:12px 0;font-size:13.5px}
+  .colmap .cname{font-family:var(--mono);font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .colmap select{width:130px}
+  .divider{height:1px;background:var(--line);margin:18px 0}
+  @media (max-width:640px){
+    .setup-grid{grid-template-columns:1fr}
+    h1{font-size:24px}
+    .wrap{padding:22px 14px 80px}
+  }
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="kicker">Balanced teams</div>
+    <h1>Team Allocator</h1>
+    <p class="lede">Turn a short yes/no skills questionnaire into teams that each carry a fair spread of every skill.</p>
+  </header>
+
+  <!-- STEP 1: SKILLS -->
+  <section class="panel">
+    <h2><span class="step">1</span> Skills for this tutorial</h2>
+    <p class="hint">One entry per yes/no question. These are the skills to spread evenly (e.g. <em>Git</em>, <em>ODEs</em>, <em>Python</em>).</p>
+    <div class="chips" id="skillChips"></div>
+    <div class="row">
+      <div class="grow"><input type="text" id="skillInput" placeholder="Add a skill and press Enter — e.g. Used Git before" autocomplete="off"></div>
+      <button class="primary" id="addSkill">Add skill</button>
+    </div>
+  </section>
+
+  <!-- STEP 2: STUDENTS -->
+  <section class="panel">
+    <h2><span class="step">2</span> Students &amp; answers</h2>
+    <p class="hint">Add students by hand, or paste responses from a spreadsheet / Google Form export below.</p>
+
+    <div id="studentTableWrap"></div>
+
+    <div class="row" style="margin-top:12px">
+      <div class="grow"><input type="text" id="studentName" placeholder="Student name or ID" autocomplete="off"></div>
+      <button id="addStudent">Add student</button>
+    </div>
+
+    <div class="divider"></div>
+
+    <label class="f" for="csvBox">Paste CSV or tab-separated rows (a header row of column names is expected)</label>
+    <textarea id="csvBox" placeholder="Name, Used Git before, Knows ODEs, Python&#10;Ana, Yes, No, Yes&#10;Ben, No, Yes, Yes&#10;Cai, Yes, Yes, No"></textarea>
+    <div class="row" style="margin-top:10px">
+      <button id="parseCsv">Read pasted rows</button>
+      <button class="ghost" id="clearStudents">Clear all students</button>
+    </div>
+    <div id="colmapWrap"></div>
+
+  </section>
+
+  <!-- STEP 3: TEAM SETUP -->
+  <section class="panel">
+    <h2><span class="step">3</span> How to size the teams</h2>
+    <p class="hint">Pin the number of teams, cap how many sit in one team, or let coverage decide.</p>
+    <div class="row" style="margin-bottom:16px">
+      <div class="seg" id="modeSeg" role="group" aria-label="Sizing mode">
+        <button data-mode="teams" aria-pressed="true">Fixed number of teams</button>
+        <button data-mode="size" aria-pressed="false">Maximum team size</button>
+        <button data-mode="auto" aria-pressed="false">Auto (best coverage)</button>
+      </div>
+    </div>
+    <div class="setup-grid">
+      <div>
+        <label class="f" id="modeLabel" for="modeVal">Number of teams</label>
+        <input type="number" id="modeVal" min="1" step="1" value="4">
+        <div class="note" id="modeNote"></div>
+      </div>
+      <div>
+        <div class="toolbar" style="margin-top:0">
+          <button class="primary" id="formBtn">Form teams</button>
+          <button id="reshuffleBtn" disabled>Re-shuffle</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- RESULTS -->
+  <section class="panel" id="results" style="display:none">
+    <h2><span class="step">4</span> Teams</h2>
+    <div id="banners"></div>
+    <div class="metrics" id="metrics"></div>
+    <div class="teams" id="teams"></div>
+
+    <div class="divider"></div>
+    <h2 style="margin-bottom:10px">Skill coverage</h2>
+    <div style="overflow-x:auto"><table class="coverage-tbl" id="coverageTbl"></table></div>
+
+    <div class="toolbar">
+      <button id="exportBtn">Download teams as CSV</button>
+      <button id="copyBtn">Copy summary</button>
+    </div>
+  </section>
+</div>
+
+<script>
+"use strict";
+
+// ---------- state ----------
+const state = {
+  skills: [],                 // ["Used Git before", ...]
+  students: [],               // [{name, skills:Set<skillName>}]
+  mode: "teams",              // teams | size | auto
+  seed: 1,
+  teams: null,                // [[studentIndex,...], ...] after forming
+  pendingCsv: null,           // {headers, rows}
+};
+
+// ---------- seeded RNG (mulberry32) ----------
+function makeRng(seed){
+  let a = seed >>> 0;
+  return function(){
+    a |= 0; a = (a + 0x6D2B79F5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+// ---------- helpers ----------
+const $ = id => document.getElementById(id);
+function esc(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+function balancedSizes(n, t){
+  t = Math.max(1, Math.min(t, n || 1));
+  const base = Math.floor(n / t), rem = n % t;
+  const out = [];
+  for (let i = 0; i < t; i++) out.push(base + (i < rem ? 1 : 0));
+  return out;
+}
+
+function teamCountForMode(){
+  const n = state.students.length;
+  const v = Math.max(1, parseInt($("modeVal").value || "1", 10));
+  if (n === 0) return 1;
+  if (state.mode === "teams") return Math.min(v, n);
+  if (state.mode === "size")  return Math.max(1, Math.ceil(n / v));
+  return autoPlan(v).T;
+}
+
+// Auto mode: as many teams as possible without breaking skill coverage
+// or dropping below the smallest workable team size.
+//   byCover = holders of the scarcest skill  (pigeonhole: T > byCover leaves a team uncovered)
+//   bySize  = floor(n / minSize)             (don't shrink teams past what's workable)
+// More teams means smaller teams and more hands-on time each, so we take the
+// largest T that satisfies both, and report which constraint was binding.
+function autoPlan(minSize){
+  const n = state.students.length;
+  if (!n) return { T: 1, bound: "none", byCover: Infinity, bySize: 1, scarcest: null };
+  minSize = Math.max(1, minSize || 1);
+  const bySize = Math.max(1, Math.floor(n / minSize));
+
+  let byCover = Infinity, scarcest = null;
+  state.skills.forEach(s => {
+    const h = state.students.filter(st => st.skills.has(s)).length;
+    if (h > 0 && h < byCover){ byCover = h; scarcest = s; }
+  });
+
+  const T = Math.max(1, Math.min(bySize, byCover, n));
+  let bound = "none";
+  if (byCover < bySize) bound = "cover";
+  else if (bySize < byCover) bound = "size";
+  else if (isFinite(byCover)) bound = "both";
+  return { T, bound, byCover, bySize, scarcest };
+}
+
+// ---------- rendering: skills ----------
+function renderSkills(){
+  const box = $("skillChips");
+  if (!state.skills.length){ box.innerHTML = '<span class="empty">No skills yet. Add the ones this tutorial needs.</span>'; return; }
+  box.innerHTML = state.skills.map((s,i) =>
+    `<span class="chip">${esc(s)}<button data-i="${i}" title="Remove" aria-label="Remove ${esc(s)}">✕</button></span>`
+  ).join("");
+  box.querySelectorAll("button").forEach(b => b.onclick = () => {
+    const s = state.skills[+b.dataset.i];
+    state.skills.splice(+b.dataset.i, 1);
+    state.students.forEach(st => st.skills.delete(s));
+    renderSkills(); renderStudents();
+  });
+}
+function addSkill(){
+  const inp = $("skillInput"); const v = inp.value.trim();
+  if (!v) return;
+  if (!state.skills.some(s => s.toLowerCase() === v.toLowerCase())) state.skills.push(v);
+  inp.value = ""; inp.focus(); renderSkills(); renderStudents();
+}
+
+// ---------- rendering: students ----------
+function renderStudents(){
+  const wrap = $("studentTableWrap");
+  if (!state.students.length){ wrap.innerHTML = '<p class="empty">No students yet.</p>'; return; }
+  const head = ['<th>Student</th>']
+    .concat(state.skills.map(s => `<th class="skill" title="${esc(s)}">${esc(s.length>14?s.slice(0,13)+'…':s)}</th>`))
+    .concat('<th></th>').join('');
+  const body = state.students.map((st,i) => {
+    const cells = state.skills.map(s =>
+      `<td class="skill"><input type="checkbox" class="check" data-s="${i}" data-skill="${esc(s)}" ${st.skills.has(s)?'checked':''}></td>`
+    ).join('');
+    return `<tr><td>${esc(st.name)}</td>${cells}<td class="skill"><button class="ghost small" data-del="${i}" title="Remove">✕</button></td></tr>`;
+  }).join('');
+  wrap.innerHTML = `<div style="overflow-x:auto"><table><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div>`;
+
+  wrap.querySelectorAll('input.check').forEach(cb => cb.onchange = () => {
+    const st = state.students[+cb.dataset.s];
+    if (cb.checked) st.skills.add(cb.dataset.skill); else st.skills.delete(cb.dataset.skill);
+  });
+  wrap.querySelectorAll('button[data-del]').forEach(b => b.onclick = () => {
+    state.students.splice(+b.dataset.del, 1); renderStudents();
+  });
+}
+function addStudent(name, skillSet){
+  const nm = (name || "").trim(); if (!nm) return;
+  const existing = state.students.find(s => s.name.toLowerCase() === nm.toLowerCase());
+  if (existing){ existing.skills = skillSet || existing.skills; }   // latest wins (dedupe)
+  else state.students.push({ name: nm, skills: skillSet || new Set() });
+}
+
+// ---------- CSV parsing ----------
+function parseDelimited(text){
+  text = text.replace(/\r\n?/g, "\n").trim();
+  if (!text) return [];
+  const rows = []; let row = [], field = "", q = false;
+  // detect delimiter: tab if present in first line and more common than comma
+  const first = text.split("\n")[0];
+  const delim = (first.split("\t").length > first.split(",").length) ? "\t" : ",";
+  for (let i = 0; i < text.length; i++){
+    const c = text[i];
+    if (q){
+      if (c === '"'){ if (text[i+1] === '"'){ field += '"'; i++; } else q = false; }
+      else field += c;
+    } else {
+      if (c === '"') q = true;
+      else if (c === delim){ row.push(field); field = ""; }
+      else if (c === "\n"){ row.push(field); rows.push(row); row = []; field = ""; }
+      else field += c;
+    }
+  }
+  row.push(field); rows.push(row);
+  return rows.filter(r => r.some(x => x.trim() !== ""));
+}
+const YES = /^(y|yes|true|1|x|✓|✔|checked|si|sí)$/i;
+function truthy(v){ return YES.test(String(v).trim()); }
+
+function guessRole(header){
+  const h = header.toLowerCase().trim();
+  if (/\b(name|student|id|full name|who)\b/.test(h)) return "name";
+  if (/timestamp|email|e-mail|score|marca temporal/.test(h)) return "ignore";
+  return "skill";
+}
+
+function showColumnMap(headers){
+  const wrap = $("colmapWrap");
+  const rolesDefault = headers.map(guessRole);
+  if (!rolesDefault.includes("name")){
+    const idx = rolesDefault.findIndex(r => r !== "ignore");
+    if (idx >= 0) rolesDefault[idx] = "name";
+  }
+  const rowsHtml = headers.map((h,i) =>
+    `<div class="cname" title="${esc(h)}">${esc(h || '(blank column '+(i+1)+')')}</div>
+     <select data-col="${i}">
+       <option value="name" ${rolesDefault[i]==='name'?'selected':''}>Name / ID</option>
+       <option value="skill" ${rolesDefault[i]==='skill'?'selected':''}>Skill (yes/no)</option>
+       <option value="ignore" ${rolesDefault[i]==='ignore'?'selected':''}>Ignore</option>
+     </select>`).join("");
+  wrap.innerHTML =
+    `<div class="banner good"><span class="ic">✓</span><div>Read <b>${state.pendingCsv.rows.length}</b> row(s). Tag each column, then load. Skill columns you don't already have will be added.</div></div>
+     <div class="colmap">${rowsHtml}</div>
+     <div class="row"><button class="primary" id="applyCsv">Load these students</button>
+     <button class="ghost" id="cancelCsv">Cancel</button></div>`;
+  $("applyCsv").onclick = applyColumnMap;
+  $("cancelCsv").onclick = () => { wrap.innerHTML = ""; state.pendingCsv = null; };
+}
+
+function applyColumnMap(){
+  const selects = [...$("colmapWrap").querySelectorAll("select")];
+  const roles = selects.map(s => s.value);
+  const nameCol = roles.indexOf("name");
+  const skillCols = roles.map((r,i) => r === "skill" ? i : -1).filter(i => i >= 0);
+  if (nameCol < 0){ alert("Pick which column holds the name or ID."); return; }
+
+  // add any new skills (in order)
+  skillCols.forEach(ci => {
+    const label = (state.pendingCsv.headers[ci] || "Skill "+(ci+1)).trim();
+    if (!state.skills.some(s => s.toLowerCase() === label.toLowerCase())) state.skills.push(label);
+  });
+
+  state.pendingCsv.rows.forEach(r => {
+    const nm = (r[nameCol] || "").trim();
+    if (!nm) return;
+    const set = new Set();
+    skillCols.forEach(ci => {
+      const label = (state.pendingCsv.headers[ci] || "Skill "+(ci+1)).trim();
+      if (truthy(r[ci])) set.add(label);
+    });
+    addStudent(nm, set);
+  });
+
+  $("colmapWrap").innerHTML = ""; state.pendingCsv = null;
+  renderSkills(); renderStudents();
+}
+
+// ---------- the allocation ----------
+function rarityWeights(){
+  const n = state.students.length, w = {};
+  state.skills.forEach(s => {
+    const c = state.students.filter(st => st.skills.has(s)).length;
+    w[s] = (c > 0 && c < n) ? n / c : 0;   // trivially balanced skills get no weight
+  });
+  return w;
+}
+
+function objective(teams, counts, weights, T){
+  // weighted sum of squared deviation of per-team counts from the skill's mean
+  let obj = 0;
+  state.skills.forEach(s => {
+    if (weights[s] === 0) return;
+    let total = 0;
+    for (let t = 0; t < T; t++) total += counts[t][s];
+    const mean = total / T;
+    for (let t = 0; t < T; t++){ const d = counts[t][s] - mean; obj += weights[s] * d * d; }
+  });
+  return obj;
+}
+
+function allocate(){
+  const n = state.students.length;
+  const T = teamCountForMode();
+  const sizes = balancedSizes(n, T);
+  const weights = rarityWeights();
+  const rng = makeRng(state.seed);
+
+  // priority: students holding rarer skills placed first
+  const order = state.students.map((st, idx) => {
+    let p = 0; state.skills.forEach(s => { if (st.skills.has(s)) p += weights[s]; });
+    return { idx, p, j: rng() };
+  }).sort((a,b) => (b.p - a.p) || (a.j - b.j)).map(o => o.idx);
+
+  const teams = Array.from({length: T}, () => []);
+  const counts = Array.from({length: T}, () => { const o = {}; state.skills.forEach(s => o[s] = 0); return o; });
+
+  for (const si of order){
+    const st = state.students[si];
+    let best = -1, bestCost = Infinity;
+    for (let t = 0; t < T; t++){
+      if (teams[t].length >= sizes[t]) continue;
+      let cost = 0;
+      state.skills.forEach(s => { if (st.skills.has(s)) cost += weights[s] * counts[t][s]; });
+      cost += 1e-4 * teams[t].length;   // tie-break toward emptier teams
+      cost += 1e-7 * rng();             // jitter so re-shuffle varies
+      if (cost < bestCost){ bestCost = cost; best = t; }
+    }
+    teams[best].push(si);
+    state.skills.forEach(s => { if (st.skills.has(s)) counts[best][s]++; });
+  }
+
+  // local pair-swaps to polish balance (sizes preserved automatically)
+  let improved = true, passes = 0;
+  while (improved && passes < 60){
+    improved = false; passes++;
+    for (let a = 0; a < T; a++){
+      for (let b = a + 1; b < T; b++){
+        for (let ia = 0; ia < teams[a].length; ia++){
+          for (let ib = 0; ib < teams[b].length; ib++){
+            const before = teamPairObj(counts, weights, T, a, b);
+            const sa = state.students[teams[a][ia]], sb = state.students[teams[b][ib]];
+            state.skills.forEach(s => {
+              const ca = sa.skills.has(s) ? 1 : 0, cb = sb.skills.has(s) ? 1 : 0;
+              counts[a][s] += cb - ca; counts[b][s] += ca - cb;
+            });
+            const after = teamPairObj(counts, weights, T, a, b);
+            if (after < before - 1e-9){
+              const tmp = teams[a][ia]; teams[a][ia] = teams[b][ib]; teams[b][ib] = tmp;
+              improved = true;
+            } else {
+              state.skills.forEach(s => {   // revert
+                const ca = sa.skills.has(s) ? 1 : 0, cb = sb.skills.has(s) ? 1 : 0;
+                counts[a][s] += ca - cb; counts[b][s] += cb - ca;
+              });
+            }
+          }
+        }
+      }
+    }
+  }
+  state.teams = teams;
+  return { teams, counts, weights, T, sizes };
+}
+
+function teamPairObj(counts, weights, T, a, b){
+  // contribution to objective from only teams a,b (means depend on all, so recompute those two terms fully)
+  let obj = 0;
+  state.skills.forEach(s => {
+    if (weights[s] === 0) return;
+    let total = 0; for (let t = 0; t < T; t++) total += counts[t][s];
+    const mean = total / T;
+    const da = counts[a][s] - mean, db = counts[b][s] - mean;
+    obj += weights[s] * (da*da + db*db);
+  });
+  return obj;
+}
+
+// ---------- results rendering ----------
+function currentCounts(teams){
+  return teams.map(team => {
+    const o = {}; state.skills.forEach(s => o[s] = 0);
+    team.forEach(si => state.skills.forEach(s => { if (state.students[si].skills.has(s)) o[s]++; }));
+    return o;
+  });
+}
+
+function renderResults(res){
+  const { teams, T } = res;
+  const counts = currentCounts(teams);          // recompute (robust to manual moves)
+  $("results").style.display = "";
+  $("reshuffleBtn").disabled = false;
+
+  // banners: coverage feasibility per skill
+  const n = state.students.length;
+  const bWrap = $("banners"); let banners = "";
+  state.skills.forEach(s => {
+    const holders = state.students.filter(st => st.skills.has(s)).length;
+    if (holders === 0){
+      banners += `<div class="banner warn"><span class="ic">!</span><div><b>${esc(s)}</b>: nobody answered yes, so no team can be covered. Check the question or the responses.</div></div>`;
+    } else if (holders < T){
+      banners += `<div class="banner warn"><span class="ic">!</span><div><b>${esc(s)}</b>: only ${holders} student(s) hold this, so with ${T} teams at most ${holders} can each have one. ${T - holders} team(s) will go without — fewer teams or a larger team size would fix it.</div></div>`;
+    }
+  });
+  if (!banners && state.skills.length){
+    banners = `<div class="banner good"><span class="ic">✓</span><div>Every team can be covered for every skill. Distribution below is balanced by rarity.</div></div>`;
+  }
+  bWrap.innerHTML = banners;
+
+  // metrics
+  const weights = rarityWeights();
+  let worstSpread = 0, spreadSkill = "";
+  state.skills.forEach(s => {
+    if (weights[s] === 0) return;
+    const vals = counts.map(c => c[s]); const sp = Math.max(...vals) - Math.min(...vals);
+    if (sp > worstSpread){ worstSpread = sp; spreadSkill = s; }
+  });
+  const sizesNow = teams.map(t => t.length);
+  $("metrics").innerHTML =
+    `<div class="metric"><div class="v">${T}</div><div class="k">teams</div></div>
+     <div class="metric"><div class="v">${Math.min(...sizesNow)}–${Math.max(...sizesNow)}</div><div class="k">members per team</div></div>
+     <div class="metric"><div class="v">${worstSpread}</div><div class="k">widest skill gap${spreadSkill?` (${esc(spreadSkill)})`:''}</div></div>`;
+
+  // team cards
+  const opts = Array.from({length:T}, (_,t)=>t);
+  $("teams").innerHTML = teams.map((team, t) => {
+    const members = team.map((si, mi) => {
+      const sel = `<select data-si="${si}" data-from="${t}" aria-label="Move ${esc(state.students[si].name)}">`
+        + opts.map(o => `<option value="${o}" ${o===t?'selected':''}>Team ${o+1}</option>`).join("")
+        + `</select>`;
+      return `<li><span class="who">${esc(state.students[si].name)}</span>${sel}</li>`;
+    }).join("") || '<li class="empty" style="padding:8px 14px">empty</li>';
+
+    const bars = state.skills.map(s => {
+      const have = counts[t][s], total = team.length;
+      const holders = state.students.filter(st => st.skills.has(s)).length;
+      const feasible = holders >= T;               // could this team have had one?
+      const gap = have === 0 && feasible;
+      let dots = "";
+      for (let i = 0; i < total; i++) dots += `<span class="dot ${i<have?'on':''}"></span>`;
+      const marker = gap ? '<span class="dot gap" title="No holder, though coverage was possible"></span>' : '';
+      return `<div class="skillbar"><span class="lbl" title="${esc(s)}">${esc(s)}</span>
+        <span class="dots">${dots || marker}${gap&&dots?marker:''}<span class="cnt">${have}/${total}</span></span></div>`;
+    }).join("");
+
+    return `<div class="team">
+      <div class="team-head"><h3>Team ${t+1}</h3><span class="size">${team.length} member${team.length!==1?'s':''}</span></div>
+      <ul class="members">${members}</ul>
+      ${state.skills.length ? `<div class="skillbars">${bars}</div>` : ''}
+    </div>`;
+  }).join("");
+
+  $("teams").querySelectorAll("select[data-si]").forEach(sel => sel.onchange = () => {
+    const si = +sel.dataset.si, from = +sel.dataset.from, to = +sel.value;
+    if (from === to) return;
+    const arr = state.teams[from]; const k = arr.indexOf(si);
+    if (k >= 0) arr.splice(k, 1);
+    state.teams[to].push(si);
+    renderResults({ teams: state.teams, T: state.teams.length });
+  });
+
+  // coverage table
+  const ct = $("coverageTbl");
+  const head = '<tr><th>Skill</th>' + teams.map((_,t)=>`<th class="skill">T${t+1}</th>`).join('') + '<th class="skill">Holders</th><th class="skill">Status</th></tr>';
+  const rows = state.skills.map(s => {
+    const holders = state.students.filter(st => st.skills.has(s)).length;
+    const cells = teams.map((_,t)=>`<td class="skill">${counts[t][s]}</td>`).join('');
+    const covered = teams.every((_,t)=>counts[t][s] > 0);
+    const feasible = holders >= T;
+    const status = covered ? '<span class="pill ok">all covered</span>'
+      : feasible ? '<span class="pill no">gap</span>'
+      : '<span class="pill no">too few</span>';
+    return `<tr><td>${esc(s)}</td>${cells}<td class="skill">${holders}</td><td class="skill">${status}</td></tr>`;
+  }).join('');
+  ct.innerHTML = head + rows || '<tr><td class="empty">No skills.</td></tr>';
+}
+
+// ---------- form / actions ----------
+function form(){
+  if (!state.students.length){ alert("Add some students first."); return; }
+  const res = allocate();
+  renderResults(res);
+  $("results").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function updateModeUi(){
+  const labels = { teams:"Number of teams", size:"Most members in one team", auto:"Smallest workable team" };
+  $("modeLabel").textContent = labels[state.mode];
+  const n = state.students.length || 0;
+  let note = "";
+  if (n){
+    const T = teamCountForMode();
+    const sizes = balancedSizes(n, T);
+    note = `${n} students → ${T} team(s) of ${Math.min(...sizes)}–${Math.max(...sizes)}.`;
+    if (state.mode === "auto"){
+      const p = autoPlan(Math.max(1, parseInt($("modeVal").value || "1", 10)));
+      if (p.bound === "cover")
+        note += ` Held to ${p.byCover} by “${p.scarcest}” — only ${p.byCover} student(s) have it.`;
+      else if (p.bound === "size")
+        note += ` Held by team size; coverage alone would allow ${isFinite(p.byCover)?p.byCover:n}.`;
+      else if (p.bound === "both")
+        note += ` Team size and coverage both cap it here.`;
+    }
+  }
+  $("modeNote").textContent = note;
+}
+
+// ---------- export ----------
+function exportCsv(){
+  if (!state.teams) return;
+  const header = ["Team","Name",...state.skills];
+  const lines = [header.map(csvCell).join(",")];
+  state.teams.forEach((team,t) => team.forEach(si => {
+    const st = state.students[si];
+    lines.push([ "Team "+(t+1), st.name, ...state.skills.map(s => st.skills.has(s)?"1":"0") ].map(csvCell).join(","));
+  }));
+  download("teams.csv", lines.join("\n"));
+}
+function csvCell(v){ v = String(v); return /[",\n]/.test(v) ? '"'+v.replace(/"/g,'""')+'"' : v; }
+function download(name, text){
+  const blob = new Blob([text], {type:"text/csv"}); const url = URL.createObjectURL(blob);
+  const a = document.createElement("a"); a.href = url; a.download = name; a.click();
+  setTimeout(()=>URL.revokeObjectURL(url), 500);
+}
+function copySummary(){
+  if (!state.teams) return;
+  const counts = currentCounts(state.teams);
+  let out = "";
+  state.teams.forEach((team,t) => {
+    out += `Team ${t+1}: ` + team.map(si=>state.students[si].name).join(", ") + "\n";
+    const cov = state.skills.map(s=>`${s} ${counts[t][s]}`).join(" · ");
+    if (cov) out += "   " + cov + "\n";
+  });
+  navigator.clipboard.writeText(out.trim()).then(()=>{
+    const b = $("copyBtn"); const o = b.textContent; b.textContent = "Copied ✓";
+    setTimeout(()=>b.textContent = o, 1400);
+  });
+}
+
+// ---------- wiring ----------
+$("addSkill").onclick = addSkill;
+$("skillInput").addEventListener("keydown", e => { if (e.key === "Enter") addSkill(); });
+$("addStudent").onclick = () => { addStudent($("studentName").value, new Set()); $("studentName").value=""; $("studentName").focus(); renderStudents(); updateModeUi(); };
+$("studentName").addEventListener("keydown", e => { if (e.key === "Enter") $("addStudent").click(); });
+$("clearStudents").onclick = () => { if (state.students.length && confirm("Remove all students?")){ state.students = []; renderStudents(); updateModeUi(); } };
+$("parseCsv").onclick = () => {
+  const rows = parseDelimited($("csvBox").value);
+  if (rows.length < 2){ alert("Paste a header row plus at least one student row."); return; }
+  state.pendingCsv = { headers: rows[0].map(h=>h.trim()), rows: rows.slice(1) };
+  showColumnMap(state.pendingCsv.headers);
+};
+$("modeSeg").querySelectorAll("button").forEach(b => b.onclick = () => {
+  state.mode = b.dataset.mode;
+  $("modeSeg").querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", x===b));
+  const defaults = { teams:4, size:4, auto:3 };
+  $("modeVal").value = defaults[state.mode];
+  updateModeUi();
+});
+$("modeVal").addEventListener("input", updateModeUi);
+$("formBtn").onclick = form;
+$("reshuffleBtn").onclick = () => { state.seed = (state.seed * 1103515245 + 12345) >>> 0; form(); };
+$("exportBtn").onclick = exportCsv;
+$("copyBtn").onclick = copySummary;
+
+// ---------- boot ----------
+["Git/GitHub","ODEs","Coding", "Dynamical Systems"].forEach(s => state.skills.push(s));
+["Armaan","Flynn","George","Molly","Charlie","Sheetal", "Kevan", "Rata", "Zoey", "Maya", "Isabel", "Can", "Cindy"].forEach(n => state.students.push({name:n, skills:new Set()}));
+// seed a rough demo distribution so the tool isn't blank
+// state.students[0].skills = new Set(["Used Git before","Codes in Python"]);
+// state.students[1].skills = new Set(["Comfortable with ODEs"]);
+// state.students[2].skills = new Set(["Used Git before","Comfortable with ODEs"]);
+// state.students[3].skills = new Set(["Codes in Python"]);
+renderSkills(); renderStudents(); updateModeUi();
+</script>
+</body>
+</html>

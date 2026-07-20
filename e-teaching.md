@@ -34,3 +34,14 @@ All run directly in the browser — no software installation needed.
     </span>
   </div>
 </div>
+
+<hr>
+
+<div class="grid one">
+  <div class="card">
+    <strong><a href="https://jpatinoe.github.io/team-allocator.html" target="_blank" rel="noopener">Team allocator↗</a></strong><br>
+    <span class="subtle">
+      Distribute students into teams with a balanced set of skills
+    </span>
+  </div>
+</div>
