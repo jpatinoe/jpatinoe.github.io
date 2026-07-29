@@ -719,12 +719,28 @@ $("copyBtn").onclick = copySummary;
 
 // ---------- boot ----------
 ["Git installed", "Git/GitHub","ODEs","Coding", "Dynamical Systems"].forEach(s => state.skills.push(s));
-["Armaan","Flynn","George","Molly","Charlie","Sheetal", "Kevan", "Rata", "Zoey", "Maya", "Isabel", "Can", "Cindy", "Jordan", "Jonty", "Emile"].forEach(n => state.students.push({name:n, skills:new Set()}));
+["Armaan","Flynn","George","Molly","Charlie","Sheetal", "Kevan", "Rata", "Zoey", "Maya", "Isabel", "Can", "Cindy", "Jordan", "Jonty", "Emile", "Julia", "Alan", "Bo", "Minglin"].forEach(n => state.students.push({name:n, skills:new Set()}));
 // seed a rough demo distribution so the tool isn't blank
-// state.students[0].skills = new Set(["Used Git before","Codes in Python"]);
-// state.students[1].skills = new Set(["Comfortable with ODEs"]);
-// state.students[2].skills = new Set(["Used Git before","Comfortable with ODEs"]);
-// state.students[3].skills = new Set(["Codes in Python"]);
+state.students[0].skills = new Set(["Git installed", "ODEs","Coding", "Dynamical Systems"]);
+state.students[1].skills = new Set(["Git installed", "Git/GitHub","ODEs","Coding", "Dynamical Systems"]);
+state.students[2].skills = new Set(["Git installed", "ODEs","Coding", "Dynamical Systems"]);
+state.students[3].skills = new Set(["Git installed", "ODEs","Coding", "Dynamical Systems"]);
+// state.students[4].skills = new Set(["Git installed", "Git/GitHub","ODEs","Coding", "Dynamical Systems"]);
+state.students[5].skills = new Set(["Git installed", "ODEs","Coding"]);
+state.students[6].skills = new Set(["Git installed", "ODEs","Coding"]);
+state.students[7].skills = new Set(["Git installed", "Git/GitHub","ODEs","Coding", "Dynamical Systems"]);
+state.students[8].skills = new Set(["Git installed", "Git/GitHub","ODEs","Coding", "Dynamical Systems"]);
+// state.students[9].skills = new Set(["Git installed", "Git/GitHub","ODEs","Coding", "Dynamical Systems"]);
+// state.students[10].skills = new Set(["Git installed", "Git/GitHub","ODEs","Coding", "Dynamical Systems"]);
+// state.students[11].skills = new Set(["Git installed", "Git/GitHub","ODEs","Coding", "Dynamical Systems"]);
+state.students[12].skills = new Set(["Git installed", "ODEs","Coding", "Dynamical Systems"]);
+// state.students[13].skills = new Set(["Git installed", "Git/GitHub","ODEs","Coding", "Dynamical Systems"]);
+state.students[14].skills = new Set(["ODEs","Coding"]);
+state.students[15].skills = new Set(["ODEs","Coding"]);
+// state.students[16].skills = new Set(["Git installed", "Git/GitHub","ODEs","Coding", "Dynamical Systems"]);
+// state.students[17].skills = new Set(["Git installed", "Git/GitHub","ODEs","Coding", "Dynamical Systems"]);
+// state.students[18].skills = new Set(["Git installed", "Git/GitHub","ODEs","Coding", "Dynamical Systems"]);
+// state.students[19].skills = new Set(["Git installed", "Git/GitHub","ODEs","Coding", "Dynamical Systems"]);
 renderSkills(); renderStudents(); updateModeUi();
 </script>
 </body>
