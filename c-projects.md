@@ -10,11 +10,15 @@ permalink: /projects/
 
 <span class="section-label">Publications</span>
 
-### Journal Publications
+### Publications
 
 - **Patiño-Echeverría, Krauskopf & Osinga (2026)**
   *Global bifurcation structure of a four-dimensional Lorenz-like system with a wild chaotic attractor.*
   [Nonlinearity, 39 065010](https://iopscience.iop.org/article/10.1088/1361-6544/ae7172)
+  
+- **Patiño-Echeverría, Krauskopf & Osinga (2026)**
+  *Bifurcations of symmetric periodic orbits in a four-dimensional Lorenz-like system and their relation to wild chaos.*
+  [Preprint, University of Auckland](https://www.math.auckland.ac.nz/~hinke/preprints/pko_sympo.html)
 
 ### PhD thesis
 
