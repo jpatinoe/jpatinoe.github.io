@@ -45,3 +45,24 @@ All run directly in the browser — no software installation needed.
     </span>
   </div>
 </div>
+
+<hr>
+
+<span class="section-label">Lecture notes</span>
+
+<div class="grid two">
+  <div class="card">
+    <strong>Methods in Applied Mathematics (MATHS 362)</strong><br>
+    <span class="subtle">
+      Lecture notes on asymptotic methods: asymptotic expansions, regular and singular perturbation problems, and matched asymptotic expansions for algebraic and differential equations.
+    </span><br><br>
+    <a href="{{ '/files/lecture-notes-362.pdf' | relative_url }}" target="_blank" rel="noopener" class="button">Open PDF ↗</a>
+  </div>
+  <div class="card">
+    <strong>Mathematical Modelling (MATHS 765)</strong><br>
+    <span class="subtle">
+      Course notes on the modelling process: dimensional analysis and the Buckingham Pi theorem, nondimensionalisation, and dominant balance in the construction of models.
+    </span><br><br>
+    <a href="{{ '/files/lecture-notes-765.pdf' | relative_url }}" target="_blank" rel="noopener" class="button">Open PDF ↗</a>
+  </div>
+</div>
