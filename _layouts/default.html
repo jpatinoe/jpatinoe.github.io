@@ -444,6 +444,23 @@
     border: 0;
   }
 
+  /* ── Anchor target highlight (for deep links, e.g. #masters-thesis) ── */
+  .anchor-target {
+    scroll-margin-top: 24px;
+    border-radius: 12px;
+    padding: 10px 14px;
+    margin: 0 -14px;
+  }
+
+  .anchor-target:target {
+    animation: target-fade 2.5s ease-out forwards;
+  }
+
+  @keyframes target-fade {
+    0%   { background: var(--accent-soft); box-shadow: 0 0 0 1px var(--accent-line); }
+    100% { background: transparent; box-shadow: 0 0 0 1px transparent; }
+  }
+
   /* ── Footer ── */
   footer {
     margin-top: 16px;

@@ -26,6 +26,16 @@ My thesis, [**"Transitions to Wild Chaos in a Four-Dimensional Lorenz-like Vecto
 
 - Posters and research snapshots: [Figshare profile](https://auckland.figshare.com/authors/Juan_Patino_Echeverria/12040190)
 
+<div id="masters-thesis" class="anchor-target" markdown="1">
+
+### Master's thesis
+
+Before my PhD, I completed a Master's thesis in higher-education, **"Del triángulo didáctico al grafo completo K4: nuevas aristas en los procesos de enseñanza-aprendizaje en la era tecnológica"** (*From the Didactic Triangle to the K4 Complete Graph: New Connections in Teaching and Learning in the Digital Age*). It proposes a topological reinterpretation of the classic teacher–knowledge–student triangle as a complete graph K4, showing how digital tools add a fourth node to the teaching–learning relationship, illustrated with examples from university mathematics teaching.
+
+[Open thesis (PDF)]({{ "/files/Tesis_JuanPatino.pdf" | relative_url }}){: .button}
+
+</div>
+
 <hr>
 
 <span class="section-label">3 Minutes thesis</span>
