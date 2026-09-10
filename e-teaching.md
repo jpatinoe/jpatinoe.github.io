@@ -37,6 +37,19 @@ All run directly in the browser — no software installation needed.
 
 <hr>
 
+<span class="section-label">Numerical Computation</span>
+
+<div class="grid one">
+  <div class="card">
+    <strong><a href="https://jpatinoe.github.io/quadrature-explorer.html" target="_blank" rel="noopener">Quadratures ↗</a></strong><br>
+    <span class="subtle">
+      Interactive examples of different quadrature rules: Riemann Sums, Midpoint, Trapezoid, Simpson's and Gauss.
+    </span>
+  </div>
+</div>
+
+<hr>
+
 <div class="grid one">
   <div class="card">
     <strong><a href="https://jpatinoe.github.io/team-allocator.html" target="_blank" rel="noopener">Team allocator ↗</a></strong><br>

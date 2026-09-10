@@ -1,0 +1,1460 @@
+<title>Quadrature Explorer</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:ital,wght@0,400;0,600;1,400;1,600&display=swap">
+
+<style>
+/* ============================================================
+   Quadrature Explorer -- MATHS 270
+   Palette derives from the printed notes: navy rules, teal curve,
+   amber weights. Neutrals carry a slight cool bias.
+   ============================================================ */
+
+:root {
+  --paper:      #F2F3F1;
+  --panel:      #FFFFFF;
+  --panel-2:    #F7F8F7;
+  --ink:        #16202E;
+  --ink-soft:   #4A5666;
+  --ink-faint:  #8C97A5;
+  --line:       #D8DCE1;
+  --line-faint: #E8EBEE;
+
+  --node:       #1F3864;   /* nodes, rule geometry */
+  --node-fill:  rgba(31,56,100,0.13);
+  --curve:      #0F6B6B;   /* the exact function */
+  --weight:     #A8551A;   /* weights */
+  --bad:        #9B1B1B;   /* error */
+  --good:       #2F6B2F;
+
+  --shadow: 0 1px 2px rgba(22,32,46,.06), 0 6px 20px rgba(22,32,46,.05);
+
+  --f-sans: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+  --f-serif: "IBM Plex Serif", Georgia, serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper:      #10151C;
+    --panel:      #171D26;
+    --panel-2:    #1D242F;
+    --ink:        #E3E8EF;
+    --ink-soft:   #A3AEBC;
+    --ink-faint:  #6C7885;
+    --line:       #2C353F;
+    --line-faint: #232B35;
+
+    --node:       #7FA3DC;
+    --node-fill:  rgba(127,163,220,0.16);
+    --curve:      #4FB8B2;
+    --weight:     #E09A4E;
+    --bad:        #E58080;
+    --good:       #7FBF7F;
+
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.3);
+  }
+}
+
+:root[data-theme="dark"] {
+  --paper:      #10151C;
+  --panel:      #171D26;
+  --panel-2:    #1D242F;
+  --ink:        #E3E8EF;
+  --ink-soft:   #A3AEBC;
+  --ink-faint:  #6C7885;
+  --line:       #2C353F;
+  --line-faint: #232B35;
+
+  --node:       #7FA3DC;
+  --node-fill:  rgba(127,163,220,0.16);
+  --curve:      #4FB8B2;
+  --weight:     #E09A4E;
+  --bad:        #E58080;
+  --good:       #7FBF7F;
+
+  --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.3);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--f-sans);
+  font-size: 15px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+.wrap {
+  max-width: 1220px;
+  margin: 0 auto;
+  padding: 28px 22px 64px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ---------- header ---------- */
+
+header { display: flex; flex-direction: column; gap: 6px; }
+
+.eyebrow {
+  font-family: var(--f-mono);
+  font-size: 11.5px;
+  letter-spacing: .13em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+h1 {
+  font-family: var(--f-serif);
+  font-weight: 600;
+  font-size: clamp(28px, 4vw, 40px);
+  line-height: 1.1;
+  margin: 0;
+  text-wrap: balance;
+  letter-spacing: -0.01em;
+}
+
+.standfirst {
+  color: var(--ink-soft);
+  max-width: 62ch;
+  margin: 2px 0 0;
+}
+
+/* ---------- the master formula band ---------- */
+
+.thesis {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--node);
+  border-radius: 3px;
+  padding: 20px 24px;
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.thesis .master {
+  font-family: var(--f-serif);
+  font-size: clamp(19px, 2.6vw, 25px);
+  text-align: center;
+  padding: 4px 0 2px;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+.thesis p {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 14px;
+  text-align: center;
+}
+
+.thesis b { color: var(--ink); font-weight: 600; }
+
+/* inline maths, hand-set */
+.mv { font-family: var(--f-serif); font-style: italic; }
+.w-c { color: var(--weight); font-weight: 600; }
+.n-x { color: var(--node); font-weight: 600; }
+.big-int { font-size: 1.5em; vertical-align: -0.28em; font-family: var(--f-serif); }
+sub, sup { font-size: .68em; }
+
+/* ---------- tabs ---------- */
+
+.tabs {
+  display: inline-flex;
+  gap: 2px;
+  padding: 3px;
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  align-self: flex-start;
+}
+
+.tabs button {
+  font-family: var(--f-sans);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ink-soft);
+  background: transparent;
+  border: 0;
+  padding: 8px 16px;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: background .12s, color .12s;
+}
+.tabs button:hover { color: var(--ink); }
+.tabs button[aria-selected="true"] {
+  background: var(--panel);
+  color: var(--ink);
+  box-shadow: 0 1px 2px rgba(0,0,0,.08);
+}
+.tabs button:focus-visible { outline: 2px solid var(--node); outline-offset: 1px; }
+
+/* ---------- control strip ---------- */
+
+.controls {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  padding: 16px 20px;
+  box-shadow: var(--shadow);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 18px 24px;
+  align-items: end;
+}
+
+.field { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+
+.field > label,
+.field > .lbl {
+  font-family: var(--f-mono);
+  font-size: 10.5px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+select, input[type="number"] {
+  font-family: var(--f-sans);
+  font-size: 14px;
+  color: var(--ink);
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  padding: 7px 9px;
+  width: 100%;
+}
+input[type="number"] { font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
+select:focus-visible, input:focus-visible { outline: 2px solid var(--node); outline-offset: 1px; }
+
+.pair { display: flex; gap: 8px; }
+.pair > * { flex: 1; min-width: 0; }
+
+/* segmented rule picker */
+.seg { display: flex; flex-wrap: wrap; gap: 4px; }
+.seg button {
+  font-family: var(--f-sans);
+  font-size: 13px;
+  padding: 7px 12px;
+  border: 1px solid var(--line);
+  background: var(--panel-2);
+  color: var(--ink-soft);
+  border-radius: 2px;
+  cursor: pointer;
+  transition: background .12s, color .12s, border-color .12s;
+}
+.seg button:hover { color: var(--ink); }
+.seg button[aria-pressed="true"] {
+  background: var(--node);
+  border-color: var(--node);
+  color: #fff;
+  font-weight: 500;
+}
+.seg button:focus-visible { outline: 2px solid var(--node); outline-offset: 1px; }
+
+/* slider */
+.slider-row { display: flex; align-items: center; gap: 12px; }
+input[type="range"] {
+  flex: 1;
+  accent-color: var(--node);
+  min-width: 0;
+}
+.nval {
+  font-family: var(--f-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 17px;
+  font-weight: 600;
+  min-width: 3.4ch;
+  text-align: right;
+  color: var(--node);
+}
+
+.ab-tag {
+  font-family: var(--f-serif);
+  font-style: italic;
+  font-size: 15px;
+  color: var(--node);
+  width: 1.2ch;
+  text-align: center;
+}
+#abField .nval { font-size: 14px; min-width: 5.2ch; }
+button.mini {
+  font-family: var(--f-sans);
+  font-size: 12px;
+  color: var(--ink-soft);
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  padding: 5px 10px;
+  cursor: pointer;
+  align-self: flex-start;
+  margin-top: 2px;
+}
+button.mini:hover { color: var(--ink); }
+button.mini:focus-visible { outline: 2px solid var(--node); outline-offset: 1px; }
+
+.hint { font-size: 12.5px; color: var(--ink-faint); grid-column: 1 / -1; margin: -4px 0 0; }
+.warn { color: var(--bad); font-weight: 500; }
+
+/* ---------- main split ---------- */
+
+.split {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+@media (max-width: 900px) { .split { grid-template-columns: 1fr; } }
+
+.rightcol { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
+
+.card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.card h2 {
+  font-family: var(--f-mono);
+  font-size: 10.5px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  font-weight: 500;
+  margin: 0;
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--line-faint);
+}
+
+.card .body { padding: 16px 18px 18px; }
+
+canvas { display: block; width: 100%; }
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+  padding: 10px 18px 14px;
+  font-size: 12.5px;
+  color: var(--ink-soft);
+}
+.legend span { display: inline-flex; align-items: center; gap: 7px; }
+.swatch { width: 16px; height: 3px; border-radius: 2px; display: inline-block; }
+.swatch.dot { width: 9px; height: 9px; border-radius: 50%; }
+
+/* ---------- the expanded sum ---------- */
+
+.sum {
+  font-family: var(--f-mono);
+  font-size: 13.5px;
+  line-height: 1.9;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.sum .row { display: grid; grid-template-columns: 3.6em minmax(0, 1fr); align-items: baseline; }
+.sum .lead { color: var(--ink-faint); }
+.sum .terms { min-width: 0; }
+.sum .t { display: inline-block; white-space: nowrap; }
+.sum .op { color: var(--ink-faint); padding: 0 .4em; }
+.sum .tot { color: var(--ink); font-weight: 600; }
+
+.general {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--line);
+  font-size: 13px;
+  color: var(--ink-soft);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.general code {
+  font-family: var(--f-mono);
+  font-size: 12.5px;
+  color: var(--ink);
+}
+
+/* ---------- readout numbers ---------- */
+
+.readout { display: flex; flex-direction: column; }
+.rrow {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 14px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--line-faint);
+}
+.rrow:last-child { border-bottom: 0; }
+.rrow .k { font-size: 13px; color: var(--ink-soft); }
+.rrow .v {
+  font-family: var(--f-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 15px;
+  font-weight: 500;
+}
+.rrow.err .v { color: var(--bad); }
+.rrow.err.zero .v { color: var(--good); }
+.rrow.big .v { font-size: 19px; font-weight: 600; }
+
+.badge {
+  display: inline-block;
+  font-family: var(--f-mono);
+  font-size: 11px;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 2px;
+  border: 1px solid currentColor;
+}
+.badge.ok { color: var(--good); }
+.badge.no { color: var(--bad); }
+
+table.wt {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--f-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 12.5px;
+  margin-top: 12px;
+}
+table.wt th {
+  text-align: right;
+  font-weight: 500;
+  color: var(--ink-faint);
+  font-size: 10.5px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  padding: 4px 6px;
+  border-bottom: 1px solid var(--line);
+}
+table.wt td { text-align: right; padding: 3px 6px; }
+table.wt td:first-child, table.wt th:first-child { text-align: left; color: var(--ink-faint); }
+table.wt .cw { color: var(--weight); }
+table.wt .cx { color: var(--node); }
+
+/* ---------- footnote ---------- */
+
+footer {
+  color: var(--ink-faint);
+  font-size: 12.5px;
+  border-top: 1px solid var(--line);
+  padding-top: 14px;
+  max-width: 78ch;
+}
+footer b { color: var(--ink-soft); }
+
+.hidden { display: none !important; }
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}
+</style>
+
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">MATHS 270 &nbsp;·&nbsp; Numerical Computation</div>
+    <h1>Quadrature Explorer</h1>
+    <p class="standfirst">
+      Every numerical integration rule on this page &mdash; and every one in the
+      course &mdash; is the same object: a list of points where you evaluate
+      <span class="mv">f</span>, and a list of numbers you multiply those values by.
+      Change the points and the numbers, and you have changed the rule.
+    </p>
+  </header>
+
+  <section class="thesis">
+    <div class="master">
+      <span class="big-int">&int;</span><sub>&thinsp;<span class="mv">a</span></sub><sup><span class="mv">b</span></sup>&nbsp;<span class="mv">f</span>(<span class="mv">x</span>)&thinsp;d<span class="mv">x</span>
+      &nbsp;&asymp;&nbsp;
+      <span style="font-size:1.25em; vertical-align:-.18em;">&sum;</span><sub><span class="mv">k</span>&thinsp;=&thinsp;0</sub><sup><span class="mv">n</span></sup>
+      &nbsp;<span class="w-c"><span class="mv">c</span><sub><span class="mv">k</span></sub></span>&thinsp;
+      <span class="mv">f</span>(<span class="n-x"><span class="mv">x</span><sub><span class="mv">k</span></sub></span>)
+    </div>
+    <p>
+      The <span class="n-x">nodes <span class="mv">x</span><sub><span class="mv">k</span></sub></span>
+      are where you look. The <span class="w-c">weights <span class="mv">c</span><sub><span class="mv">k</span></sub></span>
+      say how much each look counts. <b>Neither depends on <span class="mv">f</span></b> &mdash;
+      that is what makes a rule reusable.
+    </p>
+  </section>
+
+  <div class="tabs" role="tablist" aria-label="Choose a family of rules">
+    <button id="tabRiemann" role="tab" aria-selected="true" aria-controls="panelMain">Riemann sums</button>
+    <button id="tabClassic" role="tab" aria-selected="false" aria-controls="panelMain">One interval: midpoint, trapezoid, Simpson</button>
+    <button id="tabGauss" role="tab" aria-selected="false" aria-controls="panelMain">Changing the interval: 3-node Gauss</button>
+  </div>
+
+  <section class="controls" id="panelMain" role="tabpanel">
+    <div class="field">
+      <label for="fsel">Integrand &nbsp;<span class="mv">f</span>(<span class="mv">x</span>)</label>
+      <select id="fsel"></select>
+    </div>
+
+    <div class="field" id="intField">
+      <span class="lbl">Interval [<span class="mv">a</span>, <span class="mv">b</span>]</span>
+      <div class="pair">
+        <input type="number" id="ain" value="0" step="0.25" min="-4" max="6" aria-label="lower limit a">
+        <input type="number" id="bin" value="2" step="0.25" min="-4" max="6" aria-label="upper limit b">
+      </div>
+    </div>
+
+    <div class="field hidden" id="abField">
+      <span class="lbl">Drag the endpoints</span>
+      <div class="slider-row">
+        <span class="ab-tag"><span class="mv">a</span></span>
+        <input type="range" id="aslider" min="-4" max="6" step="0.05" value="-1" aria-label="lower limit a">
+        <span class="nval" id="aval">-1.00</span>
+      </div>
+      <div class="slider-row">
+        <span class="ab-tag"><span class="mv">b</span></span>
+        <input type="range" id="bslider" min="-4" max="6" step="0.05" value="1" aria-label="upper limit b">
+        <span class="nval" id="bval">1.00</span>
+      </div>
+      <button type="button" id="resetAB" class="mini">reset to [&minus;1, 1]</button>
+    </div>
+
+    <div class="field" id="ruleField">
+      <span class="lbl">Rule</span>
+      <div class="seg" id="ruleSeg"></div>
+    </div>
+
+    <div class="field" id="nField">
+      <label for="nslider">Subintervals &nbsp;<span class="mv">N</span></label>
+      <div class="slider-row">
+        <input type="range" id="nslider" min="1" max="60" value="4">
+        <span class="nval" id="nval">4</span>
+      </div>
+    </div>
+
+    <p class="hint" id="hint"></p>
+  </section>
+
+  <div class="split">
+
+    <div class="card">
+      <h2 id="plotTitle">The rule, drawn</h2>
+      <canvas id="plot" height="420"></canvas>
+      <div class="legend" id="legend"></div>
+    </div>
+
+      <div class="rightcol">
+      <div class="card">
+        <h2>The rule, written out</h2>
+        <div class="body">
+          <div class="sum" id="sumOut"></div>
+          <div class="general" id="generalOut"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Diagnostics</h2>
+        <div class="body">
+          <div class="readout" id="readout"></div>
+          <div id="wtWrap"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="card hidden" id="transferCard">
+    <h2>The change of coordinates, drawn to scale</h2>
+    <canvas id="xfer" height="230"></canvas>
+    <div class="legend">
+      <span><i class="swatch" style="height:10px;background:var(--node-fill);border:1px solid var(--weight)"></i> weight, drawn as a length</span>
+      <span id="xferNote" style="color:var(--ink-faint)"></span>
+    </div>
+  </div>
+
+  <div class="card" id="convCard">
+    <h2>Error against <span class="mv" style="text-transform:none">N</span> &nbsp;&mdash;&nbsp; log&ndash;log</h2>
+    <canvas id="conv" height="260"></canvas>
+    <div class="legend">
+      <span><i class="swatch" style="background:var(--node)"></i> measured error</span>
+      <span><i class="swatch dot" style="background:var(--weight)"></i> current <span class="mv">N</span></span>
+      <span id="slopeNote" style="color:var(--ink-faint)"></span>
+    </div>
+  </div>
+
+  <footer id="foot"></footer>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ---------------------------------------------------------------
+     Integrands. Where an elementary antiderivative exists we use it,
+     so "exact" really is exact. Where it does not, we fall back to a
+     100-panel 10-point Gauss-Legendre reference, which is accurate to
+     machine precision for these functions -- and is deliberately not
+     one of the rules being taught.
+     --------------------------------------------------------------- */
+
+  var GL_X = [-0.9739065285171717, -0.8650633666889845, -0.6794095682990244,
+              -0.4333953941292472, -0.1488743389816312,
+               0.1488743389816312,  0.4333953941292472,  0.6794095682990244,
+               0.8650633666889845,  0.9739065285171717];
+  var GL_W = [0.0666713443086881, 0.1494513491505806, 0.2190863625159820,
+              0.2692667193099963, 0.2955242247147529,
+              0.2955242247147529, 0.2692667193099963, 0.2190863625159820,
+              0.1494513491505806, 0.0666713443086881];
+
+  function glReference(f, a, b) {
+    var panels = 100, H = (b - a) / panels, tot = 0;
+    for (var p = 0; p < panels; p++) {
+      var lo = a + p * H, h = H / 2, m = lo + h, s = 0;
+      for (var i = 0; i < 10; i++) s += GL_W[i] * f(m + h * GL_X[i]);
+      tot += h * s;
+    }
+    return tot;
+  }
+
+  var FUNCS = [
+    { id: "one",  label: "1  (constant)",        tex: "1",             f: function () { return 1; },              F: function (x) { return x; },            deg: 0 },
+    { id: "x",    label: "x",                    tex: "x",             f: function (x) { return x; },             F: function (x) { return x * x / 2; },    deg: 1 },
+    { id: "x2",   label: "x²",              tex: "x²",       f: function (x) { return x * x; },         F: function (x) { return Math.pow(x, 3) / 3; }, deg: 2 },
+    { id: "x3",   label: "x³",              tex: "x³",       f: function (x) { return Math.pow(x, 3); },F: function (x) { return Math.pow(x, 4) / 4; }, deg: 3 },
+    { id: "x4",   label: "x⁴",              tex: "x⁴",       f: function (x) { return Math.pow(x, 4); },F: function (x) { return Math.pow(x, 5) / 5; }, deg: 4 },
+    { id: "x5",   label: "x⁵",              tex: "x⁵",       f: function (x) { return Math.pow(x, 5); },F: function (x) { return Math.pow(x, 6) / 6; }, deg: 5 },
+    { id: "x6",   label: "x⁶",              tex: "x⁶",       f: function (x) { return Math.pow(x, 6); },F: function (x) { return Math.pow(x, 7) / 7; }, deg: 6 },
+    { id: "sin",  label: "sin x",              tex: "sin x",         f: Math.sin,                               F: function (x) { return -Math.cos(x); }, deg: null },
+    { id: "exp",  label: "eˣ",              tex: "eˣ",       f: Math.exp,                               F: Math.exp,                              deg: null },
+    { id: "rec",  label: "1 / (1 + x)",          tex: "1/(1+x)",       f: function (x) { return 1 / (1 + x); },   F: function (x) { return Math.log(Math.abs(1 + x)); }, deg: null, pole: -1 },
+    { id: "sqrt", label: "√(1 + x²)",  tex: "√(1+x²)", f: function (x) { return Math.sqrt(1 + x * x); },
+      F: function (x) { return (x * Math.sqrt(1 + x * x) + Math.asinh(x)) / 2; }, deg: null },
+    { id: "gauss", label: "e⁻ˣ²  (no antiderivative)", tex: "e⁻ˣ²",
+      f: function (x) { return Math.exp(-x * x); }, F: null, deg: null },
+    { id: "spike", label: "e⁻¹⁰⁰⁽ˣ⁻¹⁾² + 1/10  (a spike)", tex: "spike",
+      f: function (x) { return Math.exp(-100 * (x - 1) * (x - 1)) + 0.1; }, F: null, deg: null }
+  ];
+
+  /* ---------------------------------------------------------------
+     The rules. Each returns { nodes, weights, name, general }.
+     Every one of them is nothing but a list of x's and a list of c's.
+     --------------------------------------------------------------- */
+
+  function ruleLeft(a, b, N) {
+    var h = (b - a) / N, xs = [], ws = [];
+    for (var k = 0; k < N; k++) { xs.push(a + k * h); ws.push(h); }
+    return { nodes: xs, weights: ws,
+      general: ["c<sub>k</sub> = h = (b &minus; a)/N", "x<sub>k</sub> = a + k h,&nbsp; k = 0 &hellip; N&minus;1"] };
+  }
+  function ruleRight(a, b, N) {
+    var h = (b - a) / N, xs = [], ws = [];
+    for (var k = 1; k <= N; k++) { xs.push(a + k * h); ws.push(h); }
+    return { nodes: xs, weights: ws,
+      general: ["c<sub>k</sub> = h = (b &minus; a)/N", "x<sub>k</sub> = a + k h,&nbsp; k = 1 &hellip; N"] };
+  }
+  function ruleMidComposite(a, b, N) {
+    var h = (b - a) / N, xs = [], ws = [];
+    for (var k = 0; k < N; k++) { xs.push(a + (k + 0.5) * h); ws.push(h); }
+    return { nodes: xs, weights: ws,
+      general: ["c<sub>k</sub> = h = (b &minus; a)/N", "x<sub>k</sub> = a + (k + &frac12;) h,&nbsp; k = 0 &hellip; N&minus;1"] };
+  }
+  function ruleMidSingle(a, b) {
+    return { nodes: [(a + b) / 2], weights: [b - a],
+      general: ["c<sub>0</sub> = b &minus; a", "x<sub>0</sub> = (a + b)/2"] };
+  }
+  function ruleTrap(a, b) {
+    return { nodes: [a, b], weights: [(b - a) / 2, (b - a) / 2],
+      general: ["c<sub>0</sub> = c<sub>1</sub> = (b &minus; a)/2", "x<sub>0</sub> = a,&nbsp; x<sub>1</sub> = b"] };
+  }
+  function ruleSimp(a, b) {
+    var L = b - a;
+    return { nodes: [a, (a + b) / 2, b], weights: [L / 6, 4 * L / 6, L / 6],
+      general: ["c = (b &minus; a)/6 &times; [ 1, 4, 1 ]", "x = [ a, (a+b)/2, b ]"] };
+  }
+
+  /* Three-point Gauss-Legendre, stated on the reference interval [-1, 1].
+     This is the ONLY place the rule is written down. Everything that happens
+     on [a, b] is the affine map x = m + h t applied to it. */
+  var GA = [-Math.sqrt(3 / 5), 0, Math.sqrt(3 / 5)];
+  var GW = [5 / 9, 8 / 9, 5 / 9];
+
+  function ruleGauss3(a, b) {
+    var h = (b - a) / 2, m = (a + b) / 2, xs = [], ws = [];
+    for (var i = 0; i < 3; i++) { xs.push(m + h * GA[i]); ws.push(h * GW[i]); }
+    return { nodes: xs, weights: ws, h: h, m: m,
+      general: [
+        "on [&minus;1, 1]:&nbsp; t = [ &minus;&radic;(3/5), 0, &radic;(3/5) ],&nbsp; w = [ 5/9, 8/9, 5/9 ]",
+        "h = (b &minus; a)/2,&nbsp; m = (a + b)/2",
+        "x<sub>k</sub> = m + h t<sub>k</sub>&nbsp; &nbsp;<b>and</b>&nbsp; &nbsp;c<sub>k</sub> = h w<sub>k</sub>"
+      ] };
+  }
+
+  var RIEMANN = [
+    { id: "left",  label: "Left endpoint",  build: ruleLeft,          order: 1 },
+    { id: "right", label: "Right endpoint", build: ruleRight,         order: 1 },
+    { id: "mid",   label: "Midpoint",       build: ruleMidComposite,  order: 2 }
+  ];
+  var CLASSIC = [
+    { id: "mid1",  label: "Midpoint",  build: ruleMidSingle, dop: 1 },
+    { id: "trap1", label: "Trapezoid", build: ruleTrap,      dop: 1 },
+    { id: "simp1", label: "Simpson",   build: ruleSimp,      dop: 3 }
+  ];
+
+  /* ---------------------------------------------------------------
+     State
+     --------------------------------------------------------------- */
+
+  function byId(id) {
+    return FUNCS.filter(function (F) { return F.id === id; })[0];
+  }
+
+  var S = { tab: "riemann", fn: byId("rec"), a: 0, b: 2, N: 4,
+            rule: RIEMANN[0], crule: CLASSIC[2] };
+
+  var $ = function (id) { return document.getElementById(id); };
+  var fsel = $("fsel"), ain = $("ain"), bin = $("bin"),
+      nslider = $("nslider"), nval = $("nval"), ruleSeg = $("ruleSeg"),
+      hint = $("hint"), nField = $("nField"), convCard = $("convCard"),
+      plotTitle = $("plotTitle"), legend = $("legend"),
+      intField = $("intField"), abField = $("abField"), ruleField = $("ruleField"),
+      transferCard = $("transferCard"),
+      aslider = $("aslider"), bslider = $("bslider"),
+      aval = $("aval"), bval = $("bval");
+
+  FUNCS.forEach(function (F, i) {
+    var o = document.createElement("option");
+    o.value = F.id; o.textContent = F.label;
+    if (F === S.fn) o.selected = true;
+    fsel.appendChild(o);
+  });
+
+  function buildSeg() {
+    ruleSeg.innerHTML = "";
+    var list = S.tab === "riemann" ? RIEMANN : CLASSIC;
+    var cur = S.tab === "riemann" ? S.rule : S.crule;
+    list.forEach(function (R) {
+      var b = document.createElement("button");
+      b.type = "button";
+      b.textContent = R.label;
+      b.setAttribute("aria-pressed", R === cur ? "true" : "false");
+      b.onclick = function () {
+        if (S.tab === "riemann") S.rule = R; else S.crule = R;
+        buildSeg(); render();
+      };
+      ruleSeg.appendChild(b);
+    });
+  }
+
+  /* ---------------------------------------------------------------
+     Numerics
+     --------------------------------------------------------------- */
+
+  function exactValue() {
+    var F = S.fn;
+    if (F.F) return F.F(S.b) - F.F(S.a);
+    return glReference(F.f, S.a, S.b);
+  }
+
+  function currentRule() {
+    if (S.tab === "riemann") return S.rule.build(S.a, S.b, S.N);
+    if (S.tab === "gauss")   return ruleGauss3(S.a, S.b);
+    return S.crule.build(S.a, S.b);
+  }
+
+  function applyRule(R) {
+    var s = 0;
+    for (var i = 0; i < R.nodes.length; i++) s += R.weights[i] * S.fn.f(R.nodes[i]);
+    return s;
+  }
+
+  function intervalProblem() {
+    if (!(S.b > S.a)) return "Need b greater than a.";
+    if (S.fn.pole !== undefined && S.a <= S.fn.pole && S.b >= S.fn.pole)
+      return "This integrand has a pole at x = " + S.fn.pole + ", which lies inside [a, b]. Move the interval.";
+    return null;
+  }
+
+  function fmt(v, digits) {
+    if (!isFinite(v)) return "—";
+    if (v === 0) return "0";
+    var m = Math.abs(v);
+    if (m >= 1e-4 && m < 1e6) return v.toFixed(digits === undefined ? 8 : digits);
+    return v.toExponential(3);
+  }
+  function fmtErr(v) {
+    if (!isFinite(v)) return "—";
+    if (v === 0) return "0";
+    if (Math.abs(v) < 5e-16) return "< 10⁻¹⁵   (zero, computed)";
+    return v.toExponential(3);
+  }
+
+  /* ---------------------------------------------------------------
+     Drawing
+     --------------------------------------------------------------- */
+
+  function cssVar(n) { return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
+
+  function setupCanvas(cv, cssH) {
+    var dpr = window.devicePixelRatio || 1;
+    var w = cv.clientWidth || 600;
+    cv.width = Math.round(w * dpr);
+    cv.height = Math.round(cssH * dpr);
+    cv.style.height = cssH + "px";
+    var g = cv.getContext("2d");
+    g.setTransform(dpr, 0, 0, dpr, 0, 0);
+    g.clearRect(0, 0, w, cssH);
+    return { g: g, w: w, h: cssH };
+  }
+
+  function drawPlot() {
+    var cv = $("plot");
+    var C = setupCanvas(cv, 420), g = C.g, W = C.w, H = C.h;
+    var padL = 52, padR = 18, padT = 18, padB = 34;
+    var bad = intervalProblem();
+    if (bad) {
+      g.fillStyle = cssVar("--ink-faint");
+      g.font = "14px " + cssVar("--f-sans").replace(/"/g, "");
+      g.fillText(bad, padL, H / 2);
+      return;
+    }
+
+    var f = S.fn.f, a = S.a, b = S.b;
+
+    /* On the Gauss tab the outer weight blocks stick out past a and b by
+       0.0262 (b - a) each side, so the drawing window is a little wider than
+       the interval of integration. */
+    var over = S.tab === "gauss" ? 0.07 * (b - a) : 0;
+    var d0 = a - over, d1 = b + over;
+
+    /* sample the curve */
+    var M = 700, xs = [], ys = [], lo = Infinity, hi = -Infinity;
+    for (var i = 0; i <= M; i++) {
+      var x = d0 + (d1 - d0) * i / M, y = f(x);
+      xs.push(x); ys.push(y);
+      if (isFinite(y)) { if (y < lo) lo = y; if (y > hi) hi = y; }
+    }
+    var R = currentRule();
+    R.nodes.forEach(function (x) { var y = f(x); if (isFinite(y)) { if (y < lo) lo = y; if (y > hi) hi = y; } });
+    if (lo > 0) lo = 0;
+    if (hi < 0) hi = 0;
+    var span = hi - lo || 1;
+    lo -= 0.10 * span; hi += 0.12 * span;
+
+    var X = function (x) { return padL + (x - d0) / (d1 - d0) * (W - padL - padR); };
+    var Y = function (y) { return H - padB - (y - lo) / (hi - lo) * (H - padT - padB); };
+
+    /* graph-paper grid */
+    g.strokeStyle = cssVar("--line-faint");
+    g.lineWidth = 1;
+    for (var k = 0; k <= 10; k++) {
+      var gx = padL + k / 10 * (W - padL - padR);
+      g.beginPath(); g.moveTo(gx, padT); g.lineTo(gx, H - padB); g.stroke();
+      var gy = padT + k / 10 * (H - padT - padB);
+      g.beginPath(); g.moveTo(padL, gy); g.lineTo(W - padR, gy); g.stroke();
+    }
+
+    /* the shapes the rule uses */
+    var h = (b - a) / (S.tab === "riemann" ? S.N : 1);
+    g.lineWidth = 1;
+    if (S.tab === "riemann") {
+      for (var k2 = 0; k2 < R.nodes.length; k2++) {
+        var xn = R.nodes[k2], yn = f(xn);
+        var x0 = a + k2 * h, x1 = x0 + h;
+        g.fillStyle = cssVar("--node-fill");
+        g.strokeStyle = cssVar("--node");
+        var top = Y(yn), base = Y(0);
+        g.beginPath();
+        g.rect(X(x0), Math.min(top, base), X(x1) - X(x0), Math.abs(base - top));
+        g.fill();
+        if (R.nodes.length <= 90) g.stroke();
+      }
+    } else if (S.tab === "gauss") {
+      /* First the thing the rule is trying to match: the true area on [a, b]. */
+      g.save();
+      g.globalAlpha = 0.13;
+      g.fillStyle = cssVar("--curve");
+      g.beginPath();
+      g.moveTo(X(a), Y(0));
+      for (var qa = 0; qa <= 240; qa++) {
+        var xa = a + (b - a) * qa / 240;
+        g.lineTo(X(xa), Y(f(xa)));
+      }
+      g.lineTo(X(b), Y(0)); g.closePath(); g.fill();
+      g.restore();
+
+      /* Then the three blocks the rule actually adds up. Each is c_k wide and
+         f(x_k) tall, so its AREA is one term of the sum. */
+      for (var kg = 0; kg < R.nodes.length; kg++) {
+        var xg = R.nodes[kg], cg = R.weights[kg], yg = f(xg);
+        if (!isFinite(yg)) continue;
+        var topg = Y(yg), baseg = Y(0);
+        g.fillStyle = cssVar("--node-fill");
+        g.strokeStyle = cssVar("--weight");
+        g.lineWidth = 1.6;
+        g.beginPath();
+        g.rect(X(xg - cg / 2), Math.min(topg, baseg), X(xg + cg / 2) - X(xg - cg / 2),
+               Math.abs(baseg - topg));
+        g.fill(); g.stroke();
+        /* the ordinate at the node itself */
+        g.strokeStyle = cssVar("--node");
+        g.lineWidth = 1.4;
+        g.beginPath(); g.moveTo(X(xg), baseg); g.lineTo(X(xg), topg); g.stroke();
+      }
+
+      /* where the interval of integration actually ends */
+      g.save();
+      g.setLineDash([4, 4]);
+      g.strokeStyle = cssVar("--ink-faint");
+      g.lineWidth = 1;
+      [a, b].forEach(function (e) {
+        g.beginPath(); g.moveTo(X(e), padT); g.lineTo(X(e), H - padB); g.stroke();
+      });
+      g.restore();
+    } else if (S.crule.id === "trap1") {
+      g.fillStyle = cssVar("--node-fill");
+      g.strokeStyle = cssVar("--node");
+      g.beginPath();
+      g.moveTo(X(a), Y(0)); g.lineTo(X(a), Y(f(a)));
+      g.lineTo(X(b), Y(f(b))); g.lineTo(X(b), Y(0)); g.closePath();
+      g.fill(); g.lineWidth = 2; g.stroke();
+    } else if (S.crule.id === "mid1") {
+      var ym = f((a + b) / 2);
+      g.fillStyle = cssVar("--node-fill");
+      g.strokeStyle = cssVar("--node");
+      g.beginPath();
+      g.rect(X(a), Math.min(Y(ym), Y(0)), X(b) - X(a), Math.abs(Y(0) - Y(ym)));
+      g.fill(); g.lineWidth = 2; g.stroke();
+    } else {
+      /* Simpson: draw the interpolating parabola */
+      var x0s = a, x1s = (a + b) / 2, x2s = b;
+      var y0 = f(x0s), y1 = f(x1s), y2 = f(x2s);
+      var P = function (x) {
+        return y0 * ((x - x1s) * (x - x2s)) / ((x0s - x1s) * (x0s - x2s))
+             + y1 * ((x - x0s) * (x - x2s)) / ((x1s - x0s) * (x1s - x2s))
+             + y2 * ((x - x0s) * (x - x1s)) / ((x2s - x0s) * (x2s - x1s));
+      };
+      g.fillStyle = cssVar("--node-fill");
+      g.strokeStyle = cssVar("--node");
+      g.beginPath();
+      g.moveTo(X(a), Y(0));
+      for (var q = 0; q <= 200; q++) { var xq = a + (b - a) * q / 200; g.lineTo(X(xq), Y(P(xq))); }
+      g.lineTo(X(b), Y(0)); g.closePath();
+      g.fill(); g.lineWidth = 2; g.stroke();
+    }
+
+    /* axes */
+    g.strokeStyle = cssVar("--line");
+    g.lineWidth = 1.2;
+    g.beginPath(); g.moveTo(padL, Y(0)); g.lineTo(W - padR, Y(0)); g.stroke();
+    g.beginPath(); g.moveTo(padL, padT); g.lineTo(padL, H - padB); g.stroke();
+
+    /* the exact curve */
+    g.strokeStyle = cssVar("--curve");
+    g.lineWidth = 2.2;
+    g.beginPath();
+    var started = false;
+    for (var j = 0; j <= M; j++) {
+      if (!isFinite(ys[j])) { started = false; continue; }
+      if (!started) { g.moveTo(X(xs[j]), Y(ys[j])); started = true; }
+      else g.lineTo(X(xs[j]), Y(ys[j]));
+    }
+    g.stroke();
+
+    /* nodes */
+    if (R.nodes.length <= 90) {
+      g.fillStyle = cssVar("--node");
+      for (var m = 0; m < R.nodes.length; m++) {
+        var xm = R.nodes[m], ym2 = f(xm);
+        if (!isFinite(ym2)) continue;
+        g.beginPath(); g.arc(X(xm), Y(ym2), 3.4, 0, 6.2832); g.fill();
+      }
+    }
+
+    /* axis labels */
+    g.fillStyle = cssVar("--ink-faint");
+    g.font = "11px " + (cssVar("--f-mono").split(",")[0].replace(/"/g, "") || "monospace");
+    g.textAlign = "center";
+    g.fillText(a.toFixed(2), X(a), H - padB + 16);
+    g.fillText(((a + b) / 2).toFixed(2), X((a + b) / 2), H - padB + 16);
+    g.fillText(b.toFixed(2), X(b), H - padB + 16);
+    g.textAlign = "right";
+    g.fillText(hi.toFixed(2), padL - 7, padT + 10);
+    g.fillText("0", padL - 7, Y(0) + 4);
+    g.textAlign = "left";
+  }
+
+  /* ---------------------------------------------------------------
+     The transfer picture. Two number lines, ONE pixels-per-unit scale.
+     Drawing them on a common scale is the whole point: if each line were
+     stretched to fill the canvas the change of coordinates would be
+     invisible, which is exactly the misconception this is meant to kill.
+     --------------------------------------------------------------- */
+
+  function drawXfer() {
+    if (S.tab !== "gauss") return;
+    var cv = $("xfer");
+    var C = setupCanvas(cv, 230), g = C.g, W = C.w, H = C.h;
+    if (intervalProblem()) return;
+
+    var a = S.a, b = S.b, m = (a + b) / 2, h = (b - a) / 2;
+
+    var padL = 104, padR = 26;
+    var avail = Math.max(80, W - padL - padR);
+    var cx = padL + avail / 2;
+    var scale = (avail * 0.94) / Math.max(2, b - a);   /* shared */
+
+    var yTop = 66, yBot = 166, blockH = 16;
+
+    var mono = (cssVar("--f-mono").split(",")[0].replace(/"/g, "") || "monospace");
+    var sans = (cssVar("--f-sans").split(",")[0].replace(/"/g, "") || "sans-serif");
+    var serif = (cssVar("--f-serif").split(",")[0].replace(/"/g, "") || "serif");
+
+    function line(y, centre, half, nodes, weights, labelsBelow) {
+      var P = function (v) { return cx + (v - centre) * scale; };
+
+      /* weight blocks, hanging under the line */
+      for (var k = 0; k < 3; k++) {
+        var c = weights[k], x = nodes[k];
+        var xl = P(x - c / 2), xr = P(x + c / 2);
+        g.fillStyle = cssVar("--node-fill");
+        g.strokeStyle = cssVar("--weight");
+        g.lineWidth = 1.4;
+        g.beginPath(); g.rect(xl, y, xr - xl, blockH); g.fill(); g.stroke();
+        if (xr - xl > 40) {
+          g.fillStyle = cssVar("--weight");
+          g.font = "10.5px " + mono;
+          g.textAlign = "center";
+          g.fillText(c.toFixed(4), (xl + xr) / 2, y + blockH - 4.5);
+        }
+      }
+
+      /* the line itself, with end stops */
+      g.strokeStyle = cssVar("--ink-soft");
+      g.lineWidth = 1.6;
+      g.beginPath(); g.moveTo(P(centre - half), y); g.lineTo(P(centre + half), y); g.stroke();
+      [centre - half, centre + half].forEach(function (e) {
+        g.beginPath(); g.moveTo(P(e), y - 6); g.lineTo(P(e), y + 6); g.stroke();
+      });
+
+      /* nodes */
+      g.fillStyle = cssVar("--node");
+      for (var j = 0; j < 3; j++) {
+        g.beginPath(); g.arc(P(nodes[j]), y, 4, 0, 6.2832); g.fill();
+      }
+
+      /* node coordinates */
+      g.font = "10.5px " + mono;
+      g.textAlign = "center";
+      g.fillStyle = cssVar("--node");
+      for (var q = 0; q < 3; q++) {
+        g.fillText(nodes[q].toFixed(4), P(nodes[q]),
+                   labelsBelow ? y + blockH + 13 : y - 10);
+      }
+
+      /* endpoint values */
+      g.fillStyle = cssVar("--ink-faint");
+      g.font = "10.5px " + mono;
+      g.textAlign = "center";
+      g.fillText((centre - half).toFixed(2), P(centre - half),
+                 labelsBelow ? y - 10 : y + blockH + 13);
+      g.fillText((centre + half).toFixed(2), P(centre + half),
+                 labelsBelow ? y - 10 : y + blockH + 13);
+      return P;
+    }
+
+    var Pt = line(yTop, 0, 1, GA, GW, false);
+    var Pb = line(yBot, m, h, ruleGauss3(a, b).nodes, ruleGauss3(a, b).weights, true);
+
+    /* arrows: each reference node is carried to exactly one real node */
+    g.strokeStyle = cssVar("--ink-faint");
+    g.fillStyle = cssVar("--ink-faint");
+    g.lineWidth = 1.1;
+    var Rg = ruleGauss3(a, b);
+    for (var k2 = 0; k2 < 3; k2++) {
+      var x1 = Pt(GA[k2]), y1 = yTop + blockH + 18;
+      var x2 = Pb(Rg.nodes[k2]), y2 = yBot - 24;
+      g.beginPath();
+      g.moveTo(x1, y1);
+      g.bezierCurveTo(x1, y1 + 18, x2, y2 - 18, x2, y2);
+      g.stroke();
+      g.beginPath();
+      g.moveTo(x2, y2 + 6);
+      g.lineTo(x2 - 3.6, y2 - 1.5);
+      g.lineTo(x2 + 3.6, y2 - 1.5);
+      g.closePath(); g.fill();
+    }
+
+    /* row captions */
+    g.textAlign = "right";
+    g.fillStyle = cssVar("--ink");
+    g.font = "12.5px " + sans;
+    g.fillText("reference rule", padL - 14, yTop + 2);
+    g.fillText("your interval", padL - 14, yBot + 2);
+    g.fillStyle = cssVar("--ink-faint");
+    g.font = "11px " + mono;
+    g.fillText("[-1, 1]", padL - 14, yTop + 17);
+    g.fillText("[a, b]", padL - 14, yBot + 17);
+
+    /* what the arrows do */
+    g.textAlign = "center";
+    g.fillStyle = cssVar("--ink-soft");
+    g.font = "12px " + serif;
+    g.fillText("x = m + h t,   every weight × h", cx, (yTop + blockH + yBot) / 2 + 4);
+
+    g.textAlign = "left";
+
+    $("xferNote").innerHTML =
+      "h = (b &minus; a)/2 = <b>" + h.toFixed(4) + "</b> &nbsp;&middot;&nbsp; " +
+      "both lines are drawn at the same pixels-per-unit, so the lower one really is " +
+      (Math.abs(h - 1) < 1e-9 ? "the same size" : (h > 1 ? h.toFixed(3) + "&times; longer" : "shorter by a factor " + h.toFixed(3)));
+  }
+
+  function drawConv() {
+    if (S.tab !== "riemann") return;
+    var cv = $("conv");
+    var C = setupCanvas(cv, 230), g = C.g, W = C.w, H = C.h;
+    if (intervalProblem()) return;
+
+    var padL = 52, padR = 18, padT = 14, padB = 30;
+    var exact = exactValue();
+    var Ns = [], Es = [];
+    for (var n = 1; n <= 60; n++) {
+      var Rn = S.rule.build(S.a, S.b, n);
+      var v = 0;
+      for (var i = 0; i < Rn.nodes.length; i++) v += Rn.weights[i] * S.fn.f(Rn.nodes[i]);
+      var e = Math.abs(v - exact);
+      Ns.push(n); Es.push(e > 1e-17 ? e : 1e-17);
+    }
+    var lx = Ns.map(function (n) { return Math.log10(n); });
+    var ly = Es.map(function (e) { return Math.log10(e); });
+    var ymin = Math.min.apply(null, ly), ymax = Math.max.apply(null, ly);
+    if (ymax - ymin < 1) { ymin -= 0.5; ymax += 0.5; }
+    ymin -= 0.2; ymax += 0.2;
+    var xmax = Math.log10(60);
+
+    var X = function (v) { return padL + v / xmax * (W - padL - padR); };
+    var Y = function (v) { return H - padB - (v - ymin) / (ymax - ymin) * (H - padT - padB); };
+
+    g.strokeStyle = cssVar("--line-faint"); g.lineWidth = 1;
+    [1, 2, 5, 10, 20, 50].forEach(function (n) {
+      var gx = X(Math.log10(n));
+      g.beginPath(); g.moveTo(gx, padT); g.lineTo(gx, H - padB); g.stroke();
+    });
+    for (var d = Math.ceil(ymin); d <= Math.floor(ymax); d++) {
+      var gy = Y(d);
+      g.beginPath(); g.moveTo(padL, gy); g.lineTo(W - padR, gy); g.stroke();
+    }
+
+    g.strokeStyle = cssVar("--node"); g.lineWidth = 2;
+    g.beginPath();
+    for (var k = 0; k < Ns.length; k++) {
+      var px = X(lx[k]), py = Y(ly[k]);
+      if (k === 0) g.moveTo(px, py); else g.lineTo(px, py);
+    }
+    g.stroke();
+
+    var idx = S.N - 1;
+    g.fillStyle = cssVar("--weight");
+    g.beginPath(); g.arc(X(lx[idx]), Y(ly[idx]), 5, 0, 6.2832); g.fill();
+
+    g.fillStyle = cssVar("--ink-faint");
+    g.font = "11px " + (cssVar("--f-mono").split(",")[0].replace(/"/g, "") || "monospace");
+    g.textAlign = "center";
+    [1, 10, 60].forEach(function (n) { g.fillText("N=" + n, X(Math.log10(n)), H - padB + 15); });
+    g.textAlign = "right";
+    for (var d2 = Math.ceil(ymin); d2 <= Math.floor(ymax); d2++) {
+      g.fillText("1e" + d2, padL - 7, Y(d2) + 4);
+    }
+    g.textAlign = "left";
+
+    /* measured slope over the top half of the range */
+    var i1 = 19, i2 = 59;
+    var slope = (ly[i2] - ly[i1]) / (lx[i2] - lx[i1]);
+    $("slopeNote").textContent = isFinite(slope)
+      ? "measured slope ≈ " + slope.toFixed(2) + "  (order " + Math.abs(slope).toFixed(2) + ")"
+      : "";
+  }
+
+  /* ---------------------------------------------------------------
+     Text output
+     --------------------------------------------------------------- */
+
+  function num(v) {
+    var s = v.toFixed(4);
+    if (Math.abs(v) < 1e-4 && v !== 0) s = v.toExponential(2);
+    return s;
+  }
+
+  function writeSum(R, value) {
+    var out = $("sumOut");
+    var n = R.nodes.length;
+    var parts = [];
+    var show = n <= 6 ? n : 3;
+
+    function term(i) {
+      return '<span class="t"><span class="w-c">' + num(R.weights[i]) + '</span>&thinsp;&middot;&thinsp;' +
+             'f(<span class="n-x">' + num(R.nodes[i]) + '</span>)</span>';
+    }
+    function termVal(i) {
+      return '<span class="t"><span class="w-c">' + num(R.weights[i]) + '</span>&thinsp;&middot;&thinsp;' +
+             '<span class="n-x">' + num(S.fn.f(R.nodes[i])) + '</span></span>';
+    }
+
+    var line1 = [], line2 = [];
+    for (var i = 0; i < show; i++) { line1.push(term(i)); line2.push(termVal(i)); }
+    if (n > show) {
+      line1.push("&hellip;"); line2.push("&hellip;");
+      line1.push(term(n - 1)); line2.push(termVal(n - 1));
+    }
+
+    var joiner = '<span class="op">+</span>';
+    out.innerHTML =
+      '<div class="row"><span class="lead">rule =</span><span class="terms">' + line1.join(joiner) + "</span></div>" +
+      '<div class="row"><span class="lead">=</span><span class="terms">' + line2.join(joiner) + "</span></div>" +
+      '<div class="row"><span class="lead">=</span><span class="terms tot">' + value.toFixed(10) + "</span></div>";
+
+    var gen = $("generalOut");
+    var sumW = R.weights.reduce(function (p, c) { return p + c; }, 0);
+    gen.innerHTML =
+      R.general.map(function (t) { return "<div><code>" + t + "</code></div>"; }).join("") +
+      '<div style="margin-top:6px">' + n + " node" + (n === 1 ? "" : "s") +
+      ", so " + n + " evaluation" + (n === 1 ? "" : "s") + " of <span class='mv'>f</span>. " +
+      "Weights sum to <code>" + sumW.toFixed(6) + "</code>" +
+      (Math.abs(sumW - (S.b - S.a)) < 1e-10
+        ? " = <span class='mv'>b</span> &minus; <span class='mv'>a</span> ✓"
+        : " &ne; <span class='mv'>b</span> &minus; <span class='mv'>a</span> ✗") +
+      "</div>";
+  }
+
+  function writeReadout(R, value, exact) {
+    var err = value - exact;
+    var rel = exact !== 0 ? Math.abs(err / exact) : NaN;
+    var zero = Math.abs(err) < 5e-14 * Math.max(1, Math.abs(exact));
+
+    var rows = [
+      ["exact value of the integral", fmt(exact, 10), "", ""],
+      ["the rule&rsquo;s answer", value.toFixed(10), "big", ""],
+      ["absolute error", fmtErr(err), "err" + (zero ? " zero" : ""), ""],
+      ["relative error", isFinite(rel) ? (rel === 0 ? "0" : rel.toExponential(3)) : "—",
+        "err" + (zero ? " zero" : ""), ""],
+      ["evaluations of <span class='mv'>f</span>", String(R.nodes.length), "", ""]
+    ];
+
+    if (!S.fn.F) rows[0][0] = "reference value (high-order quadrature)";
+
+    if (S.tab === "gauss") {
+      rows.splice(0, 0, ["<span class='mv'>h</span> = (<span class='mv'>b</span> &minus; " +
+        "<span class='mv'>a</span>)/2", ((S.b - S.a) / 2).toFixed(6), "", ""]);
+    }
+
+    var html = rows.map(function (r) {
+      return '<div class="rrow ' + r[2] + '"><span class="k">' + r[0] +
+             '</span><span class="v">' + r[1] + "</span></div>";
+    }).join("");
+
+    /* degree-of-precision badge on the single-interval tabs */
+    if (S.tab !== "riemann" && S.fn.deg !== null) {
+      var ok = zero;
+      html += '<div class="rrow"><span class="k">exact on ' + S.fn.tex +
+              " (degree " + S.fn.deg + ')?</span><span class="v"><span class="badge ' +
+              (ok ? "ok" : "no") + '">' + (ok ? "yes" : "no") + "</span></span></div>";
+    }
+    $("readout").innerHTML = html;
+
+    /* the full weight/node table, when it is small enough to be useful */
+    var wrap = $("wtWrap");
+    if (S.tab === "gauss") {
+      var hh = (S.b - S.a) / 2;
+      var tg = '<table class="wt"><thead><tr><th>k</th>' +
+               "<th>t<sub>k</sub></th><th>w<sub>k</sub></th>" +
+               "<th>x<sub>k</sub> = m + h t<sub>k</sub></th>" +
+               "<th>c<sub>k</sub> = h w<sub>k</sub></th>" +
+               "<th>c<sub>k</sub> f(x<sub>k</sub>)</th></tr></thead><tbody>";
+      for (var ig = 0; ig < 3; ig++) {
+        var fg = S.fn.f(R.nodes[ig]);
+        tg += "<tr><td>" + ig + "</td><td>" + GA[ig].toFixed(4) + "</td><td>" +
+              GW[ig].toFixed(4) + '</td><td class="cx">' + R.nodes[ig].toFixed(4) +
+              '</td><td class="cw">' + R.weights[ig].toFixed(4) + "</td><td>" +
+              (R.weights[ig] * fg).toFixed(6) + "</td></tr>";
+      }
+      tg += '<tr><td></td><td></td><td style="color:var(--ink-faint)">' +
+            (GW[0] + GW[1] + GW[2]).toFixed(4) + "</td><td></td>" +
+            '<td class="cw">' + (R.weights[0] + R.weights[1] + R.weights[2]).toFixed(4) +
+            '</td><td style="color:var(--ink-faint)">sums</td></tr>';
+      tg += "</tbody></table>";
+      wrap.innerHTML = tg;
+      return;
+    }
+    if (R.nodes.length <= 12) {
+      var t = '<table class="wt"><thead><tr><th>k</th><th>node x<sub>k</sub></th>' +
+              "<th>weight c<sub>k</sub></th><th>f(x<sub>k</sub>)</th>" +
+              "<th>c<sub>k</sub> f(x<sub>k</sub>)</th></tr></thead><tbody>";
+      for (var i = 0; i < R.nodes.length; i++) {
+        var fv = S.fn.f(R.nodes[i]);
+        t += "<tr><td>" + i + '</td><td class="cx">' + R.nodes[i].toFixed(4) +
+             '</td><td class="cw">' + R.weights[i].toFixed(4) + "</td><td>" +
+             fv.toFixed(4) + "</td><td>" + (R.weights[i] * fv).toFixed(6) + "</td></tr>";
+      }
+      t += "</tbody></table>";
+      wrap.innerHTML = t;
+    } else {
+      wrap.innerHTML = '<p style="margin:12px 0 0;font-size:12.5px;color:var(--ink-faint)">' +
+        R.nodes.length + " nodes &mdash; too many to list. The pattern above is the whole rule.</p>";
+    }
+  }
+
+  function writeLegend() {
+    var items = [
+      '<span><i class="swatch" style="background:var(--curve)"></i> f(x)</span>',
+      '<span><i class="swatch dot" style="background:var(--node)"></i> the nodes</span>'
+    ];
+    if (S.tab === "gauss") {
+      items.push('<span><i class="swatch" style="height:10px;background:var(--node-fill);border:1px solid var(--weight)"></i> ' +
+                 'block k: width c<sub>k</sub>, height f(x<sub>k</sub>) &mdash; so its <b>area</b> is the term</span>');
+      items.push('<span><i class="swatch" style="height:10px;background:var(--curve);opacity:.25"></i> the area the rule is aiming at</span>');
+    } else if (S.tab === "riemann") {
+      items.push('<span><i class="swatch" style="height:10px;background:var(--node-fill);border:1px solid var(--node)"></i> the ' +
+                 S.N + " rectangle" + (S.N === 1 ? "" : "s") + " the rule adds up</span>");
+    } else {
+      var shape = S.crule.id === "trap1" ? "trapezium" : (S.crule.id === "simp1" ? "interpolating parabola" : "rectangle");
+      items.push('<span><i class="swatch" style="height:10px;background:var(--node-fill);border:1px solid var(--node)"></i> the ' + shape + "</span>");
+    }
+    legend.innerHTML = items.join("");
+  }
+
+  function writeHint() {
+    var bad = intervalProblem();
+    if (bad) { hint.innerHTML = '<span class="warn">' + bad + "</span>"; return; }
+    if (S.tab === "riemann") {
+      hint.innerHTML = "Drag <span class='mv'>N</span> and watch two things at once: the rectangles " +
+        "in the picture, and the error in the diagnostics. The left and right rules are first order " +
+        "(halving <span class='mv'>h</span> halves the error); the midpoint rule is second order " +
+        "(halving <span class='mv'>h</span> quarters it). The log&ndash;log plot shows this as a slope.";
+    } else if (S.tab === "gauss") {
+      hint.innerHTML = "Start at [&minus;1, 1], where the rule is defined, then drag " +
+        "<span class='mv'>a</span> and <span class='mv'>b</span>. The nodes move &mdash; but so do " +
+        "the <span class='w-c'>weights</span>: each block keeps its shape relative to the interval " +
+        "because <b>both</b> coordinates and weights carry a factor <span class='mv'>h</span>. " +
+        "Forgetting the second one is the most common bug in quadrature code, and it shows up here " +
+        "as blocks of the wrong width.";
+    } else {
+      hint.innerHTML = "One interval, no subdivision. Step through the polynomials " +
+        "1, x, x², x³, x⁴ and watch where each rule stops being exact — " +
+        "that is its degree of precision. Simpson survives x³ and fails at x⁴.";
+    }
+  }
+
+  /* ---------------------------------------------------------------
+     Render
+     --------------------------------------------------------------- */
+
+  function render() {
+    if (S.tab === "gauss") {
+      S.a = parseFloat(aslider.value);
+      S.b = parseFloat(bslider.value);
+      aval.textContent = S.a.toFixed(2);
+      bval.textContent = S.b.toFixed(2);
+      ain.value = S.a; bin.value = S.b;
+    } else {
+      S.a = parseFloat(ain.value);
+      S.b = parseFloat(bin.value);
+    }
+    S.N = parseInt(nslider.value, 10);
+    nval.textContent = S.N;
+
+    nField.classList.toggle("hidden", S.tab !== "riemann");
+    ruleField.classList.toggle("hidden", S.tab === "gauss");
+    intField.classList.toggle("hidden", S.tab === "gauss");
+    abField.classList.toggle("hidden", S.tab !== "gauss");
+    convCard.classList.toggle("hidden", S.tab !== "riemann");
+    transferCard.classList.toggle("hidden", S.tab !== "gauss");
+    plotTitle.textContent = S.tab === "riemann"
+      ? "The rule, drawn — " + S.N + " subinterval" + (S.N === 1 ? "" : "s")
+      : (S.tab === "gauss"
+          ? "The rule, drawn — three blocks, each of area cₖ f(xₖ)"
+          : "The rule, drawn — one interval");
+
+    writeHint();
+    writeLegend();
+
+    if (intervalProblem()) {
+      $("sumOut").innerHTML = "";
+      $("generalOut").innerHTML = "";
+      $("readout").innerHTML = "";
+      $("wtWrap").innerHTML = "";
+      drawPlot();
+      drawXfer();
+      return;
+    }
+
+    var R = currentRule();
+    var value = applyRule(R);
+    var exact = exactValue();
+
+    writeSum(R, value);
+    writeReadout(R, value, exact);
+    drawPlot();
+    drawXfer();
+    drawConv();
+  }
+
+  /* ---------------------------------------------------------------
+     Wiring
+     --------------------------------------------------------------- */
+
+  fsel.onchange = function () {
+    S.fn = FUNCS.filter(function (F) { return F.id === fsel.value; })[0];
+    render();
+  };
+  ain.oninput = bin.oninput = nslider.oninput = render;
+  aslider.oninput = bslider.oninput = render;
+  $("resetAB").onclick = function () {
+    aslider.value = -1; bslider.value = 1; render();
+  };
+
+  function selectTab(which) {
+    var was = S.tab;
+    S.tab = which;
+    ["Riemann", "Classic", "Gauss"].forEach(function (T) {
+      $("tab" + T).setAttribute("aria-selected",
+        which === T.toLowerCase() ? "true" : "false");
+    });
+    /* Entering the Gauss tab always starts from the reference interval, which
+       is the only place the rule is written down. Leaving it hands the current
+       interval back to the number boxes. */
+    if (which === "gauss" && was !== "gauss") {
+      aslider.value = -1; bslider.value = 1;
+      /* 1/(1+x) has its pole at the left end of the reference interval, so it
+         cannot be the integrand you land on here. */
+      if (S.fn.pole !== undefined) { S.fn = byId("exp"); fsel.value = "exp"; }
+    }
+    buildSeg();
+    render();
+  }
+  $("tabRiemann").onclick = function () { selectTab("riemann"); };
+  $("tabClassic").onclick = function () { selectTab("classic"); };
+  $("tabGauss").onclick   = function () { selectTab("gauss"); };
+
+  window.addEventListener("resize", function () { drawPlot(); drawXfer(); drawConv(); });
+
+  $("foot").innerHTML =
+    "<b>What to take away.</b> Every rule here is <span class='mv'>&sum;</span> " +
+    "<span class='w-c'>c<sub>k</sub></span> f(<span class='n-x'>x<sub>k</sub></span>). " +
+    "Riemann sums use many nodes with equal weights; the classical rules use very few nodes with " +
+    "unequal weights, chosen so that the rule is exact on polynomials up to some degree. " +
+    "Both are the same formula &mdash; only the two lists differ. " +
+    "The weights must always sum to <span class='mv'>b</span>&minus;<span class='mv'>a</span>, " +
+    "because the rule has to integrate <span class='mv'>f</span>&thinsp;=&thinsp;1 exactly; that single " +
+    "check catches a large fraction of all broken quadrature code. " +
+    "That is also what the third tab is testing: a rule stated on [&minus;1,&thinsp;1] " +
+    "moves to [<span class='mv'>a</span>,&thinsp;<span class='mv'>b</span>] only if the weights are " +
+    "scaled along with the nodes.";
+
+  buildSeg();
+  render();
+})();
+</script>
