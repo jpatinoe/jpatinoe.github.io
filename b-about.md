@@ -15,14 +15,14 @@ I'm a mathematician working in **dynamical systems**, with an emphasis on numeri
 
 - **PhD (Mathematics)**, *University of Auckland*, New Zealand (2026)
 - **Master in Higher Education**, *University of Palermo*, Argentina
-- **BSc (Hons, First Class) Applied Mathematics**, *Victoria University of Wellington*, New Zealand
+- **BSc (Hons, First Class) Mathematics**, (major in applied mathematics) *Victoria University of Wellington*, New Zealand
 
 <hr>
 
 <span class="section-label">Current role</span>
 
 - **Professional Teaching Fellow**, *University of Auckland*
-  Teaching and course development: MATHS260 (Differential Equations) and MATHS362 (Methods in Applied Mathematics).
+  Teaching and course development: MATHS270 (Numerical Computation) and MATHS765 (Mathematical Modelling).
 
 <hr>
 
@@ -30,8 +30,8 @@ I'm a mathematician working in **dynamical systems**, with an emphasis on numeri
 
 - **Graduate Teaching Assistant**, *University of Auckland*, New Zealand
 - **Graduate Teaching Assistant**, *Victoria University of Wellington*, New Zealand
-- **Graduate Teaching Assistant**, *University of Buenos Aires*, Argentina
-- **Graduate Teaching Assistant**, *Universidad Argentina de la Empresa*, Argentina
+- **Jefe de Trabajos Prácticos (associate lecturer)**, *Universidad de Buenos Aires*, Argentina
+- **Jefe de Trabajos Prácticos (associate lecturer)**, *Universidad Argentina de la Empresa*, Argentina
 
 <hr>
 

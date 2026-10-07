@@ -3,9 +3,9 @@ layout: default
 title: Home
 ---
 
-<span class="page-greeting">Kia ora — welcome</span>
+<span class="page-greeting">Kia ora</span>
 
-I'm **Juan Patiño-Echeverría**, a mathematician and Professional Teaching Fellow at the University of Auckland.
+I'm **Juan**. Mathematician. Currently and Professional Teaching Fellow at the University of Auckland.
 
 My research is in **dynamical systems**: I study how deterministic equations can produce behaviour that looks genuinely unpredictable, and how we can compute the geometric mechanisms behind that transition to chaos.
 
@@ -24,7 +24,7 @@ My research is in **dynamical systems**: I study how deterministic equations can
 <ul class="highlights-list">
   <li>
     <span class="hl-year">Now</span>
-    <span class="hl-text">Teaching <em>Differential Equations</em> (MATHS260) and <em>Methods in Applied Mathematics</em> (MATHS362).</span>
+    <span class="hl-text">Teaching <em>Numerical Computation</em> (MATHS270) and <em>Mathematical Modelling</em> (MATHS765).</span>
   </li>
   <li>
     <span class="hl-year">2026</span>
