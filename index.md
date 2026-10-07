@@ -5,7 +5,7 @@ title: Home
 
 <span class="page-greeting">Kia ora</span>
 
-I'm **Juan**. Mathematician. Currently and Professional Teaching Fellow at the University of Auckland.
+I'm **Juan**. Mathematician. Currently a Professional Teaching Fellow at the University of Auckland.
 
 My research is in **dynamical systems**: I study how deterministic equations can produce behaviour that looks genuinely unpredictable, and how we can compute the geometric mechanisms behind that transition to chaos.
 
