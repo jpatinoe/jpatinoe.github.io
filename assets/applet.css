@@ -1,0 +1,34 @@
+/* Shared by the teaching applets: the site's palette and type, both themes, and the strip that leads back to the site. */
+:root { --jpe-paper: #F4F6F7; --jpe-paper-2: #E8ECEF; --jpe-ink: #14181C; --jpe-ink-2: #59616A; --jpe-rule: #D9DEE2; --jpe-red: #C8102E; --jpe-blue: #1F4FBF; --jpe-fill: rgba(20, 24, 28, 0.08); --jpe-fill-2: rgba(20, 24, 28, 0.16); color-scheme: light;
+  --jpe-font: "Schibsted Grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --jpe-code: ui-monospace, "SF Mono", Menlo, Consolas, monospace; }
+@media (prefers-color-scheme: dark) { :root:not([data-jpe-theme="light"]) { --jpe-paper: #0E1419; --jpe-paper-2: #152029; --jpe-ink: #E6EAED; --jpe-ink-2: #9AA4AD; --jpe-rule: #24303A; --jpe-red: #FF5A5F; --jpe-blue: #7FA6FF; --jpe-fill: rgba(230, 234, 237, 0.10); --jpe-fill-2: rgba(230, 234, 237, 0.20); color-scheme: dark; } }
+:root[data-jpe-theme="dark"] { --jpe-paper: #0E1419; --jpe-paper-2: #152029; --jpe-ink: #E6EAED; --jpe-ink-2: #9AA4AD; --jpe-rule: #24303A; --jpe-red: #FF5A5F; --jpe-blue: #7FA6FF; --jpe-fill: rgba(230, 234, 237, 0.10); --jpe-fill-2: rgba(230, 234, 237, 0.20); color-scheme: dark; }
+html { background: var(--jpe-paper); }
+:focus-visible { outline: 2px solid var(--jpe-red) !important; outline-offset: 2px; }
+
+.jp-strip {
+  grid-column: 1 / -1; box-sizing: border-box; position: relative; z-index: 5;
+  display: flex; align-items: center; gap: 16px; height: 44px; padding: 0 clamp(12px, 3vw, 24px); margin: 0;
+  background: var(--jpe-paper); border-bottom: 1px solid var(--jpe-rule);
+  font: 400 14px/1.4 var(--jpe-font); color: var(--jpe-ink); -webkit-font-smoothing: antialiased;
+}
+.jp-strip a { color: inherit; }
+.jp-strip .jp-strip-brand { position: relative; display: flex; align-items: center; color: var(--jpe-ink); text-decoration: none; flex: none; }
+.jp-strip .jp-strip-brand svg { width: 40px; height: auto; display: block; }
+.jp-strip .jp-strip-brand::after { content: ""; position: absolute; inset: -12px -4px; }
+.jp-strip .jp-crumb { color: var(--jpe-ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.jp-strip .jp-crumb a { text-decoration: none; }
+.jp-strip .jp-crumb a:hover { text-decoration: underline; text-underline-offset: 3px; }
+.jp-strip .jp-crumb b { color: var(--jpe-ink); font-weight: 600; }
+.jp-strip .jp-back { margin-left: auto; white-space: nowrap; text-decoration: none; border-bottom: 1px solid var(--jpe-rule); flex: none; }
+.jp-strip .jp-back:hover { border-bottom-color: currentColor; }
+.jp-strip button.jp-iconbtn {
+  position: relative; flex: none; width: 36px; height: 36px; margin: 0 -8px 0 0; padding: 0;
+  display: grid; place-items: center; background: none; border: 0; border-radius: 0; box-shadow: none;
+  color: var(--jpe-ink); cursor: pointer; font: inherit;
+}
+.jp-strip button.jp-iconbtn:hover { background: none; }
+.jp-strip button.jp-iconbtn::after { content: ""; position: absolute; inset: -4px; }
+.jp-strip button.jp-iconbtn svg { width: 20px; height: 20px; display: block; }
+@media (max-width: 560px) { .jp-strip .jp-crumb .jp-up { display: none; } }
