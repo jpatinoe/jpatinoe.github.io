@@ -15,7 +15,7 @@
 
 - id: thesis
   title: PhD thesis
-  intro: Supervised by <a href="https://www.math.auckland.ac.nz/~hinke/">Hinke Osinga</a> and <a href="https://www.math.auckland.ac.nz/~berndk/">Bernd Krauskopf</a>.
+  intro: Supervised by <a href="https://www.math.auckland.ac.nz/~hinke/" target="_blank" rel="noopener">Hinke Osinga<span class="vh"> (opens in a new tab)</span></a> and <a href="https://www.math.auckland.ac.nz/~berndk/" target="_blank" rel="noopener">Bernd Krauskopf<span class="vh"> (opens in a new tab)</span></a>.
   items:
     - title: Transitions to wild chaos in a four-dimensional Lorenz-like vector field
       url: https://hdl.handle.net/2292/75030

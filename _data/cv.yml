@@ -4,9 +4,9 @@
   title: Skills
   items:
     - title: Mathematics
-      meta: Dynamical systems, bifurcation analysis and numerical continuation, numerical analysis, asymptotic and perturbation methods, mathematical modelling and extreme value analysis
+      meta: Dynamical systems, bifurcation analysis and numerical continuation, asymptotic and perturbation methods, numerical analysis and mathematical modelling
     - title: Programming and software
-      meta: MATLAB, Julia, Python (pandas, Jupyter, FastAPI), AUTO-07p, SQLite, the Claude API, Git and GitHub, LaTeX
+      meta: MATLAB, Julia, Python (pandas, Jupyter, FastAPI), C, AUTO-07p, SQLite, the Claude API, Git and GitHub, LaTeX
     - title: Teaching and communication
       meta: Course design, lecture notes, interactive teaching tools, coordinating teaching assistants, and talks and posters for specialist and general audiences
 
