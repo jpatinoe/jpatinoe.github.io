@@ -1,13 +1,12 @@
-# The four destinations on the home page's field, in this order (the field script places them)
+# The four destinations on the home page's field, in this order (the field script places them). desc is optional.
 - title: Research
-  desc: Papers and thesis
   url: /research/
 - title: Teaching
-  desc: Notes and interactive tools
+  desc: Course notes and interactive tools
   url: /teaching/
-- title: Software
-  desc: Code from my research
-  url: /research/#software
+- title: Projects
+  desc: Code on GitHub
+  url: /projects/
 - title: CV
-  desc: Background, awards and contact
+  desc: Background and contact
   url: /cv/

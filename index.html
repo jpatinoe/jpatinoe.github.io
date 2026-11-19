@@ -11,7 +11,7 @@ name_lines: [Juan, Patiño-Echeverría]
   </div>
   <nav class="equilibria" aria-label="Sections">
 {%- for d in site.data.destinations %}
-    <a class="eq" href="{{ d.url | relative_url }}"><span class="dot" aria-hidden="true"></span><span class="lbl"><span class="t">{{ d.title }}</span><span class="d">{{ d.desc }}</span></span></a>
+    <a class="eq" href="{{ d.url | relative_url }}"><span class="dot" aria-hidden="true"></span><span class="lbl"><span class="t">{{ d.title }}</span>{% if d.desc %}<span class="d">{{ d.desc }}</span>{% endif %}</span></a>
 {%- endfor %}
   </nav>
   <button class="iconbtn hold" id="hold" type="button" aria-pressed="false" aria-label="Pause the animation" title="Pause the animation">
@@ -22,20 +22,21 @@ name_lines: [Juan, Patiño-Echeverría]
 
 {%- assign pubs = site.data.research | where: "id", "publications" | first -%}
 {%- assign thesis = site.data.research | where: "id", "thesis" | first -%}
-{%- assign software = site.data.research | where: "id", "software" | first -%}
+{%- assign project_rows = "" | split: "" -%}{%- for s in site.data.projects -%}{%- assign project_rows = project_rows | concat: s.items -%}{%- endfor -%}
+{%- assign project_rows = project_rows | where: "home", true -%}
 {%- assign tools = site.data.teaching | where: "id", "tools" | first -%}
 {%- assign research_rows = pubs.items | concat: thesis.items | slice: 0, 3 -%}
 {%- assign home_tools = tools.items | where: "home", true -%}
 
 <main class="index" id="main">
-{% include section.html id="research" title="Research" intro="How wild chaos arises in a four-dimensional Lorenz-like system. With Bernd Krauskopf and Hinke Osinga." items=research_rows home=true %}
+{% include section.html id="research" title="Research" items=research_rows home=true %}
 
-{% include section.html id="software" title=software.title intro=software.intro items=software.items %}
+{% include section.html id="projects" title="Projects" intro="Code from my research." items=project_rows %}
 
 <section class="group" id="teaching" aria-labelledby="h-teaching">
   <div class="gh">
     <h2 id="h-teaching">Teaching</h2>
-    <p>Course notes and tools that run in the browser.</p>
+    <p>Course notes and interactive tools.</p>
   </div>
   {%- assign teaching_rows = home_tools | push: site.data.home.notes %}
   {% include rows.html items=teaching_rows %}

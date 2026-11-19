@@ -2,7 +2,7 @@
 
 - id: tools
   title: Interactive tools
-  intro: Nothing to install.
+  intro: Nothing to install. Runs in the browser.
   tiles: true
   items:
     - title: Phase plane explorer
@@ -40,13 +40,12 @@
 
 - id: recent
   title: Recently taught
-  intro: At the University of Auckland.
   items:
     - title: Numerical Computation
-      meta: MATHS 270
+      meta: MATHS 270. University of Auckland
       when: "2026"
     - title: Mathematical Modelling
-      meta: MATHS 765
+      meta: MATHS 765. University of Auckland
       when: "2026"
 
 - id: other

@@ -1,0 +1,12 @@
+---
+layout: inner
+title: Projects
+lede: Code from my research and other projects, in MATLAB, Julia and Python.
+permalink: /projects/
+band:
+  desktop: '[0.79,0.52,"r",1]'
+  phone: '[0.72,0.80,"r",1]'
+---
+{% for s in site.data.projects %}
+{% include section.html id=s.id title=s.title intro=s.intro items=s.items %}
+{% endfor %}

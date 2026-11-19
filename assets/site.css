@@ -101,12 +101,15 @@ a { color: inherit; }
 .group { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 9fr); gap: 24px; scroll-margin-top: calc(var(--bar-h) + 24px); }
 .group h2 { margin: 0; font-size: 30px; line-height: 1.1; font-weight: 700; letter-spacing: -0.015em; }
 .group .gh p { margin: 10px 0 0; font-size: 16px; color: var(--ink-2); max-width: 26ch; }
+.group .gh p a { text-decoration-thickness: 1px; text-underline-offset: 3px; }
+.group .gh p a:hover { color: var(--ink); }
 .rows { list-style: none; margin: 0; padding: 0; border-bottom: 1px solid var(--rule); max-width: 920px; }
 .row {
   display: grid; grid-template-columns: 128px minmax(0, 1fr) 24px; gap: 24px; align-items: center;
   padding: 18px 0; border-top: 1px solid var(--rule); text-decoration: none; color: var(--ink);
 }
 .row.plain { grid-template-columns: minmax(0, 1fr) 24px; }
+.row.quiet { grid-template-columns: minmax(0, 1fr); }
 .thumb { width: 128px; height: 96px; object-fit: cover; display: block; background: var(--paper-2); }
 .thumb-logo { display: grid; place-items: center; color: var(--ink); }
 .thumb-logo svg { width: 84px; height: auto; }
@@ -140,11 +143,12 @@ footer .note { grid-column: 2; margin: 24px 0 0; font-size: 14px; color: var(--i
 
 /* ---------- Phones ---------- */
 @media (max-width: 719px) {
-  .bar { gap: 12px; }
-  .brand svg { width: 44px; }
+  /* the logo, four links and two buttons share one row: they ease down together, down to 360px */
+  .bar { gap: clamp(8px, 4vw - 6px, 12px); }
+  .brand svg { width: clamp(28px, 10vw - 6px, 44px); }
   .bar.is-solid .brand-name { display: none; }
-  .bar nav { gap: 16px; }
-  .bar nav a { font-size: 15px; }
+  .bar nav { gap: clamp(8px, 5vw - 8px, 16px); }
+  .bar nav a { font-size: clamp(13px, 3.6vw, 15px); }
   .hero { height: clamp(520px, 80vh, 760px); }
   .field {
     -webkit-mask-image: radial-gradient(ellipse 95% 38% at 25% 90%, rgba(0,0,0,.12) 0%, rgba(0,0,0,.35) 55%, #000 100%);
@@ -213,3 +217,5 @@ body.inner .index { padding-top: clamp(56px, 6vw, 80px); }
 .brand::after { content: ""; position: absolute; inset: -10px -4px; }
 .bar nav a::after { content: ""; position: absolute; inset: -3px -8px; }
 .iconbtn::after { content: ""; position: absolute; inset: -4px; }
+/* below 360px there is no room for the flow switch in the bar */
+@media (max-width: 359px) { .flowbtn { display: none; } }
