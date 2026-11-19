@@ -1,0 +1,20 @@
+<header class="bar{% unless page.home %} is-solid{% endunless %}" id="bar">
+  <a class="brand" href="{% if page.home %}#top{% else %}{{ '/' | relative_url }}{% endif %}" aria-label="{{ site.title }}, {% if page.home %}back to top{% else %}home{% endif %}">
+    {% include logo.svg %}
+    <span class="brand-name">{{ site.title }}</span>
+  </a>
+  <nav aria-label="Main">
+{%- for item in site.data.nav %}
+    <a href="{% if item.url contains ':' %}{{ item.url }}{% else %}{{ item.url | relative_url }}{% endif %}"{% if page.url == item.url %} aria-current="page"{% endif %}>{{ item.title }}</a>
+{%- endfor %}
+  </nav>
+  <div class="tools">
+    <button class="iconbtn flowbtn" id="flowbtn" type="button" aria-pressed="false" aria-label="Show the flow" title="Show the flow">
+      <svg class="ic-spiral" viewBox="0 0 20 20" aria-hidden="true"><path d="M10 10A1.5 1.5 0 0 1 13 10A3 3 0 0 1 7 10A4.5 4.5 0 0 1 16 10A6 6 0 0 1 4 10" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+      <svg class="ic-rings" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="2.5" fill="none" stroke="currentColor" stroke-width="1.4"/><circle cx="10" cy="10" r="5.5" fill="none" stroke="currentColor" stroke-width="1.4"/><circle cx="10" cy="10" r="8.3" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>
+    </button>
+    <button class="iconbtn" id="theme" type="button" aria-label="Switch theme" title="Switch theme">
+      <svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="8" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M10 2C5.5 6.5 14.5 13.5 10 18A8 8 0 0 1 10 2Z" fill="currentColor"/></svg>
+    </button>
+  </div>
+</header>

@@ -1,0 +1,14 @@
+---
+layout: inner
+title: Research
+lede: I study how deterministic equations can produce behaviour that looks genuinely unpredictable, and how we can compute the geometric mechanisms behind that transition to chaos.
+permalink: /research/
+redirect_from:
+  - /projects/
+band:
+  desktop: '[0.80,0.50,"r",1]'
+  phone: '[0.72,0.80,"r",1]'
+---
+{% for s in site.data.research %}
+{% include section.html id=s.id title=s.title intro=s.intro items=s.items %}
+{% endfor %}

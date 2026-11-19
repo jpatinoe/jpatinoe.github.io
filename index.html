@@ -1,0 +1,43 @@
+---
+layout: default
+home: true
+name_lines: [Juan, Patiño-Echeverría]
+---
+<section class="hero" id="top" aria-label="Introduction">
+  <canvas class="field" id="field" aria-hidden="true"></canvas>
+  <div class="masthead">
+    <h1>{% for line in page.name_lines %}<span>{{ line }}</span>{% unless forloop.last %} {% endunless %}{% endfor %}</h1>
+    <p>{{ site.description }}</p>
+  </div>
+  <nav class="equilibria" aria-label="Sections">
+{%- for d in site.data.destinations %}
+    <a class="eq" href="{{ d.url | relative_url }}"><span class="dot" aria-hidden="true"></span><span class="lbl"><span class="t">{{ d.title }}</span><span class="d">{{ d.desc }}</span></span></a>
+{%- endfor %}
+  </nav>
+  <button class="iconbtn hold" id="hold" type="button" aria-pressed="false" aria-label="Pause the animation" title="Pause the animation">
+    <svg class="ic-pause" viewBox="0 0 20 20" aria-hidden="true"><path d="M7 5v10M13 5v10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+    <svg class="ic-play" viewBox="0 0 20 20" aria-hidden="true"><path d="M7 4.5v11l9-5.5z" fill="currentColor"/></svg>
+  </button>
+</section>
+
+{%- assign pubs = site.data.research | where: "id", "publications" | first -%}
+{%- assign thesis = site.data.research | where: "id", "thesis" | first -%}
+{%- assign software = site.data.research | where: "id", "software" | first -%}
+{%- assign tools = site.data.teaching | where: "id", "tools" | first -%}
+{%- assign research_rows = pubs.items | concat: thesis.items | slice: 0, 3 -%}
+{%- assign home_tools = tools.items | where: "home", true -%}
+
+<main class="index" id="main">
+{% include section.html id="research" title="Research" intro="How wild chaos arises in a four-dimensional Lorenz-like system. With Bernd Krauskopf and Hinke Osinga." items=research_rows home=true %}
+
+{% include section.html id="software" title=software.title intro=software.intro items=software.items %}
+
+<section class="group" id="teaching" aria-labelledby="h-teaching">
+  <div class="gh">
+    <h2 id="h-teaching">Teaching</h2>
+    <p>Course notes and tools that run in the browser.</p>
+  </div>
+  {%- assign teaching_rows = home_tools | push: site.data.home.notes %}
+  {% include rows.html items=teaching_rows %}
+</section>
+</main>

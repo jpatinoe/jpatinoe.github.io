@@ -1,0 +1,27 @@
+---
+layout: inner
+title: CV
+lede: Education and awards. The full CV is available on request.
+permalink: /cv/
+redirect_from:
+  - /about/
+  - /contact/
+band:
+  desktop: '[0.82,0.48,"r",-1]'
+  phone: '[0.72,0.80,"r",-1]'
+---
+{% for s in site.data.cv %}
+{% include section.html id=s.id title=s.title intro=s.intro items=s.items %}
+{% endfor %}
+
+<section class="group" id="full-cv" aria-labelledby="h-full-cv">
+  <div class="gh">
+    <h2 id="h-full-cv">Full CV</h2>
+    <p>Sent by email on request.</p>
+  </div>
+  <ul class="rows">
+    <li><a class="row plain" href="mailto:{{ site.email }}?subject=CV%20request">
+      <span class="body"><span class="title">Ask for the full CV</span><span class="meta">{{ site.email }}</span></span>
+      <span class="go" aria-hidden="true">↗</span></a></li>
+  </ul>
+</section>
