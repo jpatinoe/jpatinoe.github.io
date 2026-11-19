@@ -1,0 +1,39 @@
+# Sections of the CV page, in order. The full-CV request at the end uses the email in _config.yml.
+
+- id: education
+  title: Education
+  items:
+    - title: PhD in Mathematics
+      meta: University of Auckland, 2026
+    - title: Master in Higher Education
+      meta: University of Palermo, Argentina
+    - title: BSc (Hons, First Class) in Mathematics
+      meta: Victoria University of Wellington, major in applied mathematics
+
+- id: masters-thesis
+  title: Master’s thesis
+  intro: In higher education.
+  items:
+    - title: Del triángulo didáctico al grafo completo K4
+      lang: es
+      url: /files/Tesis_JuanPatino.pdf
+      meta: How digital tools add a fourth node to the teacher, knowledge and student triangle. In Spanish. PDF
+
+- id: awards
+  title: Awards
+  items:
+    - title: Red Sock Award for Best Poster Presentation
+      meta: SIAM Conference on Applications of Dynamical Systems
+      when: "2025"
+    - title: T. M. Cherry Prize for Best Student Presentation
+      meta: ANZIAM
+      when: "2025"
+    - title: ANZIAM Prize for Best Poster Presentation
+      meta: Joint Meeting of the NZMS, AustMS and AMS
+      when: "2024"
+    - title: Aitken Prize for Best Student Presentation
+      meta: New Zealand Mathematical Society
+      when: "2023"
+    - title: University of Auckland Doctoral Scholarship
+      meta: Funding for the PhD
+      when: 2022–25

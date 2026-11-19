@@ -1,23 +1,17 @@
 title: Juan Patiño-Echeverría
+description: Mathematician working where theory meets computation, on dynamical systems and chaos.
+url: https://jpatinoe.github.io
 
-logo: https://github.com/jpatinoe.png
-
-description: Dynamical systems • Chaos • Scientific Computation
-
-theme: jekyll-theme-minimal
-
-github_username: jpatinoe
-
-# Contact address used across the site (change it here only)
+# Contact details used across the site (change them here only)
 email: juanpatinoe@gmail.com
+github_username: jpatinoe
+linkedin_username: jpatinoe
 
-# Nice URLs
 permalink: pretty
 
-# Navigation order (rendered explicitly in the layout)
-header_pages:
-  - index.md
-  - b-about.md
-  - c-projects.md
-  - d-contact.md
-  - e-teaching.md
+plugins:
+  - jekyll-redirect-from
+
+exclude:
+  - "reference images"
+  - README.md

@@ -1,0 +1,18 @@
+{%- comment -%} A list of link rows and plain items. include.items: the rows; include.home: use meta_home where a row has one. {%- endcomment -%}
+<ul class="rows">
+{%- for it in include.items %}
+{%- if it.url %}
+  <li><a class="row{% unless it.thumb or it.thumb_logo or it.thumb_play %} plain{% endunless %}" href="{% if it.url contains ':' %}{{ it.url }}{% else %}{{ it.url | relative_url }}{% endif %}">
+    {%- if it.thumb %}<img class="thumb" src="{{ it.thumb | relative_url }}" alt="" width="128" height="96" loading="lazy">
+    {%- elsif it.thumb_logo %}<span class="thumb thumb-logo" aria-hidden="true">{% include logo.svg %}</span>
+    {%- elsif it.thumb_play %}<span class="thumb thumb-play" aria-hidden="true">{% include play.svg %}</span>
+    {%- endif %}
+    <span class="body"><span class="title"{% if it.lang %} lang="{{ it.lang }}"{% endif %}>{{ it.title }}</span><span class="meta">{% if include.home and it.meta_home %}{{ it.meta_home }}{% else %}{{ it.meta }}{% endif %}</span></span>
+    <span class="go" aria-hidden="true">↗</span></a></li>
+{%- elsif it.when %}
+  <li class="item dated"><span class="when">{{ it.when }}</span><span class="body"><span class="title">{{ it.title }}</span><span class="meta">{{ it.meta }}</span></span></li>
+{%- else %}
+  <li class="item"><span class="title">{{ it.title }}</span><span class="meta">{{ it.meta }}</span></li>
+{%- endif %}
+{%- endfor %}
+</ul>

@@ -1,0 +1,49 @@
+# Sections of the Research page, in order. A row with a url is a link; without one it is a plain item.
+# Meta lines: papers as "Journal volume, article (year)"; otherwise a short description, then the destination.
+
+- id: publications
+  title: Publications
+  intro: With Bernd Krauskopf and Hinke Osinga.
+  items:
+    - title: Bifurcations of symmetric periodic orbits in a four-dimensional Lorenz-like system and their relation to wild chaos
+      url: https://doi.org/10.1063/5.0352615
+      meta: Chaos 36, 113116 (2026)
+      thumb: /assets/thumbs/thumb-chaos.jpg
+    - title: Global bifurcation structure of a four-dimensional Lorenz-like system with a wild chaotic attractor
+      url: https://iopscience.iop.org/article/10.1088/1361-6544/ae7172
+      meta: Nonlinearity 39, 065010 (2026)
+      thumb: /assets/thumbs/thumb-nonlinearity.jpg
+
+- id: thesis
+  title: PhD thesis
+  intro: Supervised by Hinke Osinga and Bernd Krauskopf.
+  items:
+    - title: Transitions to wild chaos in a four-dimensional Lorenz-like vector field
+      url: https://hdl.handle.net/2292/75030
+      meta: University of Auckland, 2026
+      meta_home: PhD thesis, University of Auckland, 2026
+      thumb_logo: true
+    - title: The thesis in three minutes
+      url: https://www.youtube.com/watch?v=WCe56C2lkiY
+      meta: Three Minute Thesis talk. YouTube
+      thumb_play: true
+    - title: Posters and research snapshots
+      url: https://auckland.figshare.com/authors/Juan_Patino_Echeverria/12040190
+      meta: Figshare
+
+- id: software
+  title: Software
+  intro: Tools I wrote for my research.
+  items:
+    - title: MAUTOLAB
+      url: https://github.com/jpatinoe/MAUTOLAB
+      meta: MATLAB toolkit and apps for reading and plotting AUTO-07p output. GitHub
+
+- id: earlier
+  title: Earlier research
+  intro: Before the PhD, at Victoria University of Wellington.
+  items:
+    - title: Inertial particle focusing in spiral-duct flows
+      meta: Summer research scholarship with Brendan Harding
+    - title: Synchronisation in coupled oscillators
+      meta: Honours project supervised by Mark McGuinness

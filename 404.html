@@ -1,0 +1,17 @@
+---
+layout: inner
+title: Not found
+lede: This page has moved or never existed. These are the places to start.
+permalink: /404.html
+band:
+  desktop: '[0.80,0.50,"r",1]'
+  phone: '[0.72,0.80,"r",1]'
+---
+<section class="group" id="start" aria-labelledby="h-start">
+  <div class="gh"><h2 id="h-start">The site</h2></div>
+  <ul class="rows">
+{%- for item in site.data.nav %}
+    <li><a class="row plain" href="{{ item.url | relative_url }}"><span class="body"><span class="title">{{ item.title }}</span><span class="meta">{% for d in site.data.destinations %}{% if d.url == item.url %}{{ d.desc }}{% endif %}{% endfor %}</span></span><span class="go" aria-hidden="true">↗</span></a></li>
+{%- endfor %}
+  </ul>
+</section>

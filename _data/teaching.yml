@@ -1,0 +1,57 @@
+# Sections of the Teaching page, in order. Tools marked home: true also appear on the home page.
+
+- id: tools
+  title: Interactive tools
+  intro: Nothing to install.
+  tiles: true
+  items:
+    - title: Phase plane explorer
+      url: /phase-plane.html
+      meta: Vector fields, nullclines and trajectories of planar systems
+      art: pendulum
+      home: true
+    - title: Hopf bifurcation
+      url: /phase-portrait.html
+      meta: Watch a limit cycle appear as a parameter crosses zero
+      art: hopf
+    - title: Quadrature explorer
+      url: /quadrature-explorer.html
+      meta: Riemann sums, midpoint, trapezoid, Simpson and Gauss rules side by side
+      art: quadrature
+      home: true
+    - title: Team allocator
+      url: /team-allocator.html
+      meta: "For teachers: split a class into teams with a balanced mix of skills"
+      art: teams
+
+- id: notes
+  title: Lecture notes
+  intro: Notes I wrote for my courses.
+  items:
+    - title: Numerical Computation
+      url: /files/NumericalComputation_2026_LectureNotes.pdf
+      meta: MATHS 270. Quadrature, numerical differentiation, differential equations and linear systems. PDF
+    - title: Mathematical Modelling
+      url: /files/lecture-notes-765.pdf
+      meta: MATHS 765. Dimensional analysis, nondimensionalisation and dominant balance. PDF
+    - title: Methods in Applied Mathematics
+      url: /files/lecture-notes-362.pdf
+      meta: MATHS 362. Asymptotic expansions and perturbation methods. PDF
+
+- id: recent
+  title: Recently taught
+  intro: At the University of Auckland.
+  items:
+    - title: Numerical Computation
+      meta: MATHS 270
+      when: "2026"
+    - title: Mathematical Modelling
+      meta: MATHS 765
+      when: "2026"
+
+- id: other
+  title: Other projects
+  items:
+    - title: Ingooz
+      url: https://www.ingooz.com
+      meta: Online tutoring service I founded and ran from 2018 to 2020, connecting students with tutors across Latin America
