@@ -1,7 +1,9 @@
-# The three links in the bar
+# The links in the bar
 - title: Research
   url: /research/
 - title: Teaching
   url: /teaching/
+- title: Projects
+  url: /projects/
 - title: CV
   url: /cv/

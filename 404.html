@@ -11,7 +11,7 @@ band:
   <div class="gh"><h2 id="h-start">The site</h2></div>
   <ul class="rows">
 {%- for item in site.data.nav %}
-    <li><a class="row plain" href="{{ item.url | relative_url }}"><span class="body"><span class="title">{{ item.title }}</span><span class="meta">{% for d in site.data.destinations %}{% if d.url == item.url %}{{ d.desc }}{% endif %}{% endfor %}</span></span><span class="go" aria-hidden="true">{% include arrow.svg %}</span></a></li>
+    <li><a class="row plain" href="{{ item.url | relative_url }}"><span class="body"><span class="title">{{ item.title }}</span>{% for d in site.data.destinations %}{% if d.url == item.url and d.desc %}<span class="meta">{{ d.desc }}</span>{% endif %}{% endfor %}</span><span class="go" aria-hidden="true">{% include arrow.svg %}</span></a></li>
 {%- endfor %}
   </ul>
 </section>

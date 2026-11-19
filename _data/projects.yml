@@ -1,0 +1,27 @@
+# Sections of the Projects page, in order. A row with home: true also appears on the home page;
+# one with cv: true also appears under Projects on the CV page.
+# Meta lines: a short description, then the destination.
+
+- id: code
+  title: Research code
+  items:
+    - title: MAUTOLAB
+      url: https://github.com/jpatinoe/MAUTOLAB
+      meta: MATLAB toolkit and apps for reading and plotting AUTO-07p output. GitHub
+      home: true
+    - title: LyapunovSpectra.jl
+      url: https://github.com/jpatinoe/LyapunovSpectra.jl
+      meta: Julia implementation of the continuous Gram–Schmidt method for computing Lyapunov spectra (Christiansen and Rugh, 1997). GitHub
+      home: true
+
+- id: other
+  title: Other projects
+  items:
+    - title: Climate extremes in New Zealand
+      url: https://github.com/jpatinoe/nz-climate-extremes
+      meta: Defining and detecting extreme daily temperature and rainfall at 30 sites, with seasonal climatology and extreme value theory. Python. GitHub
+      cv: true
+    - title: Nag
+      url: https://github.com/jpatinoe/nag
+      meta: A personal AI agent on WhatsApp that remembers tasks and sends reminders as deadlines approach. Python, Claude API, FastAPI, Twilio and SQLite. GitHub
+      cv: true

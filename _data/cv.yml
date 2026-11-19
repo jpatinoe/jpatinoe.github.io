@@ -1,23 +1,42 @@
-# Sections of the CV page, in order. The full-CV request at the end uses the email in _config.yml.
+# Sections of the CV page, in order. Projects lists the rows marked cv: true in projects.yml.
+
+- id: skills
+  title: Skills
+  items:
+    - title: Mathematics
+      meta: Dynamical systems, bifurcation analysis and numerical continuation, numerical analysis, asymptotic and perturbation methods, mathematical modelling and extreme value analysis
+    - title: Programming and software
+      meta: MATLAB, Julia, Python (pandas, Jupyter, FastAPI), AUTO-07p, SQLite, the Claude API, Git and GitHub, LaTeX
+    - title: Teaching and communication
+      meta: Course design, lecture notes, interactive teaching tools, coordinating teaching assistants, and talks and posters for specialist and general audiences
+
+- id: experience
+  title: Experience
+  items:
+    - title: Professional Teaching Fellow
+      meta: Department of Mathematics, University of Auckland. Lectured undergraduate and postgraduate courses, wrote lecture notes, co-designed a postgraduate modelling course and coordinated graduate teaching assistants
+      when: 2025–26
+    - title: Doctoral researcher
+      meta: University of Auckland. Studied the transition to wild chaos in a four-dimensional Lorenz-like system using bifurcation analysis and numerical continuation, with results published in Chaos and Nonlinearity
+      when: 2022–25
+
+- id: projects
+  title: Projects
 
 - id: education
   title: Education
   items:
     - title: PhD in Mathematics
-      meta: University of Auckland, 2026
+      meta: University of Auckland, New Zealand
     - title: Master in Higher Education
       meta: University of Palermo, Argentina
-    - title: BSc (Hons, First Class) in Mathematics
-      meta: Victoria University of Wellington, major in applied mathematics
-
-- id: masters-thesis
-  title: Master’s thesis
-  intro: In higher education.
-  items:
-    - title: Del triángulo didáctico al grafo completo K4
-      lang: es
+      # A quiet link: no arrow. The note is read out by screen readers only.
       url: /files/Tesis_JuanPatino.pdf
-      meta: How digital tools add a fourth node to the teacher, knowledge and student triangle. In Spanish. PDF
+      quiet: true
+      hreflang: es
+      note: Master’s thesis, PDF in Spanish
+    - title: BSc (Hons, First Class) in Mathematics
+      meta: Victoria University of Wellington, New Zealand
 
 - id: awards
   title: Awards
@@ -37,3 +56,8 @@
     - title: University of Auckland Doctoral Scholarship
       meta: Funding for the PhD
       when: 2022–25
+
+- id: languages
+  title: Languages
+  items:
+    - title: Spanish and English
