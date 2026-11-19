@@ -12,7 +12,7 @@
       home: true
     - title: Hopf bifurcation
       url: /phase-portrait.html
-      meta: Watch a limit cycle appear as a parameter crosses zero
+      meta: Fixed points appear, then a limit cycle is born, as μ grows
       art: hopf
     - title: Quadrature explorer
       url: /quadrature-explorer.html
