@@ -169,15 +169,15 @@
     for (var i = 0; i < N; i++) sad[i].ok = false;
     allocGrid();
     initParticles();
-    positionCentres();
-    measureLabels();
+    arrange();
   }
+  function arrange() { measureLabels(); separateLabels(); positionCentres(); }
   function positionCentres() {
     var anchors = phone ? phoneAnchors : desktopAnchors;
     for (var i = 0; i < N; i++) {
       var drift = phone ? 4 : 7;
-      cx[i] = anchors[i][0] * W + drift * Math.sin(2 * Math.PI * t / 23 + i * 1.7);
-      cy[i] = anchors[i][1] * H + drift * Math.cos(2 * Math.PI * t / 29 + i * 2.3);
+      cx[i] = anchors[i][0] * W + offX[i] + drift * Math.sin(2 * Math.PI * t / 23 + i * 1.7);
+      cy[i] = anchors[i][1] * H + offY[i] + drift * Math.cos(2 * Math.PI * t / 29 + i * 2.3);
       cs[i] = sgn[i] * GAMMA * sigma * gf[i];
       var el = eqEls[i];
       var ox = el.classList.contains('left') ? 'calc(-100% + ' + (cx[i] + 15.5).toFixed(1) + 'px)' : (cx[i] - 7.5).toFixed(1) + 'px';
@@ -192,9 +192,78 @@
     lblBox = eqEls.map(function (el) {
       var l = el.querySelector('.lbl');
       if (!l) return { w: 0 };
-      return { ox: l.offsetLeft, oy: l.offsetTop, w: l.offsetWidth, h: l.offsetHeight, ew: el.offsetWidth, left: el.classList.contains('left') };
+      return { ox: l.offsetLeft, oy: l.offsetTop, w: l.offsetWidth, h: l.offsetHeight, ew: el.offsetWidth, eh: el.offsetHeight, left: el.classList.contains('left') };
     });
     measureBar();
+  }
+
+  // ---------------- Keeping the destinations apart ----------------
+  // The anchors suit a typical window. Where two destinations (dot and label) would come closer than a minimum gap,
+  // 2% of the field's width and at least 16 px, plus room for the drift, they move apart along whichever axis needs
+  // the smaller move; each also keeps clear of the name, the tagline and the bar. Worked out once per layout, so nothing jitters.
+  var offX = new Float64Array(N), offY = new Float64Array(N);
+  function boxAt(i, x, y) {
+    var b = lblBox[i], l = b.left ? x + 11.5 - b.ew : x - 11.5;
+    return { l: l, r: l + b.ew, t: y - 13.5, b: y - 13.5 + b.eh };
+  }
+  function mastheadRects() {
+    var out = [], r = hero.getBoundingClientRect(), rg = document.createRange();
+    hero.querySelectorAll('.masthead h1 span, .masthead p').forEach(function (el) {
+      rg.selectNodeContents(el); var q = rg.getBoundingClientRect();
+      if (q.width) out.push({ l: q.left - r.left, r: q.right - r.left, t: q.top - r.top, b: q.bottom - r.top });
+    });
+    return out;
+  }
+  function separateLabels() {
+    offX.fill(0); offY.fill(0);
+    if (still || N < 2 || !lblBox.length || !lblBox[0].ew) return;
+    var anchors = phone ? phoneAnchors : desktopAnchors;
+    var drift = phone ? 4 : 7, gapMin = Math.max(16, 0.02 * W);
+    var bar = document.getElementById('bar');
+    var top = (bar ? bar.offsetHeight : 0) + 8 + drift, edge = 16 + drift;
+    var fixed = mastheadRects();
+    // how far each destination may move: its label stays inside the field, and its island never goes
+    // further under the bar or off the bottom than its anchor already puts it
+    var loX = [], hiX = [], loY = [], hiY = [];
+    for (var n = 0; n < N; n++) {
+      var ax = anchors[n][0] * W, ay = anchors[n][1] * H, b0 = boxAt(n, ax, ay);
+      loX[n] = Math.min(0, edge - b0.l); hiX[n] = Math.max(loX[n], W - edge - b0.r);
+      loY[n] = Math.max(top - b0.t, Math.min(0, top + 2 * sigma - ay));
+      hiY[n] = Math.max(loY[n], Math.min(H - edge - b0.b, Math.max(0, H - 2 * sigma - ay)));
+    }
+    function box(i) { return boxAt(i, anchors[i][0] * W + offX[i], anchors[i][1] * H + offY[i]); }
+    function overlap(a, b, m) { return [Math.min(a.r, b.r) - Math.max(a.l, b.l) + m, Math.min(a.b, b.b) - Math.max(a.t, b.t) + m]; }
+    // share a move of o between i (towards lower values) and j (towards higher), half each where both have room
+    function share(o, off, lo, hi, i, j) {
+      var ri = Math.max(0, off[i] - lo[i]), rj = Math.max(0, hi[j] - off[j]);
+      var mi = Math.min(o / 2, ri), mj = Math.min(o - mi, rj); mi = Math.min(o - mj, ri);
+      return { mi: mi, mj: mj, cost: Math.max(mi, mj) + 4 * (o - mi - mj) };
+    }
+    for (var it = 0; it < 12; it++) {
+      var moved = false;
+      for (var i = 0; i < N; i++) {
+        for (var j = i + 1; j < N; j++) {
+          var a = box(i), b = box(j), o = overlap(a, b, gapMin + 2 * drift);
+          if (o[0] <= 0.5 || o[1] <= 0.5) continue;
+          var li = a.l + a.r < b.l + b.r, ti = a.t + a.b < b.t + b.b;
+          var hx = li ? share(o[0], offX, loX, hiX, i, j) : share(o[0], offX, loX, hiX, j, i);
+          var vy = ti ? share(o[1], offY, loY, hiY, i, j) : share(o[1], offY, loY, hiY, j, i);
+          if (hx.cost <= vy.cost) { offX[li ? i : j] -= hx.mi; offX[li ? j : i] += hx.mj; }
+          else { offY[ti ? i : j] -= vy.mi; offY[ti ? j : i] += vy.mj; }
+          moved = true;
+        }
+        for (var k = 0; k < fixed.length; k++) {
+          var c = box(i), f = fixed[k], q = overlap(c, f, gapMin + drift);
+          if (q[0] <= 0.5 || q[1] <= 0.5) continue;
+          if (q[0] < q[1]) offX[i] += c.l + c.r < f.l + f.r ? -q[0] : q[0];
+          else offY[i] += c.t + c.b < f.t + f.b ? -q[1] : q[1];
+          moved = true;
+        }
+        offX[i] = Math.min(hiX[i], Math.max(loX[i], offX[i]));
+        offY[i] = Math.min(hiY[i], Math.max(loY[i], offY[i]));
+      }
+      if (!moved) break;
+    }
   }
   // the bar's logo, links and buttons get the same gaps while the bar is see-through (home page only)
   var barBox = [];
@@ -572,7 +641,7 @@
 
   onScroll();
   startReveal();
-  if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { positionCentres(); measureLabels(); kick(); });
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { arrange(); kick(); });
   // once everything has loaded (styles included), read the colours and sizes again
   window.addEventListener('load', function () { readColours(); labelTheme(); layout(); kick(); });
 })();
