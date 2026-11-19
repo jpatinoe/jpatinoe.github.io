@@ -1,16 +1,16 @@
 # Sections of the Research page, in order. A row with a url is a link; without one it is a plain item.
-# Meta lines: papers as "Journal volume, article (year)"; otherwise a short description, then the destination.
+# Meta lines: papers as "With co-authors. Journal volume, article (year)"; otherwise a short description, then the destination.
 
 - id: publications
   title: Publications
   items:
     - title: Bifurcations of symmetric periodic orbits in a four-dimensional Lorenz-like system and their relation to wild chaos
       url: https://doi.org/10.1063/5.0352615
-      meta: Chaos 36, 113116 (2026)
+      meta: With Bernd Krauskopf and Hinke Osinga. Chaos 36, 113116 (2026)
       thumb: /assets/thumbs/thumb-chaos.jpg
     - title: Global bifurcation structure of a four-dimensional Lorenz-like system with a wild chaotic attractor
       url: https://iopscience.iop.org/article/10.1088/1361-6544/ae7172
-      meta: Nonlinearity 39, 065010 (2026)
+      meta: With Bernd Krauskopf and Hinke Osinga. Nonlinearity 39, 065010 (2026)
       thumb: /assets/thumbs/thumb-nonlinearity.jpg
 
 - id: thesis
