@@ -597,11 +597,20 @@
   // Bar: it always stays. On the home page it condenses into a solid strip once the masthead has gone;
   // on inner pages it is solid from the start.
   var bar = document.getElementById('bar');
+  var eqLayer = hero.querySelector('.equilibria'), mast = hero.querySelector('.masthead');
   function onScroll() {
     if (still) return;
-    bar.classList.toggle('is-solid', window.scrollY > hero.offsetHeight - 120);
+    var y = window.scrollY;
+    bar.classList.toggle('is-solid', y > hero.offsetHeight - 120);
+    // while the bar is see-through, the first screen's words fade out as they slide under it, as the field's lines already do
+    if (y < hero.offsetHeight) {
+      var cut = y - hero.offsetTop + bar.offsetHeight;
+      if (eqLayer) eqLayer.style.setProperty('--cut', cut + 'px');
+      if (mast) mast.style.setProperty('--cut', (cut - mast.offsetTop) + 'px');
+    }
   }
   window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', onScroll, { passive: true });
 
   if ('IntersectionObserver' in window) {
     new IntersectionObserver(function (entries) { onScreen = entries[0].isIntersecting; kick(); }).observe(hero);

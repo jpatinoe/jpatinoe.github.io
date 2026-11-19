@@ -75,6 +75,12 @@ a { color: inherit; }
 .hold[aria-pressed="true"] .ic-play { display: block; }
 .hold[aria-pressed="true"] .ic-pause { display: none; }
 
+/* The first screen's words fade out under the see-through bar: the script sets --cut to the bar's lower edge */
+.hero .masthead, .hero .equilibria {
+  -webkit-mask-image: linear-gradient(to bottom, transparent calc(var(--cut, -100px) - 10px), #000 var(--cut, -100px));
+  mask-image: linear-gradient(to bottom, transparent calc(var(--cut, -100px) - 10px), #000 var(--cut, -100px));
+}
+
 /* Equilibria: real links, placed by the script on the computed fixed points */
 .equilibria { position: absolute; inset: 0; pointer-events: none; }
 .eq {
