@@ -8,10 +8,10 @@
 <script>
   document.documentElement.classList.add('js');
   (function () {
-    // the visitor's light/dark choice: kept in localStorage, and in window.name where storage is blocked
+    // the visitor's light/dark choice: sessionStorage for this visit, localStorage for the next one
     var t = null;
-    try { t = localStorage.getItem('jpe-theme'); } catch (e) {}
-    if (!t) { var m = /(?:^|;)jpe-theme=(light|dark)/.exec(window.name || ''); if (m) t = m[1]; }
+    try { t = sessionStorage.getItem('jpe-theme'); } catch (e) {}
+    if (!t) { try { t = localStorage.getItem('jpe-theme'); } catch (e) {} }
     if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t);
   })();
 </script>

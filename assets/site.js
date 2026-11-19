@@ -9,19 +9,19 @@
   var reduceMQ = window.matchMedia('(prefers-reduced-motion: reduce)');
   var darkMQ = window.matchMedia('(prefers-color-scheme: dark)');
 
-  // the visitor's choices: theme in localStorage (kept), field view in sessionStorage (until the tab closes or
-  // the page is refreshed); both also in window.name, for viewers that block storage
+  // the visitor's choices: the theme in sessionStorage (this visit) and localStorage (the next one);
+  // the field view in sessionStorage only, so it is kept from page to page until a refresh
   function store(k, v, scope) {
-    var s = scope === 'session' ? 'sessionStorage' : 'localStorage';
-    try { if (v === null) window[s].removeItem(k); else window[s].setItem(k, v); } catch (e) {}
-    try { var n = (window.name || '').replace(new RegExp('(?:^|;)' + k + '=[a-z]+', 'g'), ''); window.name = v === null ? n : n + ';' + k + '=' + v; } catch (e) {}
+    var stores = scope === 'session' ? ['sessionStorage'] : ['sessionStorage', 'localStorage'];
+    stores.forEach(function (s) { try { if (v === null) window[s].removeItem(k); else window[s].setItem(k, v); } catch (e) {} });
   }
   function load(k, scope) {
-    var s = scope === 'session' ? 'sessionStorage' : 'localStorage', v = null;
-    try { v = window[s].getItem(k); } catch (e) {}
-    if (v === null) { var m = new RegExp('(?:^|;)' + k + '=([a-z]+)').exec(window.name || ''); if (m) v = m[1]; }
-    return v;
+    var stores = scope === 'session' ? ['sessionStorage'] : ['sessionStorage', 'localStorage'];
+    for (var i = 0; i < stores.length; i++) { try { var v = window[stores[i]].getItem(k); if (v !== null) return v; } catch (e) {} }
+    return null;
   }
+  // an earlier version wrote its choices into window.name, which the Claude viewer uses for its own settings: tidy them away
+  try { if (/jpe-(theme|field)=/.test(window.name)) window.name = window.name.replace(/;?jpe-(theme|field)=[a-z]+/g, ''); } catch (e) {}
   var navType = 'navigate';
   try { var navEntry = performance.getEntriesByType('navigation')[0]; if (navEntry && navEntry.type) navType = navEntry.type; } catch (e) {}
 
