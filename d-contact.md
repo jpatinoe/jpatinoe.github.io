@@ -10,4 +10,6 @@ Email is best: [j.patino@auckland.ac.nz](mailto:j.patino@auckland.ac.nz)
 
 If you're in Auckland and want to chat — research, teaching, scientific computing, careers in mathematics — feel free to reach out. Always happy to grab a coffee.
 
+A full CV is available on request.
+
 - [LinkedIn](https://www.linkedin.com/in/jpatinoe/)
