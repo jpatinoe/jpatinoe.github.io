@@ -12,7 +12,7 @@
     var t = null;
     try { t = sessionStorage.getItem('jpe-theme'); } catch (e) {}
     if (!t) { try { t = localStorage.getItem('jpe-theme'); } catch (e) {} }
-    if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t);
+    if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-jpe-theme', t);
   })();
 </script>
 <style>
@@ -33,16 +33,16 @@
   color-scheme: light;
 }
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
+  :root:not([data-jpe-theme="light"]) {
     --paper: #0E1419; --paper-2: #152029; --ink: #E6EAED; --ink-2: #9AA4AD; --rule: #24303A;
     --red: #FF5A5F; --blue: #7FA6FF; color-scheme: dark;
   }
 }
-:root[data-theme="dark"] {
+:root[data-jpe-theme="dark"] {
   --paper: #0E1419; --paper-2: #152029; --ink: #E6EAED; --ink-2: #9AA4AD; --rule: #24303A;
   --red: #FF5A5F; --blue: #7FA6FF; color-scheme: dark;
 }
-:root[data-accent="blue"] { --accent: var(--blue); }
+:root[data-jpe-accent="blue"] { --accent: var(--blue); }
 html { background: var(--paper); color: var(--ink); }
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com">

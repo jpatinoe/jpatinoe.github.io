@@ -40,8 +40,8 @@ a { color: inherit; }
 .tools { display: flex; gap: 4px; margin-right: -8px; }
 /* the flow switch shows a spiral (offering the flow) or concentric rings (offering the curves) */
 .flowbtn .ic-rings { display: none; }
-:root[data-field="flow"] .flowbtn .ic-spiral { display: none; }
-:root[data-field="flow"] .flowbtn .ic-rings { display: block; }
+:root[data-jpe-field="flow"] .flowbtn .ic-spiral { display: none; }
+:root[data-jpe-field="flow"] .flowbtn .ic-rings { display: block; }
 
 /* ---------- First screen: the field ---------- */
 .hero {

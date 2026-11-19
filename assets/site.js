@@ -62,7 +62,7 @@
     return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
   }
   function themeNow() {
-    var a = root.getAttribute('data-theme');
+    var a = root.getAttribute('data-jpe-theme');
     if (a === 'dark' || a === 'light') return a;
     return darkMQ.matches ? 'dark' : 'light';
   }
@@ -71,7 +71,7 @@
   function readColours() {
     var csd = getComputedStyle(root), th = themeNow(), pal = PALETTE[th];
     col.ink = hexToRgb(csd.getPropertyValue('--ink').trim() || pal.ink);
-    col.accent = csd.getPropertyValue('--accent').trim() || (root.getAttribute('data-accent') === 'blue' ? pal.blue : pal.red);
+    col.accent = csd.getPropertyValue('--accent').trim() || (root.getAttribute('data-jpe-accent') === 'blue' ? pal.blue : pal.red);
     col.stable = csd.getPropertyValue('--blue').trim() || pal.blue;
     col.dark = th === 'dark';
   }
@@ -491,8 +491,8 @@
   var flowBtn = document.getElementById('flowbtn');
   function setMode(m) {
     mode = m;
-    root.setAttribute('data-field', m);
-    root.setAttribute('data-accent', m === 'flow' ? 'blue' : 'red');
+    root.setAttribute('data-jpe-field', m);
+    root.setAttribute('data-jpe-accent', m === 'flow' ? 'blue' : 'red');
     var label = m === 'flow' ? 'Show the level curves' : 'Show the flow';
     flowBtn.setAttribute('aria-pressed', String(m === 'flow'));
     flowBtn.setAttribute('aria-label', label); flowBtn.title = label;
@@ -519,11 +519,11 @@
   themeBtn.addEventListener('click', function () {
     var next = themeNow() === 'dark' ? 'light' : 'dark';
     var sys = darkMQ.matches ? 'dark' : 'light';
-    root.setAttribute('data-theme', next);
+    root.setAttribute('data-jpe-theme', next);
     store('jpe-theme', next === sys ? null : next);
     readColours(); labelTheme(); kick();
   });
-  darkMQ.addEventListener && darkMQ.addEventListener('change', function () { if (!load('jpe-theme')) root.removeAttribute('data-theme'); readColours(); labelTheme(); kick(); });
+  darkMQ.addEventListener && darkMQ.addEventListener('change', function () { if (!load('jpe-theme')) root.removeAttribute('data-jpe-theme'); readColours(); labelTheme(); kick(); });
 
   // Bar: it always stays. On the home page it condenses into a solid strip once the masthead has gone;
   // on inner pages it is solid from the start.
