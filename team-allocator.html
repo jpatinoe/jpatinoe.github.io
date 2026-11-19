@@ -188,7 +188,7 @@
     <div class="setup-grid">
       <div>
         <label class="f" id="modeLabel" for="modeVal">Number of teams</label>
-        <input type="number" id="modeVal" min="1" step="1" value="4">
+        <input type="number" id="modeVal" min="1" step="1" value="2">
         <div class="note" id="modeNote"></div>
       </div>
       <div>
@@ -712,28 +712,12 @@ $("copyBtn").onclick = copySummary;
 
 // ---------- boot ----------
 ["Git installed", "Git/GitHub","ODEs","Coding", "Dynamical Systems"].forEach(s => state.skills.push(s));
-["Armaan","Flynn","George","Molly","Charlie","Sheetal", "Kevan", "Rata", "Zoey", "Maya", "Isabel", "Can", "Cindy", "Jordan", "Jonty", "Emile", "Julia", "Alan", "Bo", "Minglin"].forEach(n => state.students.push({name:n, skills:new Set()}));
-// seed a rough demo distribution so the tool isn't blank
-state.students[0].skills = new Set(["Git installed", "ODEs","Coding", "Dynamical Systems"]);
-state.students[1].skills = new Set(["Git installed", "Git/GitHub","ODEs","Coding", "Dynamical Systems"]);
-state.students[2].skills = new Set(["Git installed", "ODEs","Coding", "Dynamical Systems"]);
-state.students[3].skills = new Set(["Git installed", "ODEs","Coding", "Dynamical Systems"]);
-// state.students[4].skills = new Set(["Git installed", "Git/GitHub","ODEs","Coding", "Dynamical Systems"]);
-state.students[5].skills = new Set(["Git installed", "ODEs","Coding"]);
-state.students[6].skills = new Set(["Git installed", "ODEs","Coding"]);
-state.students[7].skills = new Set(["Git installed", "Git/GitHub","ODEs","Coding", "Dynamical Systems"]);
-state.students[8].skills = new Set(["Git installed", "Git/GitHub","ODEs","Coding", "Dynamical Systems"]);
-// state.students[9].skills = new Set(["Git installed", "Git/GitHub","ODEs","Coding", "Dynamical Systems"]);
-// state.students[10].skills = new Set(["Git installed", "Git/GitHub","ODEs","Coding", "Dynamical Systems"]);
-// state.students[11].skills = new Set(["Git installed", "Git/GitHub","ODEs","Coding", "Dynamical Systems"]);
-state.students[12].skills = new Set(["Git installed", "ODEs","Coding", "Dynamical Systems"]);
-// state.students[13].skills = new Set(["Git installed", "Git/GitHub","ODEs","Coding", "Dynamical Systems"]);
-state.students[14].skills = new Set(["ODEs","Coding"]);
-state.students[15].skills = new Set(["ODEs","Coding"]);
-// state.students[16].skills = new Set(["Git installed", "Git/GitHub","ODEs","Coding", "Dynamical Systems"]);
-// state.students[17].skills = new Set(["Git installed", "Git/GitHub","ODEs","Coding", "Dynamical Systems"]);
-// state.students[18].skills = new Set(["Git installed", "Git/GitHub","ODEs","Coding", "Dynamical Systems"]);
-// state.students[19].skills = new Set(["Git installed", "Git/GitHub","ODEs","Coding", "Dynamical Systems"]);
+["Ana", "Ben", "Cai", "Dev"].forEach(n => state.students.push({name:n, skills:new Set()}));
+// a small invented class, so the tool isn't blank
+state.students[0].skills = new Set(["Git installed", "ODEs", "Coding"]);
+state.students[1].skills = new Set(["Git installed", "Git/GitHub", "Dynamical Systems"]);
+state.students[2].skills = new Set(["ODEs", "Coding"]);
+state.students[3].skills = new Set(["Git/GitHub", "Dynamical Systems"]);
 renderSkills(); renderStudents(); updateModeUi();
 </script>
 </body>
