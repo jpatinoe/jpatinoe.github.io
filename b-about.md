@@ -42,4 +42,4 @@ I'm a mathematician working in **dynamical systems**, with an emphasis on numeri
 
 <span class="section-label">CV</span>
 
-A full CV is available on request: [email me](mailto:j.patino@auckland.ac.nz?subject=CV%20request).
+A full CV is available on request: [email me](mailto:{{ site.email }}?subject=CV%20request).

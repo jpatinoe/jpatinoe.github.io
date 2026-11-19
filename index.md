@@ -54,4 +54,4 @@ I like writing small programs to automate boring tasks, and I maintain ambitious
 
 <span class="section-label">Contact</span>
 
-[j.patino@auckland.ac.nz](mailto:j.patino@auckland.ac.nz)
+[{{ site.email }}](mailto:{{ site.email }})

@@ -8,6 +8,9 @@ theme: jekyll-theme-minimal
 
 github_username: jpatinoe
 
+# Contact address used across the site (change it here only)
+email: juanpatinoe@gmail.com
+
 # Nice URLs
 permalink: pretty
 
