@@ -30,12 +30,17 @@
   }
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   body { background: var(--bg); color: var(--text-primary); font-family: var(--jpe-font); font-variant-numeric: tabular-nums; min-height: 100vh; -webkit-font-smoothing: antialiased; }
-  .pp { display: flex; flex-direction: column; align-items: center; padding: 32px 16px 56px; }
-  header { width: 100%; max-width: 760px; margin-bottom: 24px; }
+  /* two columns on a wide screen: everything you read and move on the left, the portrait on the right,
+     sized so the whole of it fits under the strip without scrolling */
+  .pp { display: grid; grid-template-columns: minmax(300px, 380px) minmax(0, 1fr); gap: 32px; align-items: start;
+        padding: 24px clamp(16px, 3vw, 32px) 32px; max-width: 1480px; margin: 0 auto; }
+  .side { display: flex; flex-direction: column; min-width: 0; }
+  .plot { min-width: 0; display: flex; flex-direction: column; align-items: center; position: sticky; top: 24px; }
+  header { width: 100%; margin-bottom: 24px; }
   .title-eq { font-size: 15px; color: var(--text-muted); margin-bottom: 4px; }
   h1 { font-size: 32px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.1; }
   .system-eq { font-size: 17px; color: var(--text-muted); margin-top: 8px; }
-  .card { width: 100%; max-width: 760px; margin-bottom: 20px; }
+  .card { width: 100%; margin-bottom: 20px; }
   .slider-row { display: flex; align-items: center; gap: 14px; margin-bottom: 18px; }
   .slider-label { font-size: 17px; color: var(--text-muted); min-width: 24px; font-style: italic; }
   .mu-value { font-size: 24px; font-weight: 600; color: var(--text-primary); min-width: 64px; letter-spacing: -0.01em; }
@@ -51,15 +56,26 @@
   .badge-amber { color: var(--unstable); }
   .badge-gray { color: var(--text-muted); font-weight: 400; }
   .fp-coords { font-size: 15px; color: var(--text-muted); margin-bottom: 12px; min-height: 1.4em; }
-  canvas { display: block; width: 100%; height: auto; border: 1px solid var(--border); background: var(--bg); }
-  .legend { display: flex; gap: 8px 22px; flex-wrap: wrap; margin-top: 12px; }
+  canvas { display: block; width: min(100%, calc((100vh - 44px - 56px) * 1.44)); height: auto; aspect-ratio: 720 / 500; border: 1px solid var(--border); background: var(--bg); }
+  .legend { display: flex; gap: 8px 22px; flex-wrap: wrap; margin-top: 4px; }
   .legend-item { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--text-muted); }
   .leg-dot { width: 11px; height: 11px; border-radius: 50%; display: inline-block; flex: none; }
   .leg-dot.leg-saddle { background: transparent; border: 1.5px solid var(--saddle); }
   .leg-dot.leg-unstable { background: var(--bg); border: 3px solid var(--unstable); }
   .leg-line { width: 18px; height: 0; border-top: 1.5px solid var(--traj); display: inline-block; flex: none; }
-  .desc-card { width: 100%; max-width: 760px; padding-top: 16px; border-top: 1px solid var(--border); font-size: 17px; line-height: 1.55; color: var(--text-muted); }
-  footer { margin-top: 28px; font-size: 14px; color: var(--text-muted); text-align: center; }
+  .desc-card { width: 100%; padding-top: 16px; border-top: 1px solid var(--border); font-size: 16px; line-height: 1.55; color: var(--text-muted); }
+  footer { margin-top: 20px; font-size: 14px; color: var(--text-muted); }
+  /* narrow screens: one column, and the slider stays pinned at the top while you look at the portrait */
+  @media (max-width: 900px) {
+    .pp { grid-template-columns: 1fr; gap: 0; padding-top: 20px; }
+    .side, .plot { display: contents; }
+    header { order: 1; margin-bottom: 12px; }
+    .controls { order: 2; position: sticky; top: 0; z-index: 4; background: var(--bg); padding: 10px 0 6px; margin: 0 0 8px; border-bottom: 1px solid var(--border); }
+    canvas { order: 3; width: 100%; }
+    .legend { order: 4; margin-bottom: 20px; }
+    .desc-card { order: 5; }
+    footer { order: 6; }
+  }
 </style>
 </head>
 <body>
@@ -72,31 +88,31 @@
 <script src="/assets/applet.js"></script>
 <div class="pp">
 
-<header>
-  <div class="title-eq">Planar ODE system</div>
-  <h1>Hopf bifurcation</h1>
-  <div class="system-eq">x′ = −y &nbsp;&nbsp; y′ = μ − 0.9y − x² − xy</div>
-</header>
+<div class="side">
+  <header>
+    <div class="title-eq">Planar ODE system</div>
+    <h1>Hopf bifurcation</h1>
+    <div class="system-eq">x′ = −y &nbsp;&nbsp; y′ = μ − 0.9y − x² − xy</div>
+  </header>
 
-<div class="card">
-  <div class="slider-row">
-    <span class="slider-label">μ =</span>
-    <span class="mu-value" id="muVal">0.50</span>
-    <div class="slider-container">
-      <input type="range" id="muSlider" aria-label="μ" min="-2" max="2" step="0.01" value="0.5">
-      <div style="position:relative;height:16px;margin-top:2px;">
-        <span class="bif-mark" style="left:50%">0</span>
-        <span class="bif-mark bif-highlight" style="left:70.25%">0.81</span>
-        <span class="bif-mark" style="left:0%">−2</span>
-        <span class="bif-mark" style="left:100%">2</span>
+  <div class="card controls">
+    <div class="slider-row">
+      <span class="slider-label">μ =</span>
+      <span class="mu-value" id="muVal">0.50</span>
+      <div class="slider-container">
+        <input type="range" id="muSlider" aria-label="μ" min="-2" max="2" step="0.01" value="0.5">
+        <div style="position:relative;height:16px;margin-top:2px;">
+          <span class="bif-mark" style="left:50%">0</span>
+          <span class="bif-mark bif-highlight" style="left:70.25%">0.81</span>
+          <span class="bif-mark" style="left:0%">−2</span>
+          <span class="bif-mark" style="left:100%">2</span>
+        </div>
       </div>
     </div>
+
+    <div class="badge-row" id="badgeRow"></div>
+    <div class="fp-coords" id="fpCoords"></div>
   </div>
-
-  <div class="badge-row" id="badgeRow"></div>
-  <div class="fp-coords" id="fpCoords"></div>
-
-  <canvas id="pp" width="720" height="500" aria-label="Phase portrait of the dynamical system"></canvas>
 
   <div class="legend">
     <div class="legend-item"><span class="leg-dot" style="background:var(--stable)"></span>stable spiral or node</div>
@@ -104,11 +120,16 @@
     <div class="legend-item"><span class="leg-dot leg-unstable"></span>unstable spiral or node</div>
     <div class="legend-item"><span class="leg-line"></span>trajectory</div>
   </div>
+
+  <div class="desc-card" id="descCard" style="margin-top:20px;"></div>
+
+  <footer>Saddle-node bifurcation at μ = 0. Hopf bifurcation at μ = 0.81.</footer>
 </div>
 
-<div class="desc-card" id="descCard"></div>
+<div class="plot">
+  <canvas id="pp" width="720" height="500" aria-label="Phase portrait of the dynamical system"></canvas>
+</div>
 
-<footer>Saddle-node bifurcation at μ = 0. Hopf bifurcation at μ = 0.81.</footer>
 </div>
 
 <script>
@@ -116,7 +137,14 @@ const canvas = document.getElementById('pp');
 const ink = (a) => jpeAlpha(jpeColor('--jpe-ink'), a);
 const tok = (n) => jpeColor('--jpe-' + n);
 const ctx = canvas.getContext('2d');
-const W = canvas.width, H = canvas.height;
+const W = 720, H = 500;
+function fitCanvas(){
+  const dpr = window.devicePixelRatio || 1;
+  const cw = Math.max(1, Math.round(canvas.clientWidth * dpr));
+  const ch = Math.max(1, Math.round(cw * H / W));
+  if (canvas.width !== cw || canvas.height !== ch) { canvas.width = cw; canvas.height = ch; }
+  ctx.setTransform(cw / W, 0, 0, ch / H, 0, 0);
+}
 const xmin=-2.8, xmax=2.8, ymin=-2.1, ymax=2.1;
 
 function toC(x,y){ return [(x-xmin)/(xmax-xmin)*W, (1-(y-ymin)/(ymax-ymin))*H]; }
@@ -324,6 +352,7 @@ function getInfo(mu){
 }
 
 function render(mu){
+  fitCanvas();
   drawBackground();
   drawVectorField(mu);
   drawTrajectories(mu);
@@ -350,6 +379,7 @@ const slider=document.getElementById('muSlider');
 slider.addEventListener('input',()=>render(parseFloat(slider.value)));
 render(0.5);
 document.addEventListener('jpe-themechange', () => render(parseFloat(slider.value)));
+window.addEventListener('resize', () => render(parseFloat(slider.value)));
 </script>
 </body>
 </html>

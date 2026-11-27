@@ -328,6 +328,13 @@
       <label><input type="checkbox" id="uniform_arrows"> Uniform arrows (same size &amp; colour)</label>
     </div>
     <div style="margin-top:12px;">
+      <div class="eq-label" style="margin-bottom:4px;font-style:normal;">Trajectory colours</div>
+      <select id="traj_colors" aria-label="Trajectory colours">
+        <option value="distinct" selected>A different colour for each</option>
+        <option value="single">One colour (ink)</option>
+      </select>
+    </div>
+    <div style="margin-top:12px;">
       <div class="eq-label" style="margin-bottom:4px;font-style:normal;">Arrow colour (uniform arrows)</div>
       <input type="color" id="arrow_color" aria-label="Arrow colour" value="#59616a" style="width:100%;height:32px;padding:2px 4px;border:1px solid var(--border2);background:var(--surface2);cursor:pointer;" />
     </div>
@@ -399,9 +406,19 @@ const PRESETS = {
   bvp:        { fx:"y", fy:"-x + x*x*x/3 - y*0.5", xmin:-3, xmax:3, ymin:-3, ymax:3, label:"BVP oscillator" },
 };
 
-// trajectories are drawn in ink, as in a textbook figure; the arrow colour follows the theme until the visitor picks one
+// trajectories are drawn either in ink, as in a textbook figure, or each in its own colour so they can be told apart;
+// the arrow colour follows the theme until the visitor picks one
 const tok = (n) => jpeColor('--jpe-' + n);
-function trajColor() { return tok('ink'); }
+// the site's blue and red first, then muted companions; a lighter set for the dark theme
+const TRAJ_LIGHT = ['#1F4FBF','#C8102E','#0F7B6C','#B5651D','#6B3FA0','#AD1457','#2E7D32','#00838F'];
+const TRAJ_DARK  = ['#7FA6FF','#FF5A5F','#4FD1C5','#F6AD55','#B794F4','#F687B3','#68D391','#76E4F7'];
+let trajSeq = 0;
+function isDark() { return getComputedStyle(document.documentElement).colorScheme.indexOf('dark') !== -1; }
+function trajColor(traj) {
+  if (gv('traj_colors').value === 'single' || !traj) return tok('ink');
+  const set = isDark() ? TRAJ_DARK : TRAJ_LIGHT;
+  return set[traj.ci % set.length];
+}
 let arrowColorTouched = false;
 function syncArrowColor() { if (!arrowColorTouched) gv('arrow_color').value = tok('ink-2').toLowerCase(); }
 
@@ -419,7 +436,7 @@ gv("preset").addEventListener("change", function() {
   gv("fx").value = p.fx; gv("fy").value = p.fy;
   gv("xmin").value = p.xmin; gv("xmax").value = p.xmax;
   gv("ymin").value = p.ymin; gv("ymax").value = p.ymax;
-  trajs = []; updateTrajList(); redraw();
+  trajs = []; trajSeq = 0; updateTrajList(); redraw();
 });
 
 // Switch to custom when user edits equations
@@ -428,7 +445,8 @@ gv("preset").addEventListener("change", function() {
 // Redraw on option toggle
 ["show_nullclines","show_arrows","uniform_arrows"].forEach(id => gv(id).addEventListener("change", redraw));
 gv("arrow_color").addEventListener("input", () => { arrowColorTouched = true; redraw(); });
-document.addEventListener('jpe-themechange', () => { syncArrowColor(); redraw(); });
+gv("traj_colors").addEventListener("change", () => { updateTrajList(); redraw(); });
+document.addEventListener('jpe-themechange', () => { syncArrowColor(); updateTrajList(); redraw(); });
 
 // --- Parse ---
 function buildFn(expr) {
@@ -667,7 +685,7 @@ function integrate(x0,y0) {
 // --- Draw single trajectory ---
 function paintTraj(traj, idx, bgColor) {
   bgColor = bgColor || tok('paper');
-  const color=trajColor();
+  const color=trajColor(traj);
 
   function drawPts(pts) {
     if(pts.length<2) return;
@@ -714,6 +732,7 @@ function addTraj(x0,y0) {
     setStatus("Initial condition is outside the plot window.","err"); return;
   }
   const traj=integrate(x0,y0);
+  traj.ci=trajSeq++;
   trajs.push(traj);
   paintTraj(traj,trajs.length-1);
   setStatus(`Trajectory ${trajs.length}: (${x0.toFixed(4)}, ${y0.toFixed(4)})`,"ok");
@@ -731,7 +750,7 @@ function removeTraj(idx) {
 }
 
 function clearTrajs() {
-  trajs=[];
+  trajs=[]; trajSeq=0;
   updateTrajList();
   redraw();
   setStatus("Trajectories cleared.","");
@@ -745,7 +764,7 @@ function updateTrajList() {
   }
   el.innerHTML=trajs.map((t,i)=>`
     <div class="traj-item">
-      <div class="traj-dot" style="background:var(--jpe-ink)"></div>
+      <div class="traj-dot" style="background:${trajColor(t)}"></div>
       <span>(${t.x0.toFixed(3)}, ${t.y0.toFixed(3)})</span>
       <button class="traj-rm" onclick="removeTraj(${i})" title="Remove">×</button>
     </div>

@@ -17,13 +17,11 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/applet.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
 
 <style>
-/* ============================================================
-   Quadrature Explorer -- MATHS 270
-   Palette derives from the printed notes: navy rules, teal curve,
-   amber weights. Neutrals carry a slight cool bias.
-   ============================================================ */
+/* Quadrature explorer: the site's palette, with the weights in red and the nodes in grey ink. */
 
 :root {
   --paper:      var(--jpe-paper);
@@ -75,14 +73,6 @@ body {
 
 header { display: flex; flex-direction: column; gap: 6px; }
 
-.eyebrow {
-  font-family: var(--f-mono);
-  font-size: 11.5px;
-  letter-spacing: 0;
-  text-transform: none;
-  color: var(--ink-faint);
-}
-
 h1 {
   font-family: var(--f-serif);
   font-weight: 600;
@@ -91,12 +81,6 @@ h1 {
   margin: 0;
   text-wrap: balance;
   letter-spacing: -0.01em;
-}
-
-.standfirst {
-  color: var(--ink-soft);
-  max-width: 62ch;
-  margin: 2px 0 0;
 }
 
 /* ---------- the master formula band ---------- */
@@ -121,14 +105,10 @@ h1 {
   white-space: nowrap;
 }
 
-.thesis p {
-  margin: 0;
-  color: var(--ink-soft);
-  font-size: 14px;
-  text-align: center;
-}
-
-.thesis b { color: var(--ink); font-weight: 600; }
+.thesis .katex { font-size: 1.15em; }
+.katex .w-c { color: var(--weight); }
+.katex .n-x { color: var(--node); }
+.general .katex { font-size: 1.22em; color: var(--ink); }
 
 /* inline maths, hand-set */
 .mv { font-family: var(--f-serif); font-style: italic; }
@@ -310,6 +290,20 @@ button.mini:focus-visible { outline: 2px solid var(--node); outline-offset: 1px;
 
 .card .body { padding: 16px 18px 18px; }
 
+/* the diagnostics card opens and closes */
+details.fold > summary { list-style: none; cursor: pointer; display: flex; align-items: center; border-bottom: 1px solid transparent; }
+details.fold > summary::-webkit-details-marker { display: none; }
+details.fold > summary h2 { flex: 1; border-bottom: 0; }
+details.fold > summary::after {
+  content: ""; width: 7px; height: 7px; margin-right: 20px; flex: none;
+  border-right: 1.5px solid var(--ink-soft); border-bottom: 1.5px solid var(--ink-soft);
+  transform: translateY(-2px) rotate(45deg); transition: transform .15s;
+}
+details.fold[open] > summary { border-bottom-color: var(--line-faint); }
+details.fold[open] > summary::after { transform: translateY(2px) rotate(-135deg); }
+details.fold > summary:hover h2 { color: var(--ink); }
+details.fold > summary:focus-visible { outline: 2px solid var(--node); outline-offset: -2px; }
+
 canvas { display: block; width: 100%; }
 
 .legend {
@@ -338,6 +332,7 @@ canvas { display: block; width: 100%; }
 .sum .lead { color: var(--ink-faint); }
 .sum .terms { min-width: 0; }
 .sum .t { display: inline-block; white-space: nowrap; }
+.sum .row { min-height: 1.9em; }
 .sum .op { color: var(--ink-faint); padding: 0 .4em; }
 .sum .tot { color: var(--ink); font-weight: 600; }
 
@@ -393,6 +388,11 @@ canvas { display: block; width: 100%; }
 .badge.ok { color: var(--good); }
 .badge.no { color: var(--bad); }
 
+/* the node table keeps one height however many nodes there are, and scrolls inside */
+.wt-scroll { margin-top: 12px; overflow-y: auto; }
+.wt-scroll.fixed { height: 236px; border-bottom: 1px solid var(--line-faint); }
+.wt-scroll table.wt { margin-top: 0; }
+.wt-scroll thead th { position: sticky; top: 0; background: var(--panel); }
 table.wt {
   width: 100%;
   border-collapse: collapse;
@@ -446,30 +446,11 @@ footer b { color: var(--ink-soft); }
 <div class="wrap">
 
   <header>
-    <div class="eyebrow">MATHS 270, Numerical Computation</div>
     <h1>Quadrature explorer</h1>
-    <p class="standfirst">
-      Every numerical integration rule on this page &mdash; and every one in the
-      course &mdash; is the same object: a list of points where you evaluate
-      <span class="mv">f</span>, and a list of numbers you multiply those values by.
-      Change the points and the numbers, and you have changed the rule.
-    </p>
   </header>
 
   <section class="thesis">
-    <div class="master">
-      <span class="big-int">&int;</span><sub>&thinsp;<span class="mv">a</span></sub><sup><span class="mv">b</span></sup>&nbsp;<span class="mv">f</span>(<span class="mv">x</span>)&thinsp;d<span class="mv">x</span>
-      &nbsp;&asymp;&nbsp;
-      <span style="font-size:1.25em; vertical-align:-.18em;">&sum;</span><sub><span class="mv">k</span>&thinsp;=&thinsp;0</sub><sup><span class="mv">n</span></sup>
-      &nbsp;<span class="w-c"><span class="mv">c</span><sub><span class="mv">k</span></sub></span>&thinsp;
-      <span class="mv">f</span>(<span class="n-x"><span class="mv">x</span><sub><span class="mv">k</span></sub></span>)
-    </div>
-    <p>
-      The <span class="n-x">nodes <span class="mv">x</span><sub><span class="mv">k</span></sub></span>
-      are where you look. The <span class="w-c">weights <span class="mv">c</span><sub><span class="mv">k</span></sub></span>
-      say how much each look counts. <b>Neither depends on <span class="mv">f</span></b> &mdash;
-      that is what makes a rule reusable.
-    </p>
+    <div class="master" id="master" data-tex="\int_a^b f(x)\,dx \;\approx\; \sum_{k=0}^{n} \htmlClass{w-c}{c_k}\, f(\htmlClass{n-x}{x_k})">&int;<sub>a</sub><sup>b</sup> f(x) dx &asymp; &sum; c<sub>k</sub> f(x<sub>k</sub>)</div>
   </section>
 
   <div class="tabs" role="tablist" aria-label="Choose a family of rules">
@@ -540,13 +521,13 @@ footer b { color: var(--ink-soft); }
         </div>
       </div>
 
-      <div class="card">
-        <h2>Diagnostics</h2>
+      <details class="card fold" id="diagCard">
+        <summary><h2>Diagnostics</h2></summary>
         <div class="body">
           <div class="readout" id="readout"></div>
           <div id="wtWrap"></div>
         </div>
-      </div>
+      </details>
 
     </div>
   </div>
@@ -570,7 +551,6 @@ footer b { color: var(--ink-soft); }
     </div>
   </div>
 
-  <footer id="foot"></footer>
 </div>
 
 <script>
@@ -632,32 +612,32 @@ footer b { color: var(--ink-soft); }
     var h = (b - a) / N, xs = [], ws = [];
     for (var k = 0; k < N; k++) { xs.push(a + k * h); ws.push(h); }
     return { nodes: xs, weights: ws,
-      general: ["c<sub>k</sub> = h = (b &minus; a)/N", "x<sub>k</sub> = a + k h,&nbsp; k = 0 &hellip; N&minus;1"] };
+      general: ["c_k = h = \\tfrac{b-a}{N}", "x_k = a + k\\,h,\\quad k = 0, \\dots, N-1"] };
   }
   function ruleRight(a, b, N) {
     var h = (b - a) / N, xs = [], ws = [];
     for (var k = 1; k <= N; k++) { xs.push(a + k * h); ws.push(h); }
     return { nodes: xs, weights: ws,
-      general: ["c<sub>k</sub> = h = (b &minus; a)/N", "x<sub>k</sub> = a + k h,&nbsp; k = 1 &hellip; N"] };
+      general: ["c_k = h = \\tfrac{b-a}{N}", "x_k = a + k\\,h,\\quad k = 1, \\dots, N"] };
   }
   function ruleMidComposite(a, b, N) {
     var h = (b - a) / N, xs = [], ws = [];
     for (var k = 0; k < N; k++) { xs.push(a + (k + 0.5) * h); ws.push(h); }
     return { nodes: xs, weights: ws,
-      general: ["c<sub>k</sub> = h = (b &minus; a)/N", "x<sub>k</sub> = a + (k + &frac12;) h,&nbsp; k = 0 &hellip; N&minus;1"] };
+      general: ["c_k = h = \\tfrac{b-a}{N}", "x_k = a + \\left(k + \\tfrac12\\right) h,\\quad k = 0, \\dots, N-1"] };
   }
   function ruleMidSingle(a, b) {
     return { nodes: [(a + b) / 2], weights: [b - a],
-      general: ["c<sub>0</sub> = b &minus; a", "x<sub>0</sub> = (a + b)/2"] };
+      general: ["c_0 = b - a", "x_0 = \\tfrac{a+b}{2}"] };
   }
   function ruleTrap(a, b) {
     return { nodes: [a, b], weights: [(b - a) / 2, (b - a) / 2],
-      general: ["c<sub>0</sub> = c<sub>1</sub> = (b &minus; a)/2", "x<sub>0</sub> = a,&nbsp; x<sub>1</sub> = b"] };
+      general: ["c_0 = c_1 = \\tfrac{b-a}{2}", "x_0 = a,\\quad x_1 = b"] };
   }
   function ruleSimp(a, b) {
     var L = b - a;
     return { nodes: [a, (a + b) / 2, b], weights: [L / 6, 4 * L / 6, L / 6],
-      general: ["c = (b &minus; a)/6 &times; [ 1, 4, 1 ]", "x = [ a, (a+b)/2, b ]"] };
+      general: ["c = \\tfrac{b-a}{6}\\,\\left[\\,1,\\ 4,\\ 1\\,\\right]", "x = \\left[\\,a,\\ \\tfrac{a+b}{2},\\ b\\,\\right]"] };
   }
 
   /* Three-point Gauss-Legendre, stated on the reference interval [-1, 1].
@@ -671,9 +651,9 @@ footer b { color: var(--ink-soft); }
     for (var i = 0; i < 3; i++) { xs.push(m + h * GA[i]); ws.push(h * GW[i]); }
     return { nodes: xs, weights: ws, h: h, m: m,
       general: [
-        "on [&minus;1, 1]:&nbsp; t = [ &minus;&radic;(3/5), 0, &radic;(3/5) ],&nbsp; w = [ 5/9, 8/9, 5/9 ]",
-        "h = (b &minus; a)/2,&nbsp; m = (a + b)/2",
-        "x<sub>k</sub> = m + h t<sub>k</sub>&nbsp; &nbsp;<b>and</b>&nbsp; &nbsp;c<sub>k</sub> = h w<sub>k</sub>"
+        "\\text{on } [-1, 1]:\\quad t = \\left[-\\sqrt{3/5},\\ 0,\\ \\sqrt{3/5}\\right],\\quad w = \\left[\\tfrac59,\\ \\tfrac89,\\ \\tfrac59\\right]",
+        "h = \\tfrac{b-a}{2},\\quad m = \\tfrac{a+b}{2}",
+        "x_k = m + h\\,t_k \\quad\\text{and}\\quad c_k = h\\,w_k"
       ] };
   }
 
@@ -700,6 +680,18 @@ footer b { color: var(--ink-soft); }
             rule: RIEMANN[0], crule: CLASSIC[2] };
 
   var $ = function (id) { return document.getElementById(id); };
+
+  /* maths is typeset with KaTeX; if it did not load, the TeX source is shown as plain text */
+  function esc(t) { return String(t).replace(/[&<>]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]; }); }
+  function tex(src, display) {
+    if (!window.katex) return "<code>" + esc(src) + "</code>";
+    return katex.renderToString(src, { displayMode: !!display, throwOnError: false, strict: false,
+      trust: function (c) { return c.command === "\\htmlClass"; } });
+  }
+  (function () {
+    var m = $("master");
+    if (window.katex) m.innerHTML = tex(m.getAttribute("data-tex"), true);
+  })();
   var fsel = $("fsel"), ain = $("ain"), bin = $("bin"),
       nslider = $("nslider"), nval = $("nval"), ruleSeg = $("ruleSeg"),
       hint = $("hint"), nField = $("nField"), convCard = $("convCard"),
@@ -808,25 +800,36 @@ footer b { color: var(--ink-soft); }
 
     var f = S.fn.f, a = S.a, b = S.b;
 
-    /* On the Gauss tab the outer weight blocks stick out past a and b by
-       0.0262 (b - a) each side, so the drawing window is a little wider than
-       the interval of integration. */
-    var over = S.tab === "gauss" ? 0.07 * (b - a) : 0;
+    /* The drawing window reaches a little past a and b on both sides, so you can
+       see where the nodes sit relative to the ends and how f carries on outside
+       the interval. It stops short of a pole of f. */
+    var over = 0.15 * (b - a);
     var d0 = a - over, d1 = b + over;
+    if (S.fn.pole !== undefined) {
+      var pl = S.fn.pole;
+      if (pl < a && pl >= d0) d0 = pl + 0.5 * (a - pl);
+      if (pl > b && pl <= d1) d1 = pl - 0.5 * (pl - b);
+    }
 
-    /* sample the curve */
-    var M = 700, xs = [], ys = [], lo = Infinity, hi = -Infinity;
+    /* sample the curve; the vertical range is set by f on [a, b] and at the nodes,
+       and the parts outside may add a little more */
+    var M = 700, xs = [], ys = [], lo = Infinity, hi = -Infinity, olo = Infinity, ohi = -Infinity;
     for (var i = 0; i <= M; i++) {
       var x = d0 + (d1 - d0) * i / M, y = f(x);
       xs.push(x); ys.push(y);
-      if (isFinite(y)) { if (y < lo) lo = y; if (y > hi) hi = y; }
+      if (!isFinite(y)) continue;
+      if (x >= a && x <= b) { if (y < lo) lo = y; if (y > hi) hi = y; }
+      else { if (y < olo) olo = y; if (y > ohi) ohi = y; }
     }
     var R = currentRule();
     R.nodes.forEach(function (x) { var y = f(x); if (isFinite(y)) { if (y < lo) lo = y; if (y > hi) hi = y; } });
     if (lo > 0) lo = 0;
     if (hi < 0) hi = 0;
     var span = hi - lo || 1;
-    lo -= 0.10 * span; hi += 0.12 * span;
+    lo = Math.max(Math.min(lo, olo), lo - 0.35 * span);
+    hi = Math.min(Math.max(hi, ohi), hi + 0.35 * span);
+    span = hi - lo || 1;
+    lo -= 0.08 * span; hi += 0.10 * span;
 
     var X = function (x) { return padL + (x - d0) / (d1 - d0) * (W - padL - padR); };
     var Y = function (y) { return H - padB - (y - lo) / (hi - lo) * (H - padT - padB); };
@@ -840,6 +843,16 @@ footer b { color: var(--ink-soft); }
       var gy = padT + k / 10 * (H - padT - padB);
       g.beginPath(); g.moveTo(padL, gy); g.lineTo(W - padR, gy); g.stroke();
     }
+
+    g.save();
+    g.beginPath(); g.rect(padL, padT, W - padL - padR, H - padT - padB); g.clip();
+
+    /* outside [a, b]: a light wash, so the interval of integration stands out */
+    g.fillStyle = cssVar("--jpe-fill");
+    g.globalAlpha = 0.5;
+    g.fillRect(padL, padT, X(a) - padL, H - padT - padB);
+    g.fillRect(X(b), padT, W - padR - X(b), H - padT - padB);
+    g.globalAlpha = 1;
 
     /* the shapes the rule uses */
     var h = (b - a) / (S.tab === "riemann" ? S.N : 1);
@@ -889,15 +902,6 @@ footer b { color: var(--ink-soft); }
         g.beginPath(); g.moveTo(X(xg), baseg); g.lineTo(X(xg), topg); g.stroke();
       }
 
-      /* where the interval of integration actually ends */
-      g.save();
-      g.setLineDash([4, 4]);
-      g.strokeStyle = cssVar("--ink-faint");
-      g.lineWidth = 1;
-      [a, b].forEach(function (e) {
-        g.beginPath(); g.moveTo(X(e), padT); g.lineTo(X(e), H - padB); g.stroke();
-      });
-      g.restore();
     } else if (S.crule.id === "trap1") {
       g.fillStyle = cssVar("--node-fill");
       g.strokeStyle = cssVar("--node");
@@ -930,6 +934,16 @@ footer b { color: var(--ink-soft); }
       g.fill(); g.lineWidth = 2; g.stroke();
     }
 
+    /* where the interval of integration ends */
+    g.save();
+    g.setLineDash([4, 4]);
+    g.strokeStyle = cssVar("--ink-faint");
+    g.lineWidth = 1;
+    [a, b].forEach(function (e) {
+      g.beginPath(); g.moveTo(X(e), padT); g.lineTo(X(e), H - padB); g.stroke();
+    });
+    g.restore();
+
     /* axes */
     g.strokeStyle = cssVar("--line");
     g.lineWidth = 1.2;
@@ -940,9 +954,9 @@ footer b { color: var(--ink-soft); }
     g.strokeStyle = cssVar("--curve");
     g.lineWidth = 2.2;
     g.beginPath();
-    var started = false;
+    var started = false, far = 4 * (hi - lo);
     for (var j = 0; j <= M; j++) {
-      if (!isFinite(ys[j])) { started = false; continue; }
+      if (!isFinite(ys[j]) || ys[j] > hi + far || ys[j] < lo - far) { started = false; continue; }
       if (!started) { g.moveTo(X(xs[j]), Y(ys[j])); started = true; }
       else g.lineTo(X(xs[j]), Y(ys[j]));
     }
@@ -957,6 +971,7 @@ footer b { color: var(--ink-soft); }
         g.beginPath(); g.arc(X(xm), Y(ym2), 3.4, 0, 6.2832); g.fill();
       }
     }
+    g.restore();
 
     /* axis labels */
     g.fillStyle = cssVar("--ink-faint");
@@ -1177,7 +1192,8 @@ footer b { color: var(--ink-soft); }
     var out = $("sumOut");
     var n = R.nodes.length;
     var parts = [];
-    var show = n <= 6 ? n : 3;
+    /* always at most three terms on a line, so the card does not change height as N grows */
+    var show = n <= 3 ? n : 2;
 
     function term(i) {
       return '<span class="t"><span class="w-c">' + num(R.weights[i]) + '</span>&thinsp;&middot;&thinsp;' +
@@ -1204,7 +1220,7 @@ footer b { color: var(--ink-soft); }
     var gen = $("generalOut");
     var sumW = R.weights.reduce(function (p, c) { return p + c; }, 0);
     gen.innerHTML =
-      R.general.map(function (t) { return "<div><code>" + t + "</code></div>"; }).join("") +
+      R.general.map(function (t) { return "<div>" + tex(t) + "</div>"; }).join("") +
       '<div style="margin-top:6px">' + n + " node" + (n === 1 ? "" : "s") +
       ", so " + n + " evaluation" + (n === 1 ? "" : "s") + " of <span class='mv'>f</span>. " +
       "Weights sum to <code>" + sumW.toFixed(6) + "</code>" +
@@ -1273,8 +1289,8 @@ footer b { color: var(--ink-soft); }
       wrap.innerHTML = tg;
       return;
     }
-    if (R.nodes.length <= 12) {
-      var t = '<table class="wt"><thead><tr><th>k</th><th>node x<sub>k</sub></th>' +
+    {
+      var t = '<div class="wt-scroll' + (S.tab === "riemann" ? " fixed" : "") + '"><table class="wt"><thead><tr><th>k</th><th>node x<sub>k</sub></th>' +
               "<th>weight c<sub>k</sub></th><th>f(x<sub>k</sub>)</th>" +
               "<th>c<sub>k</sub> f(x<sub>k</sub>)</th></tr></thead><tbody>";
       for (var i = 0; i < R.nodes.length; i++) {
@@ -1283,11 +1299,8 @@ footer b { color: var(--ink-soft); }
              '</td><td class="cw">' + R.weights[i].toFixed(4) + "</td><td>" +
              fv.toFixed(4) + "</td><td>" + (R.weights[i] * fv).toFixed(6) + "</td></tr>";
       }
-      t += "</tbody></table>";
+      t += "</tbody></table></div>";
       wrap.innerHTML = t;
-    } else {
-      wrap.innerHTML = '<p style="margin:12px 0 0;font-size:12.5px;color:var(--ink-faint)">' +
-        R.nodes.length + " nodes &mdash; too many to list. The pattern above is the whole rule.</p>";
     }
   }
 
@@ -1312,24 +1325,8 @@ footer b { color: var(--ink-soft); }
 
   function writeHint() {
     var bad = intervalProblem();
-    if (bad) { hint.innerHTML = '<span class="warn">' + bad + "</span>"; return; }
-    if (S.tab === "riemann") {
-      hint.innerHTML = "Drag <span class='mv'>N</span> and watch two things at once: the rectangles " +
-        "in the picture, and the error in the diagnostics. The left and right rules are first order " +
-        "(halving <span class='mv'>h</span> halves the error); the midpoint rule is second order " +
-        "(halving <span class='mv'>h</span> quarters it). The log&ndash;log plot shows this as a slope.";
-    } else if (S.tab === "gauss") {
-      hint.innerHTML = "Start at [&minus;1, 1], where the rule is defined, then drag " +
-        "<span class='mv'>a</span> and <span class='mv'>b</span>. The nodes move &mdash; but so do " +
-        "the <span class='w-c'>weights</span>: each block keeps its shape relative to the interval " +
-        "because <b>both</b> coordinates and weights carry a factor <span class='mv'>h</span>. " +
-        "Forgetting the second one is the most common bug in quadrature code, and it shows up here " +
-        "as blocks of the wrong width.";
-    } else {
-      hint.innerHTML = "One interval, no subdivision. Step through the polynomials " +
-        "1, x, x², x³, x⁴ and watch where each rule stops being exact — " +
-        "that is its degree of precision. Simpson survives x³ and fails at x⁴.";
-    }
+    hint.innerHTML = bad ? '<span class="warn">' + bad + "</span>" : "";
+    hint.classList.toggle("hidden", !bad);
   }
 
   /* ---------------------------------------------------------------
@@ -1426,18 +1423,6 @@ footer b { color: var(--ink-soft); }
   window.addEventListener("resize", function () { drawPlot(); drawXfer(); drawConv(); });
   document.addEventListener("jpe-themechange", function () { drawPlot(); drawXfer(); drawConv(); });
 
-  $("foot").innerHTML =
-    "<b>What to take away.</b> Every rule here is <span class='mv'>&sum;</span> " +
-    "<span class='w-c'>c<sub>k</sub></span> f(<span class='n-x'>x<sub>k</sub></span>). " +
-    "Riemann sums use many nodes with equal weights; the classical rules use very few nodes with " +
-    "unequal weights, chosen so that the rule is exact on polynomials up to some degree. " +
-    "Both are the same formula &mdash; only the two lists differ. " +
-    "The weights must always sum to <span class='mv'>b</span>&minus;<span class='mv'>a</span>, " +
-    "because the rule has to integrate <span class='mv'>f</span>&thinsp;=&thinsp;1 exactly; that single " +
-    "check catches a large fraction of all broken quadrature code. " +
-    "That is also what the third tab is testing: a rule stated on [&minus;1,&thinsp;1] " +
-    "moves to [<span class='mv'>a</span>,&thinsp;<span class='mv'>b</span>] only if the weights are " +
-    "scaled along with the nodes.";
 
   buildSeg();
   render();
