@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en-NZ">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Predator-prey models | Juan Patiño-Echeverría</title>
+<script>
+  (function () {
+    // the visitor's light/dark choice from the site: this visit first, then the last one
+    var t = null;
+    try { t = sessionStorage.getItem('jpe-theme'); } catch (e) {}
+    if (!t) { try { t = localStorage.getItem('jpe-theme'); } catch (e) {} }
+    if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-jpe-theme', t);
+  })();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/applet.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
+<style>
+:root {
+  --paper: var(--jpe-paper); --panel-2: var(--jpe-paper-2);
+  --ink: var(--jpe-ink); --ink-2: var(--jpe-ink-2); --line: var(--jpe-rule);
+  --prey: var(--jpe-blue); --pred: var(--jpe-red); --eq: var(--jpe-ink); --cycle: var(--jpe-ink);
+  --accent: var(--jpe-ink);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--paper); color: var(--ink);
+  font-family: var(--jpe-font); font-size: 15px; line-height: 1.5;
+  -webkit-font-smoothing: antialiased; font-variant-numeric: tabular-nums;
+}
+.wrap { max-width: 1220px; margin: 0 auto; padding: 28px 22px 64px; display: flex; flex-direction: column; gap: 20px; }
+h1 { font-weight: 600; font-size: clamp(28px, 4vw, 40px); line-height: 1.1; margin: 0; letter-spacing: -0.01em; }
+
+/* tabs, as on the quadrature explorer */
+.tabs { display: inline-flex; gap: 2px; padding: 3px; background: var(--panel-2); border: 1px solid var(--line); align-self: flex-start; flex-wrap: wrap; }
+.tab { font-family: var(--jpe-font); font-size: 14px; font-weight: 500; color: var(--ink-2); background: transparent; border: 0; padding: 8px 16px; cursor: pointer; border-radius: 0; }
+.tab:hover { color: var(--ink); }
+.tab.active { background: var(--paper); color: var(--ink); box-shadow: inset 0 -2px 0 var(--ink); }
+
+.model { display: none; flex-direction: column; gap: 20px; }
+.model.active { display: flex; }
+
+/* the model's equations */
+.thesis { border: 1px solid var(--line); padding: 18px 24px; text-align: center; overflow-x: auto; }
+.thesis .katex { font-size: 1.15em; }
+
+.grid { display: grid; grid-template-columns: 280px minmax(0, 1fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+@media (max-width: 1050px) { .grid { grid-template-columns: 1fr 1fr; } .controls { grid-column: 1 / -1; } }
+@media (max-width: 720px) { .grid { grid-template-columns: 1fr; } }
+.panel { border: 1px solid var(--line); min-width: 0; }
+.panel h3 { font-size: 10.5px; font-weight: 500; color: var(--ink-2); margin: 0; padding: 12px 18px; border-bottom: 1px solid var(--line); }
+.panel .pbody { padding: 14px 18px 16px; }
+.panel .cap { color: var(--ink-2); font-size: 12.5px; margin: 0 0 8px; }
+canvas { width: 100%; height: auto; display: block; touch-action: none; }
+.panel canvas.phase { cursor: crosshair; }
+.controls label { display: block; font-size: 13px; margin: 12px 0 2px; font-weight: 500; }
+.controls label:first-of-type { margin-top: 0; }
+.controls .row { display: flex; align-items: center; gap: 10px; }
+.controls input[type=range] { flex: 1; accent-color: var(--ink-2); min-width: 0; }
+.controls .val { min-width: 44px; text-align: right; font-weight: 600; }
+.controls .hint { font-size: 12px; color: var(--ink-2); font-weight: 400; margin-left: 4px; }
+.btns { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 16px; }
+button.act { font-family: var(--jpe-font); padding: 6px 10px; border: 1px solid var(--line); background: var(--panel-2); cursor: pointer; font-size: 12.5px; color: var(--ink); border-radius: 0; }
+button.act:hover { background: var(--jpe-fill); border-color: var(--ink); }
+.verdict { margin-top: 14px; padding: 9px 12px; font-size: 13px; font-weight: 600; border: 1px solid currentColor; }
+.verdict.stable { color: var(--jpe-blue); }
+.verdict.cycle { color: var(--jpe-red); }
+.verdict.neutral { color: var(--ink-2); }
+.legend { display: flex; gap: 6px 16px; font-size: 12.5px; margin-top: 10px; flex-wrap: wrap; color: var(--ink-2); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.sw { width: 16px; height: 0; border-top: 2px dashed; display: inline-block; }
+.sw.solid { border-top-style: solid; }
+.sw.dot { width: 9px; height: 9px; border: 0; border-radius: 50%; }
+.eqbox { font-size: 13px; margin: 12px 0 0; color: var(--ink-2); }
+.eqbox b { color: var(--ink); font-weight: 600; }
+.frwrap { margin-top: 0; border-top: 1px solid var(--line); }
+.panel h3 .katex { font-size: 1.3em; color: var(--ink); }
+</style>
+</head>
+<body>
+<nav class="jp-strip" aria-label="Site">
+  <a class="jp-strip-brand" href="/" aria-label="Juan Patiño-Echeverría, home"><svg viewBox="229 219 1121 524" aria-hidden="true"><path fill="currentColor" fill-rule="evenodd" d="M1256.88,331.96c-32.89-20.69-70.35-31.59-109.25-34.45l-42.46-.09c-59.05,3.3-114.97,25.45-160.19,63.54-56.78,47.83-87.22,108.46-126.94,169.02l-47.97,73.14c-26.45,37.3-58.24,70.01-95.94,95.85-24.07,16.49-55.07,31.55-82.04,17.91-10.29-5.21-17.59-14.35-22.45-24.82,30.44-26.43,54.44-64.44,73.97-99.54,23.98-43.1,43.39-87.77,61.1-133.89,19.59-51,34.17-102.97,44.13-156.61,3.85-20.7,8.65-43.85,3.06-62.9-2.13-7.23-9.26-11.62-16.8-9.85-6.65,1.56-12.89,5.17-18.13,9.74-13.24,11.54-23.88,24.43-34.4,38.7-24.36,33.06-46.46,66.87-67.75,102.09l-50.09,82.9c-14.86,24.58-29.72,48.15-46.92,71.01-6.95,9.24-13.72,17.33-22.55,25.07-11.85-13.01-21.27-25.43-30.78-39.35-16.05-23.51-30.71-46.98-45.46-71.42l-40.27-66.72-35.15-55.79-23.44-34.65c-11.14-16.47-23.11-31.74-36.95-45.95-5.8-5.96-12.45-10.89-19.64-14.28-9.15-4.32-19.08-.5-22.04,9.07-2.1,6.76-3.19,14.06-2.69,21.34,1.23,17.6,4.52,33.77,8.13,51.09,10.83,51.89,25.85,102.06,45.21,151.54,18.43,47.12,38.85,92.79,62.82,137.25,13.02,24.15,26.68,47.07,43.71,68.22,8.9,11.06,18.55,20.6,30.6,27.33,28.76,16.05,52.06-4.04,67.37-29.89,7.42-13.98,13.34-28.12,18.98-43.33,11.56,6.01,22.86,9.29,36.2,9.19.02,19.38.99,37.65,6.62,56.54-9.01,7.47-17.97,13.2-27.83,18.85,11.62.35,21.28-4.98,30.92-9.94,5.23,9.44,10.9,18.05,19.5,24.05,14.82,10.34,33.14,12.84,50.7,8.76,33.37-7.76,58.32-28.94,84.8-49.15l65.22-49.76c46.42-32.86,102.2-61.58,159.18-67.59l20.05-.34c-1.05,24.64,5.58,47.86,19.08,68.08,6.24,9.34,12.54,18.68,21.26,25.68l20.56,16.49c38.07,25.87,91.56,41.55,137.73,38.43,94.74-6.41,167.48-78.83,170.92-174.08,4.85-13.64,7.56-27.09,8.78-41.47C1344.5,429.77,1313.97,367.88,1256.88,331.96ZM1044.4,438.33c-38.69,24.99-72.73,68.69-81.71,114.85-21.36-.56-41.69,2.17-62.37,8.16-29.22,8.07-55.83,20.66-81.92,36.1-29.26,17.52-55.54,37.61-82.56,58.87,24.51-27.1,46.92-53.62,66.41-84.04l47.18-73.84,44.69-67.33c18.34-27.63,41.37-51.08,67.86-71.1,42.14-31.86,92.29-50.31,145.03-52.65l39.63.06c32.54,2.11,63.87,9.95,92.52,25.34,32.51,17.2,58.07,42.75,74.48,75.69,14.06,30.11,20.04,63.08,15.19,97.39-8.11-37.84-31.27-68.36-65.04-86.78C1195.75,381.94,1107.61,395.71,1044.4,438.33ZM1201.81,459.58c-27.75-3.76-54.29-.28-80.11,9.04-47.58,17.18-86.06,50.24-108.26,95.43-14.58-5.23-28.35-8.09-43.3-10.15l4.76-17.94c9.3-23.28,22.36-44.06,40.18-61.97,64.38-64.71,178.41-91.55,256.41-39.57,33.62,22.39,52.49,60.14,50.34,100.33-3.61,10.03-7.41,18.78-14.45,27.92.79-22.26-5.41-42.62-19.35-59.7C1266.14,476.16,1236.5,464.29,1201.81,459.58ZM435.45,585.42c10.66,1.14,20.7,1.14,31.23-1.23l8.93,21.3c4.47,10.68,5.98,21.77,5.44,33.44l2.02-1.18-.31-15.74c-.27-13.92-6.2-25.88-11-39.51,11.34,13.26,22.04,24.91,35.4,35.21l-16.37,37.13c-6.78,15.39-22.59,36.8-39.93,37.77-14.43.8-31.25-14.51-41.1-26.46-30.59-37.13-57.59-91.41-78.05-136-21.14-46.07-39.8-92.36-55.05-140.71-8.9-28.19-15.64-56.04-18.86-85.36-.97-8.8-1.59-17.07.82-25.2,1.8-6.08,7.34-9.33,13.36-6.88s11.66,6.61,16.5,11.59c13.04,13.43,24.01,27.73,34.59,43.45,26.02,38.68,49.14,78.29,71.66,119.17l42.61,77.35,11.78,24.26c-15.33-17.31-28.25-35.98-41.58-55.44-18.52-43.32-41.21-83.63-66.61-123.18-11.83-18.42-44.48-66.83-62.3-54.45-9.93,6.9-6.12,35.85-2.63,51.36,16.42,73.01,56.64,166.6,101.19,226.61,11,14.82,34.02,43.03,50.21,36.4C438.47,624.59,436.19,600.95,435.45,585.42ZM1281.11,577.94c2.8-44.9-39.61-74.48-81.63-78.43-28.2-2.64-55.64,4.89-80.54,18.48-27.75,15.01-50.27,37.09-67.52,63.9l-31.06-15.63c12.75-25.66,30.75-47.03,53.29-63.56,48.86-35.96,107.69-47.72,165.03-26.55,40.97,15.13,69.93,54.92,59.89,99.32l-19.25,20.4L1281.11,577.94ZM719.9,359.48c3.38-13.79,4.64-40.61-5.61-45.53-23.63-11.35-67.36,63.54-80.5,85.89-24.17,41.08-59.16,108.9-69.59,153.44l-7.29,31.13c-7.84,2.4-16.62,2.23-24.7-.65,30.78-74.65,69.33-146.01,111.45-215.05,13.81-22.65,28.01-43.99,44.01-64.94,9.03-11.81,25.72-31.28,38.27-32.6,9.41-.99,12.16,13.51,11.2,25.9-4.48,57.72-30.2,129.09-52.51,183.54-25.41,62.05-61.05,135.05-104.06,185.88l-14.3,15.35c-4.61-19.73-5.55-39.5-5.23-60.29,2.99,3.28,5.82,8.53,10.8,7.22,22.95-6.04,48.03-38.52,61.57-59.45,18.33-28.34,33.73-57.72,46.99-88.84,11.35-26.67,21.12-52.77,29.57-80.39L719.9,359.48ZM327.79,469.75c13.14,29.31,28.79,55.97,49.89,79.45,14.52,16.16,31.38,28.28,52.11,34.96l1.6,12.84c1.01,8.2.71,16.29-2.25,24.12-5.33,14.08-25.94-4.87-35.94-17.34-39.12-48.78-73.73-123.36-95.49-182.37-9.35-25.36-26.22-77.59-18.75-99.3,4.01-11.64,20.46,2.48,29.55,13.41,9.28,11.17,17.86,21.92,25.73,34.37,17.49,27.63,34.3,55.23,48.67,84.5-11.14-13.51-18.23-27.67-28.64-40.66-9.28-13.14-30.35-40.73-42.5-34.68-7.26,3.61-6.68,18.22-4.69,28.97C311.09,429.66,318.58,449.21,327.79,469.75ZM566.99,589.14c42.64-17.21,76.65-68.87,95.59-109.7,10.54-22.74,19.65-45.61,24.56-70.21,2.21-11.1,3.2-26.76-4-29.98-17.74-7.94-47.98,39.57-59.41,57.47-4.68,7.33-8.05,14.95-14.07,21.37,14.64-29.24,30.29-56.54,47.48-83.89,9.89-15.73,41.81-61.95,54.68-55.91,9.16,4.3,4.83,33.66,1.52,48.23-6.55,28.84-16.4,55.84-27.43,83.41-14.61,36.55-31.83,71.15-52.08,104.8-14.36,23.88-38.39,57.95-63.88,68.85-5.13-7.04-5.24-15.51-4.27-23.61L566.99,589.14ZM415.47,530c5.31,15.57,10.11,30.09,12.84,46.26-16.94-6.07-30.29-15.99-42.15-28.42-32.65-34.21-56.92-86.38-68.87-131.91-2.11-8.04-3.89-22.49-1.3-25.69,3.04-3.76,14.38,7.07,20.32,14.39l9.49,11.69,56.43,80.65L415.47,530ZM602.19,556.61c-10.63,10.24-20.66,19.02-34.7,24.77,3.2-16.38,5.23-32.19,11.9-47.13,15.39-34.43,34.11-66.5,54.7-98.01,8.99-13.75,18.14-25.97,29.35-37.86,4.49-4.75,12.68-10.31,14.74-8.36,3.27,3.09,1.49,16.18-.67,24.53C664.57,464.66,639.02,519.08,602.19,556.61ZM1244.78,555.56c-16.2-18.38-39.52-27.05-63.85-25.54-42.05,2.61-83.77,33.55-107.31,67.82l-16.5-12.36c29-47.22,81.39-84.48,137.39-80.07,22.05,1.74,42.8,9.4,59.15,23.73,22.74,19.94,26.62,46.85,15.99,74.65-5.12,5.52-11.97,10.17-19.05,14.56C1259.93,596.37,1260.77,573.7,1244.78,555.56ZM1231.61,583.31c-11.93-21.39-37.95-28.64-62.52-24.06-29.16,5.43-60.45,27.8-76.69,54.21l-14.26-12.28c9.95-15.52,22.23-27.04,36.3-37.75,35.69-27.18,84.14-40.17,120.21-10.16,23.01,19.14,20.76,47.39,5.9,72.26l-10.05,5.25C1238.58,614.85,1239.9,598.18,1231.61,583.31ZM673.69,312.78c-41.82,57.18-100.98,160.94-131.07,225.61l-19.55,42.02c-8.52-4.61-16.25-10.16-22.69-16.91,8.43-8.02,14.75-15.29,21.51-23.72,14.66-19.57,27.83-39.28,40.62-60.35l66.1-108.83c20.95-34.5,43.13-67.35,67.59-99.22,9.56-12.45,28.57-34.43,41.6-34.83,14-.43,9.06,37.73,4.87,54.74-.98-6.99-1.33-13.68-5.45-19.42-9.34-13.02-27.92-.33-39,11.36C689.27,292.66,681.44,302.18,673.69,312.78ZM451.34,537.04l-40.87-75.57c-24.97-46.15-51.19-90.8-80.62-134.18-11.85-17.48-24.05-33.47-38.91-48.16-5.08-5.02-10.9-8.9-17.36-11.63-8.25-3.5-16.91,1.03-19.58,9.54-1.8,5.71-2.02,11.65-2.51,18.08-4.14-16.23-9.47-58.85,3.72-58.78,17.7.09,45.24,38.79,57.51,56.03,21.09,29.63,40.22,59.65,59.04,90.8l38.43,63.64,41.35,65.6c11.77,17.91,23.66,34.17,38.33,50.99-4.85,4.29-10.01,7.52-16.21,10.8C465.21,562.13,458.57,550.4,451.34,537.04ZM1210.57,624.89c1.89-16.68-9.28-31.29-25.27-35.16-26.02-6.3-57.46,14.43-72.65,37.49-5.64-2.94-10.56-6.17-16.28-10.84,22.36-34,70.97-64.91,109.88-47.83,15.63,6.87,25.91,20.71,26.22,37.72.18,10.22-3.61,19.5-9.1,28.04l-17.12,6.11C1208.24,634.98,1209.91,630.78,1210.57,624.89ZM1200.45,642.05c-29.24,6.75-58.32,2.29-83.58-12.47,14.71-19.13,34.31-34.52,58.09-35.91,16.54-.97,31.08,10.57,31.55,27.39C1206.71,628.27,1203.78,635.13,1200.45,642.05ZM1063.98,689.91c-33.65-13.16-62.04-33.81-80.69-65.19-10.34-18.4-16.2-38.35-14.74-60.6,14.21,1.42,28.21,4.36,41.36,9.6-3.3,11.26-4.47,21.85-4.08,33.33.9,20.82,9.08,39.75,23.21,54.92C1038.97,673.45,1051.06,680.91,1063.98,689.91ZM1193.24,653.15c-15.95,21.23-43.71,39.61-70.01,33.72-19.6-7.3-20.96-31.02-10.74-48.65C1138.23,651.48,1164.36,657.79,1193.24,653.15ZM1075.44,689.13c-17.8-6.87-32.31-18.39-43.75-32.75-18.64-22.76-24.52-52.55-14.69-80.6,10.95,4.43,21.05,9.38,30.67,15.75C1030.73,627.6,1043.06,666.66,1075.44,689.13ZM1067.35,660.2c3.71,11.5,11.13,18.96,20.09,27.67-27.32-11.62-43.44-40.01-40.43-69.88l5.73-23.65,16.84,12.59C1062.48,624.45,1061.53,642.19,1067.35,660.2ZM1219.72,690.97c12.72-8.21,24.07-15.85,34.89-26.51,22.28-21.97,38.12-49.18,47.94-78.91l18.28-24.95c-6.89,44.64-31.09,84.01-67.15,111.03C1242.74,679.1,1232.34,686.2,1219.72,690.97ZM551.95,626.68c-11.66-.19-23.8-2.95-33.95-9.5l11.24-26.39c8.76,1.49,16.78,1.9,26.07,1.29L551.95,626.68ZM1134.25,699.6l18.67-2.78c17.02-2.53,32.11-10.4,46.85-19.05,17.1-11.36,30.78-25.69,42.64-42.6l19.74-12.53c-3.84,8.31-8.48,14.9-13.82,21.72-12.57,14.86-26.3,27.97-43.29,37.64C1183.57,694.31,1160.09,701.78,1134.25,699.6ZM463.61,577.5c-10.5,2.85-19.79,2.58-29.58.36-3.64-20.12-9.39-38.39-15.74-58.63l35.34,43.03C457.5,566.97,460.82,571.25,463.61,577.5ZM1267.03,642.6c-23.56,29.73-55.64,52-93.28,58.25,44.57-13.2,80.79-44.16,99.07-87l19.12-16.29C1286.26,613.99,1277.81,628.33,1267.03,642.6ZM520.46,586.75l-11.22,25.04c-11.97-10.06-21.95-20.37-31.38-32.05l17.28-11.35C503.05,575.41,510.37,581.25,520.46,586.75ZM1088.19,622.24c-9.84,24.58-10.13,52.17,15.62,66.33-32.91-9.23-41.98-44.37-29.9-78.05L1088.19,622.24ZM1111,686.25c-26.34-8.45-28.05-35.31-18.73-60.58l15.14,9.33C1098.35,653.23,1097.76,670.53,1111,686.25ZM1165.68,684.12c13.21-10,25.9-18.8,34.66-32.72l14.12-3.56C1201.08,663.85,1185.1,676.54,1165.68,684.12ZM1179.21,682.95c16.36-10.39,32.01-21.89,43.31-38.25l9.26-3.62-10.45,12.31C1209.11,665.15,1196.46,677.33,1179.21,682.95Z"/></svg></a>
+  <span class="jp-crumb"><span class="jp-up"><a href="/teaching/#tools">Teaching tools</a> / </span><b>Predator-prey models</b></span>
+  <a class="jp-back" href="/teaching/">Back to the site</a>
+  <button class="jp-iconbtn" id="jpe-theme" type="button" aria-label="Switch theme" title="Switch theme"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="8" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M10 2C5.5 6.5 14.5 13.5 10 18A8 8 0 0 1 10 2Z" fill="currentColor"/></svg></button>
+</nav>
+<script src="/assets/applet.js"></script>
+
+<div class="wrap">
+
+<header><h1>Predator-prey models</h1></header>
+
+<div class="tabs" role="tablist" aria-label="Choose a model">
+  <button class="tab active" role="tab" aria-selected="true" data-model="lv">Lotka-Volterra</button>
+  <button class="tab" role="tab" aria-selected="false" data-model="rma">Rosenzweig-MacArthur</button>
+</div>
+
+<!-- Lotka-Volterra -->
+<div class="model active" id="lv">
+  <section class="thesis"><span class="tex" data-tex="\frac{dN}{dt} = rN - aNP, \qquad \frac{dP}{dt} = e\,aNP - mP"></span></section>
+
+  <div class="grid">
+    <div class="panel controls" id="lv-controls">
+      <h3>Parameters</h3>
+      <div class="pbody">
+      <label>r, prey growth rate</label>
+      <div class="row"><input type="range" id="lv-r" min="0.2" max="3" step="0.05" value="1"><span class="val" id="lv-r-v"></span></div>
+
+      <label>a, attack rate</label>
+      <div class="row"><input type="range" id="lv-a" min="0.2" max="3" step="0.05" value="1"><span class="val" id="lv-a-v"></span></div>
+
+      <label>e, conversion efficiency</label>
+      <div class="row"><input type="range" id="lv-e" min="0.1" max="1" step="0.02" value="0.5"><span class="val" id="lv-e-v"></span></div>
+
+      <label>m, predator death rate</label>
+      <div class="row"><input type="range" id="lv-m" min="0.1" max="2" step="0.05" value="0.6"><span class="val" id="lv-m-v"></span></div>
+
+      <div class="btns">
+        <button class="act" id="lv-clear">Clear orbits</button>
+        <button class="act" id="lv-seed">Seed a ring of orbits</button>
+        <button class="act" id="lv-reset">Reset</button>
+      </div>
+
+      <div class="verdict neutral" id="lv-verdict"></div>
+      <p class="eqbox" id="lv-eq"></p>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h3>Phase portrait, N against P</h3>
+      <div class="pbody">
+      <p class="cap">Click to launch a trajectory from that point.</p>
+      <canvas id="lv-phase" class="phase" width="520" height="460"></canvas>
+      <div class="legend">
+        <span><i class="sw" style="color:var(--prey)"></i>prey nullcline</span>
+        <span><i class="sw" style="color:var(--pred)"></i>predator nullcline</span>
+        <span><i class="sw dot" style="background:var(--eq)"></i>equilibrium</span>
+      </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h3>Time series, latest trajectory</h3>
+      <div class="pbody">
+      <canvas id="lv-time" width="520" height="300"></canvas>
+      <div class="legend">
+        <span><i class="sw solid" style="color:var(--prey)"></i>prey N</span>
+        <span><i class="sw solid" style="color:var(--pred)"></i>predator P</span>
+      </div>
+      </div>
+      <div class="frwrap">
+        <h3>Functional response, type I: <span class="tex" data-tex="g(N) = aN"></span></h3>
+        <div class="pbody"><canvas id="lv-fr" width="520" height="180"></canvas></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Rosenzweig-MacArthur -->
+<div class="model" id="rma">
+  <section class="thesis"><span class="tex" data-tex="\frac{dN}{dt} = rN\left(1 - \frac{N}{K}\right) - \frac{aNP}{1 + ahN}, \qquad \frac{dP}{dt} = \frac{e\,aNP}{1 + ahN} - mP"></span></section>
+
+  <div class="grid">
+    <div class="panel controls" id="rma-controls">
+      <h3>Parameters</h3>
+      <div class="pbody">
+      <label>K, prey carrying capacity <span class="hint">cross K<sub>c</sub> to destabilise</span></label>
+      <div class="row"><input type="range" id="rma-K" min="0.6" max="10" step="0.05" value="2"><span class="val" id="rma-K-v"></span></div>
+
+      <label>r, prey growth rate</label>
+      <div class="row"><input type="range" id="rma-r" min="0.2" max="3" step="0.05" value="1"><span class="val" id="rma-r-v"></span></div>
+
+      <label>a, attack rate</label>
+      <div class="row"><input type="range" id="rma-a" min="0.2" max="3" step="0.05" value="1"><span class="val" id="rma-a-v"></span></div>
+
+      <label>h, handling time</label>
+      <div class="row"><input type="range" id="rma-h" min="0.05" max="1.5" step="0.05" value="0.5"><span class="val" id="rma-h-v"></span></div>
+
+      <label>e, conversion efficiency</label>
+      <div class="row"><input type="range" id="rma-e" min="0.1" max="1" step="0.02" value="0.4"><span class="val" id="rma-e-v"></span></div>
+
+      <label>m, predator death rate</label>
+      <div class="row"><input type="range" id="rma-m" min="0.05" max="1" step="0.02" value="0.2"><span class="val" id="rma-m-v"></span></div>
+
+      <div class="btns">
+        <button class="act" id="rma-clear">Clear</button>
+        <button class="act" id="rma-seed">Seed trajectories</button>
+        <button class="act" id="rma-reset">Reset</button>
+      </div>
+
+      <div class="verdict" id="rma-verdict"></div>
+      <p class="eqbox" id="rma-eq"></p>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h3>Phase portrait, N against P</h3>
+      <div class="pbody">
+      <p class="cap">Click to launch a trajectory from that point.</p>
+      <canvas id="rma-phase" class="phase" width="520" height="460"></canvas>
+      <div class="legend">
+        <span><i class="sw" style="color:var(--prey)"></i>prey nullcline</span>
+        <span><i class="sw" style="color:var(--pred)"></i>predator nullcline</span>
+        <span><i class="sw dot" style="background:var(--eq)"></i>equilibrium</span>
+        <span><i class="sw solid" style="color:var(--cycle);border-top-width:3px"></i>limit cycle</span>
+      </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h3>Time series, latest trajectory</h3>
+      <div class="pbody">
+      <canvas id="rma-time" width="520" height="300"></canvas>
+      <div class="legend">
+        <span><i class="sw solid" style="color:var(--prey)"></i>prey N</span>
+        <span><i class="sw solid" style="color:var(--pred)"></i>predator P</span>
+      </div>
+      </div>
+      <div class="frwrap">
+        <h3>Functional response, type II: <span class="tex" data-tex="g(N) = \frac{aN}{1 + ahN}"></span></h3>
+        <div class="pbody">
+          <canvas id="rma-fr" width="520" height="180"></canvas>
+          <div class="legend"><span><i class="sw" style="color:var(--ink-2)"></i>type I, for comparison</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<script>
+document.querySelectorAll('.tex').forEach(function (el) {
+  var src = el.getAttribute('data-tex');
+  if (window.katex) katex.render(src, el, { throwOnError: false, displayMode: el.parentNode.classList.contains('thesis') });
+  else el.textContent = src;
+});
+</script>
+<script>
+"use strict";
+// ---------- small helpers ----------
+const $=id=>document.getElementById(id);
+function rk4(f,y,dt){
+  const k1=f(y);
+  const k2=f(y.map((v,i)=>v+0.5*dt*k1[i]));
+  const k3=f(y.map((v,i)=>v+0.5*dt*k2[i]));
+  const k4=f(y.map((v,i)=>v+dt*k3[i]));
+  return y.map((v,i)=>v+dt/6*(k1[i]+2*k2[i]+2*k3[i]+k4[i]));
+}
+// integrate, clamping to non-negative; returns array of [N,P]
+function integrate(f,y0,dt,steps){
+  let y=y0.slice(), out=[y.slice()];
+  for(let i=0;i<steps;i++){
+    y=rk4(f,y,dt);
+    if(y[0]<0)y[0]=0; if(y[1]<0)y[1]=0;
+    if(!isFinite(y[0])||!isFinite(y[1])||y[0]>1e6||y[1]>1e6) break;
+    out.push(y.slice());
+  }
+  return out;
+}
+// device-pixel-ratio aware canvas; robust to hidden tabs (clientWidth 0) and repeat calls
+function fitCanvas(cv){
+  const dpr=window.devicePixelRatio||1;
+  if(!cv._ar){ cv._ar=(+cv.getAttribute('height'))/(+cv.getAttribute('width')); } // stored once, never corrupted
+  const cssW=cv.clientWidth;
+  if(!cssW){ return null; }                 // hidden tab — skip drawing, redraw on show
+  const cssH=cssW*cv._ar;
+  cv.width=Math.round(cssW*dpr);
+  cv.height=Math.round(cssH*dpr);
+  cv.style.height=cssH+'px';
+  const ctx=cv.getContext('2d'); ctx.setTransform(dpr,0,0,dpr,0,0);
+  return {ctx,W:cssW,H:cssH};
+}
+
+// ============================================================
+//  Generic model panel: phase portrait + time series + FR
+// ============================================================
+function makeModel(cfg){
+  const orbits=[];       // list of trajectories (each: array of [N,P])
+  let lastTraj=null;
+  let limitCycle=null;   // for RMA
+  let cycleBounds=null;  // {Nmax,Pmax} enclosing the limit cycle (RMA)
+
+  function params(){ const p={}; for(const k in cfg.sliders){ p[k]=parseFloat($(cfg.pre+'-'+k).value);} return p; }
+
+  // cfg.info gives the base ranges; when a limit cycle exists, frame the view to IT
+  function infoAug(p){
+    const info=cfg.info(p);
+    if(cycleBounds){
+      info.Nmax=Math.max(cycleBounds.Nmax, info.eq?info.eq[0]*1.35:0, 1.2);
+      info.Pmax=Math.max(cycleBounds.Pmax, info.eq?info.eq[1]*1.35:0, 1.2);
+    }
+    return info;
+  }
+
+  function readouts(){
+    const p=params();
+    const info=infoAug(p);
+    // slider value labels
+    for(const k in cfg.sliders){ $(cfg.pre+'-'+k+'-v').textContent=p[k].toFixed(2); }
+    // verdict + equilibrium text
+    const v=$(cfg.pre+'-verdict'); v.className='verdict '+info.cls; v.innerHTML=info.verdict;
+    $(cfg.pre+'-eq').innerHTML=info.eqtext;
+    return {p,info};
+  }
+
+  // ---- phase portrait ----
+  function drawPhase(){
+    const cv=$(cfg.pre+'-phase'); const fit=fitCanvas(cv); if(!fit)return; const {ctx,W,H}=fit;
+    const {p,info}=readouts();
+    const Nmax=info.Nmax, Pmax=info.Pmax, pad=38;
+    const sx=N=> pad + N/Nmax*(W-pad-12);
+    const sy=P=> H-pad - P/Pmax*(H-pad-12);
+    ctx.clearRect(0,0,W,H);
+    // axes
+    ctx.strokeStyle=tok('rule'); ctx.lineWidth=1; ctx.beginPath();
+    ctx.moveTo(pad,12); ctx.lineTo(pad,H-pad); ctx.lineTo(W-12,H-pad); ctx.stroke();
+    ctx.fillStyle=tok('ink-2'); ctx.font='12px '+FONT;
+    ctx.fillText('prey N',W/2-18,H-12);
+    ctx.save(); ctx.translate(14,H/2+30); ctx.rotate(-Math.PI/2); ctx.fillText('predator P',0,0); ctx.restore();
+    // ticks
+    ctx.fillStyle=tok('ink-2');
+    for(let i=1;i<=4;i++){ const N=Nmax*i/4; ctx.fillText(N.toFixed(1),sx(N)-8,H-pad+14);}
+    for(let i=1;i<=4;i++){ const P=Pmax*i/4; ctx.fillText(P.toFixed(1),4,sy(P)+4);}
+    // nullclines
+    cfg.nullclines(ctx,p,info,sx,sy,Nmax,Pmax,W,H,pad);
+    // limit cycle (RMA)
+    if(cfg.pre==='rma' && info.cls==='cycle' && limitCycle){
+      ctx.strokeStyle=getCss('--cycle'); ctx.lineWidth=2.8; ctx.beginPath();
+      limitCycle.forEach((q,i)=>{ const X=sx(q[0]),Y=sy(q[1]); i?ctx.lineTo(X,Y):ctx.moveTo(X,Y);});
+      ctx.stroke();
+    }
+    // orbits
+    orbits.forEach((tr,idx)=>{
+      ctx.strokeStyle= (tr===lastTraj)? tok('ink-2') : jpeAlpha(tok('ink-2'),0.35);
+      ctx.lineWidth=(tr===lastTraj)?1.8:1;
+      ctx.beginPath();
+      tr.forEach((q,i)=>{ const X=sx(q[0]),Y=sy(q[1]); i?ctx.lineTo(X,Y):ctx.moveTo(X,Y);});
+      ctx.stroke();
+      // start dot
+      ctx.fillStyle=(tr===lastTraj)?tok('ink-2'):jpeAlpha(tok('ink-2'),0.5);
+      ctx.beginPath(); ctx.arc(sx(tr[0][0]),sy(tr[0][1]),3,0,7); ctx.fill();
+    });
+    // equilibrium
+    if(info.eq && info.eq[0]>0 && info.eq[1]>0 && info.eq[0]<Nmax && info.eq[1]<Pmax){
+      ctx.fillStyle=getCss('--eq'); ctx.strokeStyle=tok('paper'); ctx.lineWidth=2;
+      ctx.beginPath(); ctx.arc(sx(info.eq[0]),sy(info.eq[1]),6,0,7); ctx.fill(); ctx.stroke();
+    }
+  }
+
+  // ---- time series ----
+  function drawTime(){
+    const cv=$(cfg.pre+'-time'); const fit=fitCanvas(cv); if(!fit)return; const {ctx,W,H}=fit;
+    ctx.clearRect(0,0,W,H);
+    const pad=32;
+    ctx.strokeStyle=tok('rule'); ctx.beginPath(); ctx.moveTo(pad,8); ctx.lineTo(pad,H-pad); ctx.lineTo(W-8,H-pad); ctx.stroke();
+    ctx.fillStyle=tok('ink-2'); ctx.font='12px '+FONT; ctx.fillText('time',W-36,H-12);
+    if(!lastTraj||lastTraj.length<2) return;
+    const T=lastTraj.length; let ymax=1e-6;
+    lastTraj.forEach(q=>{ ymax=Math.max(ymax,q[0],q[1]);}); ymax*=1.1;
+    const sx=i=> pad + i/(T-1)*(W-pad-8);
+    const sy=y=> H-pad - y/ymax*(H-pad-8);
+    ctx.fillStyle=tok('ink-2');
+    for(let i=1;i<=3;i++){ const y=ymax*i/3; ctx.fillText(y.toFixed(1),3,sy(y)+4);}
+    const line=(idx,col)=>{ ctx.strokeStyle=col; ctx.lineWidth=1.8; ctx.beginPath();
+      lastTraj.forEach((q,i)=>{ const X=sx(i),Y=sy(q[idx]); i?ctx.lineTo(X,Y):ctx.moveTo(X,Y);}); ctx.stroke(); };
+    line(0,getCss('--prey')); line(1,getCss('--pred'));
+  }
+
+  // ---- functional response ----
+  function drawFR(){
+    const cv=$(cfg.pre+'-fr'); const fit=fitCanvas(cv); if(!fit)return; const {ctx,W,H}=fit;
+    const {p}=readouts(); ctx.clearRect(0,0,W,H);
+    const pad=30, Nmax=cfg.frNmax(p);
+    const gmax=Math.max(cfg.fr(Nmax,p), 1e-6)*1.15;
+    const sx=N=> pad + N/Nmax*(W-pad-8);
+    const sy=g=> H-pad - g/gmax*(H-pad-8);
+    ctx.strokeStyle=tok('rule'); ctx.beginPath(); ctx.moveTo(pad,6); ctx.lineTo(pad,H-pad); ctx.lineTo(W-8,H-pad); ctx.stroke();
+    ctx.fillStyle=tok('ink-2'); ctx.font='11px '+FONT; ctx.fillText('prey N',W-46,H-10);
+    ctx.save(); ctx.translate(12,H-pad-6); ctx.rotate(-Math.PI/2); ctx.fillText('intake g(N)',0,0); ctx.restore();
+    // linear reference (dashed) for RMA
+    if(cfg.frRef){
+      ctx.strokeStyle=tok('ink-2'); ctx.setLineDash([5,4]); ctx.lineWidth=1.3; ctx.beginPath();
+      for(let i=0;i<=100;i++){ const N=Nmax*i/100,g=cfg.frRef(N,p); const X=sx(N),Y=sy(g);
+        if(g>gmax){ctx.lineTo(sx(N),sy(gmax));break;} i?ctx.lineTo(X,Y):ctx.moveTo(X,Y);} ctx.stroke(); ctx.setLineDash([]);
+    }
+    ctx.strokeStyle=getCss('--pred'); ctx.lineWidth=2.2; ctx.beginPath();
+    for(let i=0;i<=100;i++){ const N=Nmax*i/100,g=cfg.fr(N,p); const X=sx(N),Y=sy(g); i?ctx.lineTo(X,Y):ctx.moveTo(X,Y);} ctx.stroke();
+  }
+
+  function redrawAll(){ drawPhase(); drawTime(); drawFR(); }
+
+  function launch(N0,P0){
+    const p=params(); const f=cfg.rhs(p);
+    const tr=integrate(f,[N0,P0],cfg.dt,cfg.steps);
+    orbits.push(tr); if(orbits.length>cfg.maxOrbits) orbits.shift();
+    lastTraj=tr; redrawAll();
+  }
+
+  // click-to-seed
+  const cv=$(cfg.pre+'-phase');
+  cv.addEventListener('pointerdown',ev=>{
+    const {info}=readouts(); const r=cv.getBoundingClientRect();
+    const W=r.width, Hcss=r.height, pad=38;
+    const x=(ev.clientX-r.left), y=(ev.clientY-r.top);
+    const N=(x-pad)/(W-pad-12)*info.Nmax;
+    const P=(Hcss-pad-y)/(Hcss-pad-12)*info.Pmax;
+    if(N>0&&P>0) launch(N,P);
+  });
+
+  // buttons
+  $(cfg.pre+'-clear').onclick=()=>{orbits.length=0;lastTraj=null;redrawAll();};
+  $(cfg.pre+'-reset').onclick=()=>{for(const k in cfg.sliders){$(cfg.pre+'-'+k).value=cfg.sliders[k];}orbits.length=0;lastTraj=null;computeCycle();redrawAll();};
+  $(cfg.pre+'-seed').onclick=()=>{ cfg.seed(launch, params(), readouts().info); };
+
+  // sliders
+  for(const k in cfg.sliders){
+    $(cfg.pre+'-'+k).addEventListener('input',()=>{ computeCycle(); recomputeOrbits(); });
+  }
+  // when params change, recompute existing orbits so they stay meaningful
+  function recomputeOrbits(){
+    const p=params(); const f=cfg.rhs(p);
+    for(let i=0;i<orbits.length;i++){ const y0=orbits[i][0]; orbits[i]=integrate(f,y0,cfg.dt,cfg.steps); if(orbits[i]===lastTraj){} }
+    if(lastTraj) lastTraj=orbits[orbits.length-1];
+    redrawAll();
+  }
+  // limit cycle detection for RMA: settle onto the attractor, then record one loop + its extent
+  function computeCycle(){
+    if(cfg.pre!=='rma'){ limitCycle=null; cycleBounds=null; return; }
+    const p=params(); const info=cfg.info(p);
+    if(info.cls==='cycle' && info.eq){
+      const f=cfg.rhs(p);
+      let y=[info.eq[0]*1.05+0.01, info.eq[1]*1.05+0.01];
+      for(let i=0;i<6000;i++){ y=rk4(f,y,cfg.dt); if(y[0]<0)y[0]=0; if(y[1]<0)y[1]=0; } // settle
+      const cyc=[]; let nmax=0,pmax=0;
+      for(let i=0;i<3500;i++){ y=rk4(f,y,cfg.dt); if(y[0]<0)y[0]=0; if(y[1]<0)y[1]=0;
+        cyc.push(y.slice()); if(y[0]>nmax)nmax=y[0]; if(y[1]>pmax)pmax=y[1]; }
+      limitCycle=cyc;
+      cycleBounds={ Nmax:nmax*1.22, Pmax:pmax*1.28 };   // enclose the cycle with margin
+    } else { limitCycle=null; cycleBounds=null; }
+  }
+
+  computeCycle();
+  // initial content
+  window.addEventListener('resize',redrawAll);
+  return {redrawAll, seedInit:()=>{cfg.seed(launch,params(),readouts().info);}};
+}
+
+function getCss(v){return getComputedStyle(document.documentElement).getPropertyValue(v).trim();}
+const FONT="'Schibsted Grotesk','Helvetica Neue',Arial,sans-serif";
+const tok=n=>jpeColor('--jpe-'+n);
+
+// ============================================================
+//  Lotka–Volterra config
+// ============================================================
+const LV=makeModel({
+  pre:'lv', dt:0.01, steps:2500, maxOrbits:24,
+  sliders:{r:1,a:1,e:0.5,m:0.6},
+  rhs:p=>([N,P])=>[ p.r*N - p.a*N*P,  p.e*p.a*N*P - p.m*P ],
+  fr:(N,p)=>p.a*N, frRef:null, frNmax:p=> (p.m/(p.e*p.a))*3+1,
+  info:p=>{
+    const Nstar=p.m/(p.e*p.a), Pstar=p.r/p.a;
+    return {
+      eq:[Nstar,Pstar],
+      Nmax:Math.max(Nstar*3.2, 2), Pmax:Math.max(Pstar*3.2, 2),
+      cls:'neutral',
+      verdict:'Neutral centre: closed orbits (structurally fragile)',
+      eqtext:`Equilibrium&nbsp; <b>N*</b> = m/(ea) = <b>${Nstar.toFixed(2)}</b>,&nbsp; <b>P*</b> = r/a = <b>${Pstar.toFixed(2)}</b>. Jacobian trace = 0 ⇒ purely imaginary eigenvalues.`
+    };
+  },
+  nullclines:(ctx,p,info,sx,sy,Nmax,Pmax,W,H,pad)=>{
+    // N-nullcline: P=r/a (horizontal, green);  P-nullcline: N=m/(ea) (vertical, red)
+    ctx.setLineDash([6,4]); ctx.lineWidth=1.6;
+    ctx.strokeStyle=getCss('--prey'); ctx.beginPath(); ctx.moveTo(sx(0),sy(p.r/p.a)); ctx.lineTo(sx(Nmax),sy(p.r/p.a)); ctx.stroke();
+    ctx.strokeStyle=getCss('--pred'); const Ns=p.m/(p.e*p.a); ctx.beginPath(); ctx.moveTo(sx(Ns),sy(0)); ctx.lineTo(sx(Ns),sy(Pmax)); ctx.stroke();
+    ctx.setLineDash([]);
+  },
+  seed:(launch,p,info)=>{
+    const N0=info.eq[0], P0=info.eq[1];
+    [0.25,0.5,0.9,1.4].forEach(f=> launch(N0, P0*(1+f)));
+  }
+});
+
+// ============================================================
+//  Rosenzweig–MacArthur config
+// ============================================================
+const RMA=makeModel({
+  pre:'rma', dt:0.01, steps:3500, maxOrbits:16,
+  sliders:{K:2,r:1,a:1,h:0.5,e:0.4,m:0.2},
+  rhs:p=>([N,P])=>{ const g=p.a*N/(1+p.a*p.h*N); return [ p.r*N*(1-N/p.K)-g*P, p.e*g*P-p.m*P ]; },
+  fr:(N,p)=>p.a*N/(1+p.a*p.h*N), frRef:(N,p)=>p.a*N, frNmax:p=>p.K*1.05,
+  info:p=>{
+    const denom=p.a*(p.e-p.m*p.h);
+    const Nstar= denom>0 ? p.m/denom : Infinity;
+    const Kc= (p.a*p.h*(p.e-p.m*p.h))>0 ? (p.e+p.m*p.h)/(p.a*p.h*(p.e-p.m*p.h)) : Infinity;
+    const feasible=isFinite(Nstar) && Nstar>0 && Nstar<p.K;
+    let Pstar= feasible ? (p.r/p.a)*(1-Nstar/p.K)*(1+p.a*p.h*Nstar) : NaN;
+    let cls,verdict;
+    if(!feasible){ cls='stable'; verdict='The predator cannot persist (no coexistence)'; }
+    else if(p.K>Kc){ cls='cycle'; verdict=`Unstable spiral ⇒ <b>limit cycle</b> &nbsp;(K = ${p.K.toFixed(2)} &gt; K<sub>c</sub> = ${isFinite(Kc)?Kc.toFixed(2):'∞'})`; }
+    else { cls='stable'; verdict=`Stable coexistence &nbsp;(K = ${p.K.toFixed(2)} &lt; K<sub>c</sub> = ${isFinite(Kc)?Kc.toFixed(2):'∞'})`; }
+    const Nmax=Math.max(p.K*1.18, 1.2);
+    // Pmax: peak of prey nullcline plus generous headroom (so the limit cycle isn't clipped)
+    let peak=0; for(let i=0;i<=60;i++){const N=Nmax*i/60; const val=(p.r/p.a)*(1-N/p.K)*(1+p.a*p.h*N); if(val>peak)peak=val;}
+    return { eq: feasible?[Nstar,Pstar]:null, Nmax, Pmax:Math.max(peak*1.45, Pstar*1.5||1, 1.2), cls, verdict,
+      eqtext: feasible
+        ? `Equilibrium&nbsp; <b>N*</b> = m/(a(e−mh)) = <b>${Nstar.toFixed(2)}</b> (independent of K),&nbsp; <b>P*</b> = <b>${Pstar.toFixed(2)}</b>.&nbsp; Hopf at <b>K<sub>c</sub></b> = ${isFinite(Kc)?Kc.toFixed(2):'∞'}.`
+        : `No positive coexistence: need e &gt; m·h for the predator to gain more than handling costs.`,
+      Kc };
+  },
+  nullclines:(ctx,p,info,sx,sy,Nmax,Pmax,W,H,pad)=>{
+    // prey nullcline: P=(r/a)(1-N/K)(1+ahN) (curve, green); predator nullcline: N=N* (vertical, red)
+    ctx.setLineDash([6,4]); ctx.lineWidth=1.6;
+    ctx.strokeStyle=getCss('--prey'); ctx.beginPath();
+    for(let i=0;i<=120;i++){ const N=Nmax*i/120; const P=(p.r/p.a)*(1-N/p.K)*(1+p.a*p.h*N);
+      const X=sx(N),Y=sy(Math.max(P,0)); i?ctx.lineTo(X,Y):ctx.moveTo(X,Y);} ctx.stroke();
+    if(info.eq){ ctx.strokeStyle=getCss('--pred'); ctx.beginPath(); ctx.moveTo(sx(info.eq[0]),sy(0)); ctx.lineTo(sx(info.eq[0]),sy(Pmax)); ctx.stroke(); }
+    ctx.setLineDash([]);
+  },
+  seed:(launch,p,info)=>{
+    if(info.eq){ launch(info.eq[0]*0.3, info.eq[1]*0.3); launch(info.eq[0]*1.6, info.eq[1]*1.5); launch(info.eq[0]*0.6,info.eq[1]*1.8);}
+    else launch(p.K*0.6, 0.4);
+  }
+});
+
+// ---------- tab switching ----------
+document.querySelectorAll('.tab').forEach(t=>{
+  t.onclick=()=>{
+    document.querySelectorAll('.tab').forEach(x=>{ x.classList.remove('active'); x.setAttribute('aria-selected','false'); });
+    document.querySelectorAll('.model').forEach(x=>x.classList.remove('active'));
+    t.classList.add('active'); t.setAttribute('aria-selected','true'); $(t.dataset.model).classList.add('active');
+    (t.dataset.model==='lv'?LV:RMA).redrawAll();
+  };
+});
+
+// ---------- initial render ----------
+document.addEventListener('jpe-themechange',()=>{ LV.redrawAll(); RMA.redrawAll(); });
+LV.redrawAll(); LV.seedInit();
+RMA.redrawAll();
+setTimeout(()=>{RMA.redrawAll();},60); // ensure sizing after layout
+</script>
+</body>
+</html>

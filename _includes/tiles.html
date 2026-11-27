@@ -1,3 +1,5 @@
+{%- assign many = include.items.size | minus: 4 -%}
+{%- if many > 0 %}<div class="tiles-rail" data-rail>{% endif %}
 <ul class="tiles">
 {%- for it in include.items %}
   <li><a class="tile" href="{% if it.url contains ':' %}{{ it.url }}{% else %}{{ it.url | relative_url }}{% endif %}">
@@ -7,9 +9,46 @@
         {%- when 'hopf' -%}{% include art-hopf.svg %}
         {%- when 'quadrature' -%}{% include art-quadrature.svg %}
         {%- when 'teams' -%}{% include art-teams.svg %}
+        {%- when 'elimination' -%}{% include art-elimination.svg %}
+        {%- when 'predator' -%}{% include art-predator.svg %}
+        {%- when 'bungee' -%}{% include art-bungee.svg %}
       {%- endcase -%}
     </span>
     <span class="tile-head"><span class="title">{{ it.title }}</span><span class="go" aria-hidden="true">{% include arrow.svg %}</span></span>
     <span class="meta">{{ it.meta }}</span></a></li>
 {%- endfor %}
 </ul>
+{%- if many > 0 %}
+  <div class="rail-nav">
+    <span class="rail-count" aria-live="polite"></span>
+    <button class="rail-btn" type="button" data-dir="-1" aria-label="Show the previous tools"><svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M10 3 5 8l5 5" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></button>
+    <button class="rail-btn" type="button" data-dir="1" aria-label="Show more tools"><svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="m6 3 5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></button>
+  </div>
+</div>
+<script>
+  // the tools row shows four at a time; the arrows move it along, a page at a time
+  (function () {
+    var rail = document.currentScript.previousElementSibling, track = rail.querySelector('.tiles');
+    var btns = rail.querySelectorAll('.rail-btn'), count = rail.querySelector('.rail-count');
+    function step() { var li = track.children[0], gap = parseFloat(getComputedStyle(track).columnGap) || 0; return li ? li.getBoundingClientRect().width + gap : track.clientWidth; }
+    function update() {
+      var n = track.children.length, per = Math.max(1, Math.round((track.clientWidth + 1) / step()));
+      var first = Math.round(track.scrollLeft / step());
+      var last = Math.min(n, first + per);
+      btns[0].disabled = track.scrollLeft < 2;
+      btns[1].disabled = track.scrollLeft + track.clientWidth > track.scrollWidth - 2;
+      count.textContent = (first + 1) + (last > first + 1 ? '\u2013' + last : '') + ' of ' + n;
+      rail.classList.toggle('fits', btns[0].disabled && btns[1].disabled);
+    }
+    btns.forEach(function (b) {
+      b.addEventListener('click', function () {
+        var per = Math.max(1, Math.round((track.clientWidth + 1) / step()));
+        track.scrollBy({ left: Number(b.getAttribute('data-dir')) * per * step(), behavior: 'smooth' });
+      });
+    });
+    var t; track.addEventListener('scroll', function () { clearTimeout(t); t = setTimeout(update, 60); }, { passive: true });
+    window.addEventListener('resize', update);
+    update();
+  })();
+</script>
+{%- endif %}

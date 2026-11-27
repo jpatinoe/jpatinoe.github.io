@@ -23,6 +23,18 @@
       url: /team-allocator.html
       meta: "For teachers: split a class into teams with a balanced mix of skills"
       art: teams
+    - title: Elimination explorer
+      url: /elimination-explorer.html
+      meta: Gauss elimination step by step, with pivoting, rounding and the cost of sparsity
+      art: elimination
+    - title: Predator-prey models
+      url: /predator-prey.html
+      meta: Lotka-Volterra and Rosenzweig-MacArthur, nullclines, cycles and the paradox of enrichment
+      art: predator
+    - title: Bungee jump lab
+      url: /bungee-lab.html
+      meta: A damped spring with a slack cord, and whether each jumper clears the river
+      art: bungee
 
 - id: notes
   title: Lecture notes
