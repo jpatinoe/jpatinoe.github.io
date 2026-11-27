@@ -1,0 +1,1629 @@
+<!DOCTYPE html>
+<html lang="en-NZ">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Elimination explorer | Juan Patiño-Echeverría</title>
+<script>
+  (function () {
+    // the visitor's light/dark choice from the site: this visit first, then the last one
+    var t = null;
+    try { t = sessionStorage.getItem('jpe-theme'); } catch (e) {}
+    if (!t) { try { t = localStorage.getItem('jpe-theme'); } catch (e) {} }
+    if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-jpe-theme', t);
+  })();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/applet.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
+<style>
+/* Elimination explorer: the site's palette. Blue marks the pivot, red the multipliers and changed entries. */
+
+:root {
+  --paper:      var(--jpe-paper);
+  --panel:      var(--jpe-paper);
+  --panel-2:    var(--jpe-paper-2);
+  --ink:        var(--jpe-ink);
+  --ink-soft:   var(--jpe-ink-2);
+  --ink-faint:  var(--jpe-ink-2);
+  --line:       var(--jpe-rule);
+  --line-faint: var(--jpe-rule);
+
+  --node:       var(--jpe-blue);    /* pivot, pivot row, structure */
+  --node-fill:  color-mix(in srgb, var(--jpe-blue) 16%, transparent);
+  --curve:      var(--jpe-ink);     /* solved values */
+  --curve-fill: var(--jpe-fill);
+  --weight:     var(--jpe-red);     /* multipliers, changed entries, fill-in */
+  --weight-fill:color-mix(in srgb, var(--jpe-red) 13%, transparent);
+  --bad:        var(--jpe-red);
+  --bad-fill:   color-mix(in srgb, var(--jpe-red) 12%, transparent);
+  --good:       var(--jpe-ink);
+
+  --shadow: none;
+
+  --f-sans: var(--jpe-font);
+  --f-serif: var(--jpe-font);
+  --f-mono: var(--jpe-font);
+
+  --cell: 15px;            /* matrix font size, scaled in presentation mode */
+}
+
+:root[data-present="1"] { --cell: 22px; }
+:root[data-present="1"] body { font-size: 16.5px; }
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--f-sans);
+  font-size: 15px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+.wrap {
+  max-width: 1220px;
+  margin: 0 auto;
+  padding: 28px 22px 110px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ---------- header ---------- */
+header { display: flex; flex-direction: column; gap: 6px; position: relative; }
+h1 {
+  font-family: var(--f-serif); font-weight: 600;
+  font-size: clamp(28px, 4vw, 40px); line-height: 1.1; margin: 0;
+  text-wrap: balance; letter-spacing: -0.01em;
+}
+
+.hdr-tools { position: absolute; top: 4px; right: 0; display: flex; gap: 6px; }
+
+/* ---------- thesis band ---------- */
+.thesis {
+  background: var(--panel); border: 1px solid var(--line);
+  border-radius: 0;
+  padding: 18px 24px; box-shadow: var(--shadow);
+  display: flex; flex-direction: column; gap: 8px;
+}
+.thesis .master {
+  font-family: var(--f-serif); font-size: clamp(18px, 2.4vw, 23px);
+  text-align: center; padding: 2px 0; overflow-x: auto; white-space: nowrap;
+}
+.thesis .katex { font-size: 1.12em; }
+.katex .c-piv { color: var(--node); }
+.katex .c-mul { color: var(--weight); }
+.mv { font-family: var(--f-serif); font-style: italic; }
+.c-piv { color: var(--node); font-weight: 600; }
+.c-mul { color: var(--weight); font-weight: 600; }
+.c-sol { color: var(--curve); font-weight: 600; }
+sub, sup { font-size: .68em; }
+
+/* ---------- tabs ---------- */
+.tabs {
+  display: inline-flex; gap: 2px; padding: 3px; background: var(--panel-2);
+  border: 1px solid var(--line); border-radius: 0; align-self: flex-start;
+  flex-wrap: wrap;
+}
+.tabs button {
+  font-family: var(--f-sans); font-size: 14px; font-weight: 500;
+  color: var(--ink-soft); background: transparent; border: 0;
+  padding: 8px 16px; border-radius: 0; cursor: pointer;
+  transition: background .12s, color .12s;
+}
+.tabs button:hover { color: var(--ink); }
+.tabs button[aria-selected="true"] {
+  background: var(--panel); color: var(--ink); box-shadow: inset 0 -2px 0 var(--ink);
+}
+.tabs button:focus-visible { outline: 2px solid var(--node); outline-offset: 1px; }
+
+/* ---------- controls ---------- */
+.controls {
+  background: var(--panel); border: 1px solid var(--line); border-radius: 0;
+  padding: 16px 20px; box-shadow: var(--shadow);
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 16px 24px; align-items: end;
+}
+.field { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+#arithField { grid-column: span 2; }
+.field > label, .field > .lbl {
+  font-family: var(--f-mono); font-size: 10.5px; letter-spacing: 0;
+  text-transform: none; color: var(--ink-faint);
+}
+select, input[type="number"], input[type="text"] {
+  font-family: var(--f-sans); font-size: 14px; color: var(--ink);
+  background: var(--panel-2); border: 1px solid var(--line);
+  border-radius: 0; padding: 7px 9px; width: 100%;
+}
+input[type="number"], input[type="text"] { font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
+select:focus-visible, input:focus-visible { outline: 2px solid var(--node); outline-offset: 1px; }
+
+.seg { display: flex; flex-wrap: wrap; gap: 4px; }
+.seg button {
+  font-family: var(--f-sans); font-size: 13px; padding: 7px 12px;
+  border: 1px solid var(--line); background: var(--panel-2);
+  color: var(--ink-soft); border-radius: 0; cursor: pointer;
+  transition: background .12s, color .12s, border-color .12s;
+}
+.seg button:hover { color: var(--ink); }
+.seg button[aria-pressed="true"] {
+  background: var(--node); border-color: var(--node); color: var(--jpe-paper); font-weight: 500;
+}
+.seg button:focus-visible { outline: 2px solid var(--node); outline-offset: 1px; }
+
+.slider-row { display: flex; align-items: center; gap: 12px; }
+input[type="range"] { flex: 1; accent-color: var(--node); min-width: 0; }
+.nval {
+  font-family: var(--f-mono); font-variant-numeric: tabular-nums;
+  font-size: 16px; font-weight: 600; min-width: 4.5ch; text-align: right; color: var(--node);
+}
+button.mini {
+  font-family: var(--f-sans); font-size: 12px; color: var(--ink-soft);
+  background: var(--panel-2); border: 1px solid var(--line);
+  border-radius: 0; padding: 5px 10px; cursor: pointer; align-self: flex-start;
+}
+button.mini:hover { color: var(--ink); }
+button.mini:focus-visible { outline: 2px solid var(--node); outline-offset: 1px; }
+.hint { font-size: 12.5px; color: var(--ink-faint); grid-column: 1 / -1; margin: -2px 0 0; }
+
+/* ---------- layout ---------- */
+.split {
+  display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+  gap: 20px; align-items: start;
+}
+@media (max-width: 980px) { .split { grid-template-columns: 1fr; } }
+.leftcol, .rightcol { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
+
+.card {
+  background: var(--panel); border: 1px solid var(--line);
+  border-radius: 0; box-shadow: var(--shadow); overflow: hidden;
+}
+.card h2 {
+  font-family: var(--f-mono); font-size: 10.5px; letter-spacing: 0;
+  text-transform: none; color: var(--ink-faint); font-weight: 500;
+  margin: 0; padding: 12px 18px; border-bottom: 1px solid var(--line-faint);
+  display: flex; justify-content: space-between; align-items: center; gap: 10px;
+}
+.card .body { padding: 16px 18px 18px; }
+
+/* ---------- the matrix board ---------- */
+.board { position: relative; padding: 10px 4px 26px; overflow-x: auto; }
+.grid {
+  display: inline-grid; position: relative;
+  font-family: var(--f-mono); font-variant-numeric: tabular-nums;
+  font-size: var(--cell); line-height: 1.1;
+}
+.cell {
+  padding: .38em .55em; text-align: right; min-width: 3.4em;
+  border-radius: 0; white-space: nowrap;
+  transition: background .18s, color .18s;
+}
+.cell.hdr {
+  font-size: .64em; color: var(--ink-faint); text-align: center;
+  padding-bottom: .5em; letter-spacing: 0;
+}
+.cell.rlab { font-size: .64em; color: var(--ink-faint); text-align: right; padding-right: .7em; min-width: 0; }
+.cell.bsep { border-left: 2px solid var(--line); margin-left: 6px; padding-left: .8em; }
+.cell.fin   { color: var(--ink-faint); }
+.cell.zero  { color: var(--ink-faint); opacity: .55; }
+.cell.piv   { background: var(--node); color: var(--jpe-paper); font-weight: 600; }
+.cell.pivrow{ background: var(--node-fill); }
+.cell.trow  { background: var(--weight-fill); }
+.cell.chg   { color: var(--weight); font-weight: 600; }
+.cell.kill  { background: var(--bad-fill); color: var(--bad); font-weight: 600; }
+.cell.sol   { background: var(--curve-fill); color: var(--curve); font-weight: 600; }
+.cell.dot   { outline: 2px solid var(--curve); outline-offset: -2px; }
+.blockbox {
+  position: absolute; border: 2px solid var(--weight); border-radius: 0;
+  pointer-events: none; transition: all .2s ease;
+}
+.blocktag {
+  position: absolute; font-family: var(--f-mono); font-size: 10.5px;
+  color: var(--weight); letter-spacing: 0; pointer-events: none;
+  transition: all .2s ease; white-space: nowrap;
+}
+.legend {
+  display: flex; flex-wrap: wrap; gap: 6px 18px;
+  padding: 4px 18px 14px; font-size: 12.5px; color: var(--ink-soft);
+}
+.legend span { display: inline-flex; align-items: center; gap: 7px; }
+.swatch { width: 12px; height: 12px; border-radius: 0; display: inline-block; border: 1px solid var(--line); }
+
+/* equations view */
+.eqs {
+  font-family: var(--f-mono); font-variant-numeric: tabular-nums;
+  font-size: calc(var(--cell) * .86); display: inline-grid; gap: 2px 0;
+}
+.eqs .q { padding: .3em .15em; text-align: right; white-space: nowrap; border-radius: 0; }
+.eqs .op { color: var(--ink-faint); padding: 0 .15em; text-align: center; }
+.eqs .rhs { padding-left: .6em; }
+.eqs .hl { background: var(--weight-fill); }
+.eqs .hlp { background: var(--node-fill); }
+.eqs .vx { color: var(--ink-soft); }
+
+/* ---------- narration ---------- */
+.phase {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  font-family: var(--f-mono); font-size: 11px; letter-spacing: 0;
+  text-transform: none; color: var(--ink-faint);
+}
+.pill {
+  padding: 3px 9px; border-radius: 0; border: 1px solid currentColor;
+  font-size: 10.5px;
+}
+.pill.fwd { color: var(--node); }
+.pill.back { color: var(--curve); }
+.pill.done { color: var(--good); }
+.pill.warn { color: var(--bad); }
+.narr { margin: 10px 0 0; font-size: 15px; }
+.narr .big {
+  display: block; margin-top: 10px; font-family: var(--f-mono);
+  font-size: 15px; line-height: 1.8; overflow-x: auto; white-space: nowrap;
+}
+.subnarr { margin: 10px 0 0; font-size: 13px; color: var(--ink-soft); }
+
+.banner {
+  margin: 0; padding: 11px 18px; font-size: 13.5px;
+  border-bottom: 1px solid var(--line-faint);
+  background: var(--bad-fill); color: var(--bad);
+}
+.banner.amber { background: var(--weight-fill); color: var(--weight); }
+.banner b { font-weight: 600; }
+
+/* code */
+pre.code {
+  margin: 0; padding: 14px 18px; font-family: var(--f-mono);
+  font-size: 12.5px; line-height: 1.75; overflow: auto; color: var(--ink-soft);
+  max-height: 290px; scroll-behavior: smooth;
+}
+pre.code .ln { display: block; padding: 0 6px; border-radius: 0; }
+pre.code .ln.on { background: var(--node-fill); color: var(--ink); font-weight: 500; }
+pre.code .cm { color: var(--good); font-style: italic; }
+
+/* readouts */
+.readout { display: flex; flex-direction: column; }
+.rrow {
+  display: flex; justify-content: space-between; align-items: baseline;
+  gap: 14px; padding: 8px 0; border-bottom: 1px solid var(--line-faint);
+}
+.rrow:last-child { border-bottom: 0; }
+.rrow .k { font-size: 13px; color: var(--ink-soft); }
+.rrow .v { font-family: var(--f-mono); font-variant-numeric: tabular-nums; font-size: 15px; font-weight: 500; }
+.rrow.big .v { font-size: 19px; font-weight: 600; }
+.rrow.good .v { color: var(--good); }
+.rrow.bad .v { color: var(--bad); }
+.rrow.piv .v { color: var(--node); }
+
+table.tb {
+  width: 100%; border-collapse: collapse; font-family: var(--f-mono);
+  font-variant-numeric: tabular-nums; font-size: 12.5px;
+}
+table.tb th {
+  text-align: right; font-weight: 500; color: var(--ink-faint);
+  font-size: 10px; letter-spacing: 0; text-transform: none;
+  padding: 5px 6px; border-bottom: 1px solid var(--line);
+}
+table.tb td { text-align: right; padding: 4px 6px; border-bottom: 1px solid var(--line-faint); }
+table.tb tr:last-child td { border-bottom: 0; }
+table.tb td:first-child, table.tb th:first-child { text-align: left; color: var(--ink-faint); }
+table.tb td.bad { color: var(--bad); font-weight: 600; }
+table.tb td.good { color: var(--good); font-weight: 600; }
+
+/* editable grid */
+.editgrid { display: inline-grid; gap: 4px; font-family: var(--f-mono); }
+.editgrid input {
+  width: 4.6em; padding: 5px 6px; text-align: right; font-size: 13px;
+  background: var(--panel-2); border: 1px solid var(--line); border-radius: 0; color: var(--ink);
+}
+.editgrid input.bcol { border-left: 2px solid var(--node); }
+.editgrid .lab { font-size: 10px; color: var(--ink-faint); text-align: center; align-self: end; }
+
+/* structure view */
+.spy { display: inline-grid; gap: 2px; }
+.spy div {
+  width: 17px; height: 17px; border-radius: 0; background: var(--line-faint);
+  transition: background .15s, box-shadow .15s;
+}
+.spy div.nz { background: var(--node); }
+.spy div.fill { background: var(--weight); }
+.spy div.gone { background: var(--line-faint); }
+.spy div.touch { box-shadow: 0 0 0 2px var(--curve); }
+:root[data-present="1"] .spy div { width: 24px; height: 24px; }
+
+/* transport */
+.transport {
+  position: sticky; bottom: 0; z-index: 20;
+  background: var(--panel); border: 1px solid var(--line); border-radius: 0;
+  box-shadow: none;
+  padding: 10px 16px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+}
+.transport .grp { display: flex; gap: 6px; }
+.transport button {
+  font-family: var(--f-sans); font-size: 14px; padding: 8px 14px;
+  border: 1px solid var(--line); background: var(--panel-2); color: var(--ink);
+  border-radius: 0; cursor: pointer; min-width: 44px;
+}
+.transport button:hover { border-color: var(--node); }
+.transport button:disabled { opacity: .4; cursor: default; border-color: var(--line); }
+.transport button.primary { background: var(--node); border-color: var(--node); color: var(--jpe-paper); font-weight: 500; }
+.transport .prog {
+  flex: 1; min-width: 120px; height: 5px; background: var(--line-faint);
+  border-radius: 0; overflow: hidden;
+}
+.transport .prog i { display: block; height: 100%; background: var(--node); width: 0; transition: width .18s; }
+.transport .count {
+  font-family: var(--f-mono); font-size: 12px; color: var(--ink-faint);
+  font-variant-numeric: tabular-nums;
+}
+.keys { font-family: var(--f-mono); font-size: 11px; color: var(--ink-faint); }
+.keys kbd {
+  font-family: var(--f-mono); border: 1px solid var(--line); border-bottom-width: 2px;
+  border-radius: 0; padding: 0 4px; margin: 0 1px; color: var(--ink-soft);
+}
+
+
+.hidden { display: none !important; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+@media print { .transport, .tabs, .hdr-tools { display: none !important; } }
+</style>
+</head>
+<body>
+<nav class="jp-strip" aria-label="Site">
+  <a class="jp-strip-brand" href="/" aria-label="Juan Patiño-Echeverría, home"><svg viewBox="229 219 1121 524" aria-hidden="true"><path fill="currentColor" fill-rule="evenodd" d="M1256.88,331.96c-32.89-20.69-70.35-31.59-109.25-34.45l-42.46-.09c-59.05,3.3-114.97,25.45-160.19,63.54-56.78,47.83-87.22,108.46-126.94,169.02l-47.97,73.14c-26.45,37.3-58.24,70.01-95.94,95.85-24.07,16.49-55.07,31.55-82.04,17.91-10.29-5.21-17.59-14.35-22.45-24.82,30.44-26.43,54.44-64.44,73.97-99.54,23.98-43.1,43.39-87.77,61.1-133.89,19.59-51,34.17-102.97,44.13-156.61,3.85-20.7,8.65-43.85,3.06-62.9-2.13-7.23-9.26-11.62-16.8-9.85-6.65,1.56-12.89,5.17-18.13,9.74-13.24,11.54-23.88,24.43-34.4,38.7-24.36,33.06-46.46,66.87-67.75,102.09l-50.09,82.9c-14.86,24.58-29.72,48.15-46.92,71.01-6.95,9.24-13.72,17.33-22.55,25.07-11.85-13.01-21.27-25.43-30.78-39.35-16.05-23.51-30.71-46.98-45.46-71.42l-40.27-66.72-35.15-55.79-23.44-34.65c-11.14-16.47-23.11-31.74-36.95-45.95-5.8-5.96-12.45-10.89-19.64-14.28-9.15-4.32-19.08-.5-22.04,9.07-2.1,6.76-3.19,14.06-2.69,21.34,1.23,17.6,4.52,33.77,8.13,51.09,10.83,51.89,25.85,102.06,45.21,151.54,18.43,47.12,38.85,92.79,62.82,137.25,13.02,24.15,26.68,47.07,43.71,68.22,8.9,11.06,18.55,20.6,30.6,27.33,28.76,16.05,52.06-4.04,67.37-29.89,7.42-13.98,13.34-28.12,18.98-43.33,11.56,6.01,22.86,9.29,36.2,9.19.02,19.38.99,37.65,6.62,56.54-9.01,7.47-17.97,13.2-27.83,18.85,11.62.35,21.28-4.98,30.92-9.94,5.23,9.44,10.9,18.05,19.5,24.05,14.82,10.34,33.14,12.84,50.7,8.76,33.37-7.76,58.32-28.94,84.8-49.15l65.22-49.76c46.42-32.86,102.2-61.58,159.18-67.59l20.05-.34c-1.05,24.64,5.58,47.86,19.08,68.08,6.24,9.34,12.54,18.68,21.26,25.68l20.56,16.49c38.07,25.87,91.56,41.55,137.73,38.43,94.74-6.41,167.48-78.83,170.92-174.08,4.85-13.64,7.56-27.09,8.78-41.47C1344.5,429.77,1313.97,367.88,1256.88,331.96ZM1044.4,438.33c-38.69,24.99-72.73,68.69-81.71,114.85-21.36-.56-41.69,2.17-62.37,8.16-29.22,8.07-55.83,20.66-81.92,36.1-29.26,17.52-55.54,37.61-82.56,58.87,24.51-27.1,46.92-53.62,66.41-84.04l47.18-73.84,44.69-67.33c18.34-27.63,41.37-51.08,67.86-71.1,42.14-31.86,92.29-50.31,145.03-52.65l39.63.06c32.54,2.11,63.87,9.95,92.52,25.34,32.51,17.2,58.07,42.75,74.48,75.69,14.06,30.11,20.04,63.08,15.19,97.39-8.11-37.84-31.27-68.36-65.04-86.78C1195.75,381.94,1107.61,395.71,1044.4,438.33ZM1201.81,459.58c-27.75-3.76-54.29-.28-80.11,9.04-47.58,17.18-86.06,50.24-108.26,95.43-14.58-5.23-28.35-8.09-43.3-10.15l4.76-17.94c9.3-23.28,22.36-44.06,40.18-61.97,64.38-64.71,178.41-91.55,256.41-39.57,33.62,22.39,52.49,60.14,50.34,100.33-3.61,10.03-7.41,18.78-14.45,27.92.79-22.26-5.41-42.62-19.35-59.7C1266.14,476.16,1236.5,464.29,1201.81,459.58ZM435.45,585.42c10.66,1.14,20.7,1.14,31.23-1.23l8.93,21.3c4.47,10.68,5.98,21.77,5.44,33.44l2.02-1.18-.31-15.74c-.27-13.92-6.2-25.88-11-39.51,11.34,13.26,22.04,24.91,35.4,35.21l-16.37,37.13c-6.78,15.39-22.59,36.8-39.93,37.77-14.43.8-31.25-14.51-41.1-26.46-30.59-37.13-57.59-91.41-78.05-136-21.14-46.07-39.8-92.36-55.05-140.71-8.9-28.19-15.64-56.04-18.86-85.36-.97-8.8-1.59-17.07.82-25.2,1.8-6.08,7.34-9.33,13.36-6.88s11.66,6.61,16.5,11.59c13.04,13.43,24.01,27.73,34.59,43.45,26.02,38.68,49.14,78.29,71.66,119.17l42.61,77.35,11.78,24.26c-15.33-17.31-28.25-35.98-41.58-55.44-18.52-43.32-41.21-83.63-66.61-123.18-11.83-18.42-44.48-66.83-62.3-54.45-9.93,6.9-6.12,35.85-2.63,51.36,16.42,73.01,56.64,166.6,101.19,226.61,11,14.82,34.02,43.03,50.21,36.4C438.47,624.59,436.19,600.95,435.45,585.42ZM1281.11,577.94c2.8-44.9-39.61-74.48-81.63-78.43-28.2-2.64-55.64,4.89-80.54,18.48-27.75,15.01-50.27,37.09-67.52,63.9l-31.06-15.63c12.75-25.66,30.75-47.03,53.29-63.56,48.86-35.96,107.69-47.72,165.03-26.55,40.97,15.13,69.93,54.92,59.89,99.32l-19.25,20.4L1281.11,577.94ZM719.9,359.48c3.38-13.79,4.64-40.61-5.61-45.53-23.63-11.35-67.36,63.54-80.5,85.89-24.17,41.08-59.16,108.9-69.59,153.44l-7.29,31.13c-7.84,2.4-16.62,2.23-24.7-.65,30.78-74.65,69.33-146.01,111.45-215.05,13.81-22.65,28.01-43.99,44.01-64.94,9.03-11.81,25.72-31.28,38.27-32.6,9.41-.99,12.16,13.51,11.2,25.9-4.48,57.72-30.2,129.09-52.51,183.54-25.41,62.05-61.05,135.05-104.06,185.88l-14.3,15.35c-4.61-19.73-5.55-39.5-5.23-60.29,2.99,3.28,5.82,8.53,10.8,7.22,22.95-6.04,48.03-38.52,61.57-59.45,18.33-28.34,33.73-57.72,46.99-88.84,11.35-26.67,21.12-52.77,29.57-80.39L719.9,359.48ZM327.79,469.75c13.14,29.31,28.79,55.97,49.89,79.45,14.52,16.16,31.38,28.28,52.11,34.96l1.6,12.84c1.01,8.2.71,16.29-2.25,24.12-5.33,14.08-25.94-4.87-35.94-17.34-39.12-48.78-73.73-123.36-95.49-182.37-9.35-25.36-26.22-77.59-18.75-99.3,4.01-11.64,20.46,2.48,29.55,13.41,9.28,11.17,17.86,21.92,25.73,34.37,17.49,27.63,34.3,55.23,48.67,84.5-11.14-13.51-18.23-27.67-28.64-40.66-9.28-13.14-30.35-40.73-42.5-34.68-7.26,3.61-6.68,18.22-4.69,28.97C311.09,429.66,318.58,449.21,327.79,469.75ZM566.99,589.14c42.64-17.21,76.65-68.87,95.59-109.7,10.54-22.74,19.65-45.61,24.56-70.21,2.21-11.1,3.2-26.76-4-29.98-17.74-7.94-47.98,39.57-59.41,57.47-4.68,7.33-8.05,14.95-14.07,21.37,14.64-29.24,30.29-56.54,47.48-83.89,9.89-15.73,41.81-61.95,54.68-55.91,9.16,4.3,4.83,33.66,1.52,48.23-6.55,28.84-16.4,55.84-27.43,83.41-14.61,36.55-31.83,71.15-52.08,104.8-14.36,23.88-38.39,57.95-63.88,68.85-5.13-7.04-5.24-15.51-4.27-23.61L566.99,589.14ZM415.47,530c5.31,15.57,10.11,30.09,12.84,46.26-16.94-6.07-30.29-15.99-42.15-28.42-32.65-34.21-56.92-86.38-68.87-131.91-2.11-8.04-3.89-22.49-1.3-25.69,3.04-3.76,14.38,7.07,20.32,14.39l9.49,11.69,56.43,80.65L415.47,530ZM602.19,556.61c-10.63,10.24-20.66,19.02-34.7,24.77,3.2-16.38,5.23-32.19,11.9-47.13,15.39-34.43,34.11-66.5,54.7-98.01,8.99-13.75,18.14-25.97,29.35-37.86,4.49-4.75,12.68-10.31,14.74-8.36,3.27,3.09,1.49,16.18-.67,24.53C664.57,464.66,639.02,519.08,602.19,556.61ZM1244.78,555.56c-16.2-18.38-39.52-27.05-63.85-25.54-42.05,2.61-83.77,33.55-107.31,67.82l-16.5-12.36c29-47.22,81.39-84.48,137.39-80.07,22.05,1.74,42.8,9.4,59.15,23.73,22.74,19.94,26.62,46.85,15.99,74.65-5.12,5.52-11.97,10.17-19.05,14.56C1259.93,596.37,1260.77,573.7,1244.78,555.56ZM1231.61,583.31c-11.93-21.39-37.95-28.64-62.52-24.06-29.16,5.43-60.45,27.8-76.69,54.21l-14.26-12.28c9.95-15.52,22.23-27.04,36.3-37.75,35.69-27.18,84.14-40.17,120.21-10.16,23.01,19.14,20.76,47.39,5.9,72.26l-10.05,5.25C1238.58,614.85,1239.9,598.18,1231.61,583.31ZM673.69,312.78c-41.82,57.18-100.98,160.94-131.07,225.61l-19.55,42.02c-8.52-4.61-16.25-10.16-22.69-16.91,8.43-8.02,14.75-15.29,21.51-23.72,14.66-19.57,27.83-39.28,40.62-60.35l66.1-108.83c20.95-34.5,43.13-67.35,67.59-99.22,9.56-12.45,28.57-34.43,41.6-34.83,14-.43,9.06,37.73,4.87,54.74-.98-6.99-1.33-13.68-5.45-19.42-9.34-13.02-27.92-.33-39,11.36C689.27,292.66,681.44,302.18,673.69,312.78ZM451.34,537.04l-40.87-75.57c-24.97-46.15-51.19-90.8-80.62-134.18-11.85-17.48-24.05-33.47-38.91-48.16-5.08-5.02-10.9-8.9-17.36-11.63-8.25-3.5-16.91,1.03-19.58,9.54-1.8,5.71-2.02,11.65-2.51,18.08-4.14-16.23-9.47-58.85,3.72-58.78,17.7.09,45.24,38.79,57.51,56.03,21.09,29.63,40.22,59.65,59.04,90.8l38.43,63.64,41.35,65.6c11.77,17.91,23.66,34.17,38.33,50.99-4.85,4.29-10.01,7.52-16.21,10.8C465.21,562.13,458.57,550.4,451.34,537.04ZM1210.57,624.89c1.89-16.68-9.28-31.29-25.27-35.16-26.02-6.3-57.46,14.43-72.65,37.49-5.64-2.94-10.56-6.17-16.28-10.84,22.36-34,70.97-64.91,109.88-47.83,15.63,6.87,25.91,20.71,26.22,37.72.18,10.22-3.61,19.5-9.1,28.04l-17.12,6.11C1208.24,634.98,1209.91,630.78,1210.57,624.89ZM1200.45,642.05c-29.24,6.75-58.32,2.29-83.58-12.47,14.71-19.13,34.31-34.52,58.09-35.91,16.54-.97,31.08,10.57,31.55,27.39C1206.71,628.27,1203.78,635.13,1200.45,642.05ZM1063.98,689.91c-33.65-13.16-62.04-33.81-80.69-65.19-10.34-18.4-16.2-38.35-14.74-60.6,14.21,1.42,28.21,4.36,41.36,9.6-3.3,11.26-4.47,21.85-4.08,33.33.9,20.82,9.08,39.75,23.21,54.92C1038.97,673.45,1051.06,680.91,1063.98,689.91ZM1193.24,653.15c-15.95,21.23-43.71,39.61-70.01,33.72-19.6-7.3-20.96-31.02-10.74-48.65C1138.23,651.48,1164.36,657.79,1193.24,653.15ZM1075.44,689.13c-17.8-6.87-32.31-18.39-43.75-32.75-18.64-22.76-24.52-52.55-14.69-80.6,10.95,4.43,21.05,9.38,30.67,15.75C1030.73,627.6,1043.06,666.66,1075.44,689.13ZM1067.35,660.2c3.71,11.5,11.13,18.96,20.09,27.67-27.32-11.62-43.44-40.01-40.43-69.88l5.73-23.65,16.84,12.59C1062.48,624.45,1061.53,642.19,1067.35,660.2ZM1219.72,690.97c12.72-8.21,24.07-15.85,34.89-26.51,22.28-21.97,38.12-49.18,47.94-78.91l18.28-24.95c-6.89,44.64-31.09,84.01-67.15,111.03C1242.74,679.1,1232.34,686.2,1219.72,690.97ZM551.95,626.68c-11.66-.19-23.8-2.95-33.95-9.5l11.24-26.39c8.76,1.49,16.78,1.9,26.07,1.29L551.95,626.68ZM1134.25,699.6l18.67-2.78c17.02-2.53,32.11-10.4,46.85-19.05,17.1-11.36,30.78-25.69,42.64-42.6l19.74-12.53c-3.84,8.31-8.48,14.9-13.82,21.72-12.57,14.86-26.3,27.97-43.29,37.64C1183.57,694.31,1160.09,701.78,1134.25,699.6ZM463.61,577.5c-10.5,2.85-19.79,2.58-29.58.36-3.64-20.12-9.39-38.39-15.74-58.63l35.34,43.03C457.5,566.97,460.82,571.25,463.61,577.5ZM1267.03,642.6c-23.56,29.73-55.64,52-93.28,58.25,44.57-13.2,80.79-44.16,99.07-87l19.12-16.29C1286.26,613.99,1277.81,628.33,1267.03,642.6ZM520.46,586.75l-11.22,25.04c-11.97-10.06-21.95-20.37-31.38-32.05l17.28-11.35C503.05,575.41,510.37,581.25,520.46,586.75ZM1088.19,622.24c-9.84,24.58-10.13,52.17,15.62,66.33-32.91-9.23-41.98-44.37-29.9-78.05L1088.19,622.24ZM1111,686.25c-26.34-8.45-28.05-35.31-18.73-60.58l15.14,9.33C1098.35,653.23,1097.76,670.53,1111,686.25ZM1165.68,684.12c13.21-10,25.9-18.8,34.66-32.72l14.12-3.56C1201.08,663.85,1185.1,676.54,1165.68,684.12ZM1179.21,682.95c16.36-10.39,32.01-21.89,43.31-38.25l9.26-3.62-10.45,12.31C1209.11,665.15,1196.46,677.33,1179.21,682.95Z"/></svg></a>
+  <span class="jp-crumb"><span class="jp-up"><a href="/teaching/#tools">Teaching tools</a> / </span><b>Elimination explorer</b></span>
+  <a class="jp-back" href="/teaching/">Back to the site</a>
+  <button class="jp-iconbtn" id="jpe-theme" type="button" aria-label="Switch theme" title="Switch theme"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="8" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M10 2C5.5 6.5 14.5 13.5 10 18A8 8 0 0 1 10 2Z" fill="currentColor"/></svg></button>
+</nav>
+<script src="/assets/applet.js"></script>
+
+<div class="wrap">
+
+  <header>
+    <h1>Elimination explorer</h1>
+    <div class="hdr-tools">
+      <button class="mini" id="btnPresent" title="Larger type for the projector">Presentation</button>
+    </div>
+  </header>
+
+  <section class="thesis">
+    <div class="master" id="master" data-tex="\htmlClass{c-mul}{m_{ik}} = \frac{A(i,k)}{\htmlClass{c-piv}{A(k,k)}}, \qquad A(i, k\!:\!n) \leftarrow A(i, k\!:\!n) - \htmlClass{c-mul}{m_{ik}}\, A(k, k\!:\!n), \qquad b(i) \leftarrow b(i) - \htmlClass{c-mul}{m_{ik}}\, b(k)">m<sub>ik</sub> = A(i,k) / A(k,k), &nbsp; A(i,k:n) &larr; A(i,k:n) &minus; m<sub>ik</sub> A(k,k:n), &nbsp; b(i) &larr; b(i) &minus; m<sub>ik</sub> b(k)</div>
+  </section>
+
+  <div class="tabs" role="tablist" aria-label="Choose a view">
+    <button id="tabSolve" role="tab" aria-selected="true">Solve, step by step</button>
+    <button id="tabPivot" role="tab" aria-selected="false">Pivoting lab</button>
+    <button id="tabStruct" role="tab" aria-selected="false">Structure &amp; cost</button>
+  </div>
+
+  <!-- ============ system controls (tabs 1 and 2) ============ -->
+  <section class="controls" id="sysControls" role="tabpanel">
+    <div class="field">
+      <label for="preset">System</label>
+      <select id="preset"></select>
+    </div>
+    <div class="field">
+      <span class="lbl">Partial pivoting</span>
+      <div class="seg" id="pivSeg">
+        <button type="button" data-v="0" aria-pressed="true">off</button>
+        <button type="button" data-v="1" aria-pressed="false">on</button>
+      </div>
+    </div>
+    <div class="field" id="arithField">
+      <span class="lbl">Arithmetic</span>
+      <div class="seg" id="arithSeg">
+        <button type="button" data-v="exact" aria-pressed="true">exact fractions</button>
+        <button type="button" data-v="full"  aria-pressed="false">double</button>
+        <button type="button" data-v="6"     aria-pressed="false">6 digits</button>
+        <button type="button" data-v="4"     aria-pressed="false">4 digits</button>
+        <button type="button" data-v="3"     aria-pressed="false">3 digits</button>
+      </div>
+    </div>
+    <div class="field">
+      <span class="lbl">Matrix</span>
+      <div class="seg">
+        <button type="button" class="mini" id="btnEdit">edit entries</button>
+        <button type="button" class="mini" id="btnRand">random</button>
+      </div>
+    </div>
+    <p class="hint hidden" id="sysHint"></p>
+  </section>
+
+  <section class="card hidden" id="editCard">
+    <h2>Edit the system <button class="mini" id="btnEditClose">close</button></h2>
+    <div class="body">
+      <div class="field" style="max-width:220px;margin-bottom:14px">
+        <span class="lbl">Size <span class="mv">n</span></span>
+        <div class="seg" id="sizeSeg"></div>
+      </div>
+      <div id="editGrid"></div>
+      <p class="hint" style="margin-top:12px">
+        Entries may be integers, decimals or fractions such as <code>-3/2</code>.
+        Changing anything restarts the run.
+      </p>
+    </div>
+  </section>
+
+  <!-- ============ the board ============ -->
+  <div class="split" id="boardWrap">
+    <div class="leftcol">
+      <section class="card">
+        <h2>The augmented array <span id="arrTag"></span></h2>
+        <div class="board" id="board"></div>
+        <div class="legend">
+          <span><i class="swatch" style="background:var(--node)"></i> pivot</span>
+          <span><i class="swatch" style="background:var(--node-fill)"></i> pivot row (read, never changed)</span>
+          <span><i class="swatch" style="background:var(--weight-fill)"></i> row being updated</span>
+          <span><i class="swatch" style="border:2px solid var(--weight);background:transparent"></i> active block</span>
+          <span><i class="swatch" style="background:var(--curve-fill)"></i> solved</span>
+        </div>
+      </section>
+
+      <section class="card" id="eqCard">
+        <h2>The same system, equation by equation</h2>
+        <div class="body" style="overflow-x:auto"><div id="eqs"></div></div>
+      </section>
+    </div>
+
+    <div class="rightcol">
+      <section class="card">
+        <h2>What is happening</h2>
+        <div id="warnBanner"></div>
+        <div class="body">
+          <div class="phase" id="phase"></div>
+          <div class="narr" id="narr"></div>
+          <div class="subnarr" id="subnarr"></div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Operation count</h2>
+        <div class="body">
+          <div class="readout" id="flops"></div>
+        </div>
+      </section>
+
+      <section class="card" id="resultCard">
+        <h2>Result</h2>
+        <div class="body"><div id="result"></div></div>
+      </section>
+
+      <section class="card hidden" id="compareCard">
+        <h2>Both ways, same arithmetic</h2>
+        <div class="body"><div id="compare"></div></div>
+      </section>
+
+      <section class="card">
+        <h2>The line being executed</h2>
+        <pre class="code" id="code"></pre>
+      </section>
+    </div>
+  </div>
+
+  <!-- ============ structure and cost ============ -->
+  <section id="structPanel" class="hidden" style="display:flex;flex-direction:column;gap:20px">
+    <section class="controls">
+      <div class="field">
+        <span class="lbl">Sparsity pattern</span>
+        <div class="seg" id="patSeg">
+          <button type="button" data-v="dense" aria-pressed="true">dense</button>
+          <button type="button" data-v="tri" aria-pressed="false">tridiagonal</button>
+          <button type="button" data-v="arrow" aria-pressed="false">tri + full first row &amp; column</button>
+          <button type="button" data-v="rand" aria-pressed="false">random sparse</button>
+        </div>
+      </div>
+      <div class="field">
+        <label for="nspy">Size <span class="mv">n</span></label>
+        <div class="slider-row">
+          <input type="range" id="nspy" min="5" max="18" value="12">
+          <span class="nval" id="nspyval">12</span>
+        </div>
+      </div>
+    </section>
+
+    <div class="split">
+      <section class="card">
+        <h2>Which entries elimination touches</h2>
+        <div class="body">
+          <div class="spy" id="spy"></div>
+          <div class="legend" style="padding:14px 0 0">
+            <span><i class="swatch" style="background:var(--node)"></i> non-zero</span>
+            <span><i class="swatch" style="background:var(--weight)"></i> fill-in (was zero)</span>
+            <span><i class="swatch" style="background:var(--line-faint)"></i> zero</span>
+            <span style="color:var(--ink-faint)">shown after the elimination has finished</span>
+          </div>
+        </div>
+      </section>
+      <div class="rightcol">
+        <section class="card">
+          <h2>What the pattern costs</h2>
+          <div class="body"><div class="readout" id="spyOut"></div></div>
+        </section>
+        <section class="card">
+          <h2>Dense against tridiagonal, at scale</h2>
+          <div class="body">
+            <div class="field" style="margin-bottom:14px">
+              <label for="ncost">Unknowns <span class="mv">n</span></label>
+              <div class="slider-row">
+                <input type="range" id="ncost" min="10" max="60" value="50">
+                <span class="nval" id="ncostval"></span>
+              </div>
+            </div>
+            <table class="tb" id="costTable"></table>
+            <p class="hint" style="margin-top:12px">At 10<sup>10</sup> flops per second, 8 bytes per stored number.</p>
+          </div>
+        </section>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ transport ============ -->
+  <section class="transport" id="transport">
+    <div class="grp">
+      <button id="btnFirst" title="Back to the start (R)">Start</button>
+      <button id="btnPrev" title="Previous operation (left arrow)">Back</button>
+      <button id="btnPlay" class="primary" title="Play / pause (space)">Play</button>
+      <button id="btnNext" title="Next operation (right arrow)">Next</button>
+      <button id="btnStep" title="Jump to the next value of k (down arrow)">Next k</button>
+      <button id="btnEnd" title="Run to the end (E)">End</button>
+    </div>
+    <div class="prog"><i id="progBar"></i></div>
+    <span class="count" id="progCount"></span>
+    <span class="keys">
+      <kbd>&larr;</kbd><kbd>&rarr;</kbd> step · <kbd>space</kbd> play · <kbd>&darr;</kbd> next k · <kbd>R</kbd> reset
+    </span>
+  </section>
+
+</div>
+
+<script>
+(function () {
+  var m = document.getElementById("master");
+  if (window.katex) katex.render(m.getAttribute("data-tex"), m, { displayMode: true, throwOnError: false, strict: false,
+    trust: function (c) { return c.command === "\\htmlClass"; } });
+})();
+(function () {
+"use strict";
+var $ = function (id) { return document.getElementById(id); };
+
+/* ==================================================================
+   1.  Numbers: exact rationals, or floats rounded to s digits
+   ================================================================== */
+
+var MODE = "exact";          // "exact" | "full" | "3" | "4" | "6"
+
+function gcd(a, b) { a = a < 0n ? -a : a; b = b < 0n ? -b : b;
+  while (b) { var t = a % b; a = b; b = t; } return a; }
+
+function Q(p, q) {                       // exact rational, normalised
+  p = BigInt(p); q = BigInt(q === undefined ? 1 : q);
+  if (q === 0n) q = 1n;
+  if (q < 0n) { p = -p; q = -q; }
+  var g = gcd(p, q); if (g > 1n) { p /= g; q /= g; }
+  return { p: p, q: q };
+}
+function isQ(v) { return v !== null && typeof v === "object"; }
+
+function roundSig(x, s) {
+  if (!isFinite(x) || x === 0) return x;
+  return Number(x.toPrecision(s));
+}
+function snap(x) {                       // apply the current precision
+  if (MODE === "exact" || MODE === "full") return x;
+  return roundSig(x, parseInt(MODE, 10));
+}
+
+/* parse "3", "-1.25", "-3/2" into the current representation */
+function parseVal(str) {
+  str = String(str).trim();
+  if (str === "" || str === "-") str = "0";
+  var m = str.match(/^(-?\d+(?:\.\d+)?)\s*\/\s*(-?\d+(?:\.\d+)?)$/);
+  var num;
+  if (m) {
+    if (MODE === "exact") return qdiv(decToQ(m[1]), decToQ(m[2]));
+    num = parseFloat(m[1]) / parseFloat(m[2]);
+    return snap(num);
+  }
+  if (MODE === "exact") return decToQ(str);
+  num = parseFloat(str); if (!isFinite(num)) num = 0;
+  return snap(num);
+}
+function decToQ(s) {
+  s = s.trim();
+  var neg = s[0] === "-"; if (neg || s[0] === "+") s = s.slice(1);
+  var parts = s.split(".");
+  var ip = parts[0] === "" ? "0" : parts[0];
+  var fp = parts[1] || "";
+  var p = BigInt(ip + fp), q = 10n ** BigInt(fp.length);
+  if (neg) p = -p;
+  return Q(p, q);
+}
+
+/* arithmetic, dispatching on representation */
+function qadd(a, b) { return isQ(a) ? Q(a.p * b.q + b.p * a.q, a.q * b.q) : snap(a + b); }
+function qsub(a, b) { return isQ(a) ? Q(a.p * b.q - b.p * a.q, a.q * b.q) : snap(a - b); }
+function qmul(a, b) { return isQ(a) ? Q(a.p * b.p, a.q * b.q) : snap(a * b); }
+function qdiv(a, b) { return isQ(a) ? Q(a.p * b.q, a.q * b.p) : snap(a / b); }
+function qzero(v) { return isQ(v) ? v.p === 0n : v === 0; }
+function qnum(v) { return isQ(v) ? Number(v.p) / Number(v.q) : v; }
+function qabsCmp(a, b) { return Math.abs(qnum(a)) - Math.abs(qnum(b)); }
+function zeroVal() { return MODE === "exact" ? Q(0n, 1n) : 0; }
+
+/* display */
+function fmt(v) {
+  if (isQ(v)) {
+    if (v.q === 1n) return v.p.toString();
+    var big = v.p > 100000n || v.p < -100000n || v.q > 100000n;
+    if (big) return trimNum(Number(v.p) / Number(v.q), 6);
+    return v.p.toString() + "/" + v.q.toString();
+  }
+  if (!isFinite(v)) return (v > 0 ? "Inf" : (v < 0 ? "-Inf" : "NaN"));
+  if (isNaN(v)) return "NaN";
+  return trimNum(v, MODE === "full" ? 6 : parseInt(MODE, 10));
+}
+function trimNum(x, s) {
+  if (x === 0) return "0";
+  var a = Math.abs(x);
+  if (a >= 1e5 || a < 1e-4) return x.toExponential(Math.max(1, s - 1)).replace("e", "e");
+  var t = Number(x.toPrecision(s)).toString();
+  return t;
+}
+function isBad(v) { return !isQ(v) && (!isFinite(v) || isNaN(v)); }
+
+/* ==================================================================
+   2.  Presets
+   ================================================================== */
+
+var PRESETS = [
+  { id: "lec13", name: "A 3&times;3 hand example",
+    A: [["2","1","-1"], ["-3","-1","2"], ["-2","1","2"]], b: ["8", "-11", "-3"],
+    hint: "A small hand example. In exact arithmetic the pivots are 2 and 1/2, and the answer is (2, 3, &minus;1)." },
+  { id: "three", name: "The three-digit disaster",
+    A: [["0.0001","1"], ["1","1"]], b: ["1", "2"],
+    hint: "Set the arithmetic to <b>3 digits</b> with pivoting <b>off</b>, run it, then switch pivoting on. Same system, same algorithm." },
+  { id: "zeropiv", name: "Zero pivot, non-singular matrix",
+    A: [["0","1"], ["1","1"]], b: ["1", "2"],
+    hint: "Perfectly solvable, but A(1,1) = 0. Without pivoting the first division is by zero; with pivoting the rows simply swap." },
+  { id: "sing", name: "Singular: no solution",
+    A: [["1","2","3"], ["2","4","6"], ["1","1","1"]], b: ["1", "5", "2"],
+    hint: "Row 2 is twice row 1, but the right-hand sides disagree. Elimination produces a row 0 = c with c &ne; 0." },
+  { id: "singinf", name: "Singular: infinitely many solutions",
+    A: [["1","2","3"], ["2","4","6"], ["1","1","1"]], b: ["1", "2", "2"],
+    hint: "The same matrix with a consistent right-hand side. Elimination produces a row 0 = 0, and one unknown is free." },
+  { id: "chain", name: "A chain of five neighbours (tridiagonal)",
+    A: [["2","-1","0","0","0"], ["-1","2","-1","0","0"], ["0","-1","2","-1","0"],
+        ["0","0","-1","2","-1"], ["0","0","0","-1","2"]], b: ["1", "0", "0", "0", "1"],
+    hint: "Everybody linked to their two neighbours. Watch how few entries the inner loop actually changes, and that no zero ever becomes non-zero." },
+  { id: "four", name: "A 4&times;4 &mdash; watch the block shrink",
+    A: [["2","1","-1","3"], ["1","3","2","-1"], ["3","-1","4","2"], ["1","1","1","1"]],
+    b: ["0", "0", "19", "3"],
+    hint: "Three values of k, each with fewer rows to clear than the last. The exact answer is (1, &minus;2, 3, 1)." }
+];
+
+/* ==================================================================
+   3.  State
+   ================================================================== */
+
+var S = {
+  tab: "solve",
+  n: 3,
+  Atxt: [], btxt: [],        // the system as typed (strings)
+  pivoting: false,
+  events: [],
+  at: 0,
+  playing: false,
+  timer: null
+};
+
+function loadPreset(p) {
+  S.n = p.b.length;
+  S.Atxt = p.A.map(function (r) { return r.slice(); });
+  S.btxt = p.b.slice();
+  $("sysHint").innerHTML = p.hint || "";
+}
+
+function readSystem() {                 // strings -> values, in the current MODE
+  var A = [], b = [];
+  for (var i = 0; i < S.n; i++) {
+    A.push([]);
+    for (var j = 0; j < S.n; j++) A[i].push(parseVal(S.Atxt[i][j]));
+    b.push(parseVal(S.btxt[i]));
+  }
+  return { A: A, b: b };
+}
+
+/* ==================================================================
+   4.  The engine: build every event of a complete run
+   ================================================================== */
+
+function cloneM(A) { return A.map(function (r) { return r.slice(); }); }
+
+function buildRun(A0, b0, pivoting) {
+  var n = A0.length, A = cloneM(A0), b = b0.slice();
+  var ev = [], flops = { mul: 0, div: 0, add: 0 };
+  var x = new Array(n).fill(null);
+  var broke = false, brokeMsg = "";
+
+  function push(o) {
+    o.A = cloneM(A); o.b = b.slice(); o.x = x.slice();
+    o.cum = { mul: flops.mul, div: flops.div, add: flops.add };
+    ev.push(o);
+  }
+
+  push({ kind: "init", k: 0, phase: "fwd", cost: null,
+         title: "The system as given",
+         text: "Forward elimination will clear column 1 first. The active block is the whole array.",
+         line: 0 });
+
+  for (var k = 0; k < n - 1 && !broke; k++) {
+    if (pivoting) {
+      var p = k;
+      for (var r = k + 1; r < n; r++) if (qabsCmp(A[r][k], A[p][k]) > 0) p = r;
+      push({ kind: "search", k: k, p: p, phase: "fwd", cost: null,
+             title: "Step k = " + (k + 1) + ": look for the pivot",
+             text: "Largest entry in magnitude in A(" + (k + 1) + ":" + n + "," + (k + 1) + ") is |" +
+                   fmt(A[p][k]) + "| in row " + (p + 1) + ".",
+             line: 1 });
+      if (p !== k) {
+        var tr = A[k]; A[k] = A[p]; A[p] = tr;
+        var tb = b[k]; b[k] = b[p]; b[p] = tb;
+        push({ kind: "swap", k: k, p: p, phase: "fwd", cost: null,
+               title: "Swap rows " + (k + 1) + " and " + (p + 1),
+               text: "Two equations exchange places, in A and in b together. Nothing about the problem has changed.",
+               line: 3 });
+      } else {
+        push({ kind: "noswap", k: k, p: p, phase: "fwd", cost: null,
+               title: "No swap needed",
+               text: "Row " + (k + 1) + " already holds the largest entry of the column.",
+               line: 2 });
+      }
+    }
+
+    if (qzero(A[k][k])) {
+      broke = true;
+      brokeMsg = "The pivot A(" + (k + 1) + "," + (k + 1) + ") is zero" +
+        (pivoting ? " and so is every entry below it: this column cannot be cleared, and the matrix is singular."
+                  : ". The next division would be by zero &mdash; in MATLAB that returns Inf or NaN rather than " +
+                    "stopping. Switch partial pivoting on and the rows simply swap.");
+      push({ kind: "breakdown", k: k, phase: "fwd", cost: null,
+             title: "Breakdown: zero pivot",
+             text: brokeMsg, line: 6, warn: true });
+      break;
+    }
+
+    for (var i = k + 1; i < n; i++) {
+      var m = qdiv(A[i][k], A[k][k]);
+      flops.div += 1;
+      push({ kind: "mult", k: k, i: i, m: m, phase: "fwd",
+             cost: { mul: 0, div: 1, add: 0 },
+             title: "Step k = " + (k + 1) + ", row i = " + (i + 1) + ": the multiplier",
+             mathline: "m = A(" + (i + 1) + "," + (k + 1) + ") / A(" + (k + 1) + "," + (k + 1) + ") = " +
+                       fmt(A[i][k]) + " / " + fmt(A[k][k]) + " = " + fmt(m),
+             text: "Chosen so that the entry under the pivot becomes exactly zero.",
+             line: 6 });
+
+      var before = A[i].slice(), bbefore = b[i], bk = b[k];
+      for (var j = k; j < n; j++) A[i][j] = qsub(A[i][j], qmul(m, A[k][j]));
+      A[i][k] = zeroVal();                       // it is zero by construction
+      b[i] = qsub(b[i], qmul(m, b[k]));
+      var lost = !isQ(m) && !qzero(bbefore) &&
+                 fmt(b[i]) === fmt(qsub(zeroVal(), qmul(m, bk)));
+      var cnt = n - k + 1;                       // entries of A, plus the one of b
+      flops.mul += cnt; flops.add += cnt;
+      push({ kind: "rowop", k: k, i: i, m: m, phase: "fwd",
+             cost: { mul: cnt, div: 0, add: cnt },
+             before: before, bbefore: bbefore, swamped: lost ? fmt(bbefore) : null,
+             title: "Update row " + (i + 1),
+             mathline: "A(" + (i + 1) + "," + (k + 1) + ":" + n + ") &rarr; A(" + (i + 1) + "," + (k + 1) + ":" + n +
+                       ") &minus; (" + fmt(m) + ")&middot;A(" + (k + 1) + "," + (k + 1) + ":" + n + ")",
+             text: (n - k) + " entries of A and one of b change. The entry under the pivot is now zero.",
+             line: 7 });
+    }
+  }
+
+  if (!broke) {
+    var d0 = -1;
+    for (var d = 0; d < n; d++) if (qzero(A[d][d]) && d0 < 0) d0 = d;
+    if (d0 >= 0) {
+      var rowZero = A[d0].every(qzero);
+      var title, text;
+      if (rowZero && !qzero(b[d0])) {
+        title = "Singular: no solution";
+        text = "Row " + (d0 + 1) + " of the triangle is entirely zero, and its right-hand side is " +
+               fmt(b[d0]) + ". The row reads 0 = " + fmt(b[d0]) + ", which no x can satisfy: the " +
+               "system is inconsistent.";
+      } else if (rowZero) {
+        title = "Singular: infinitely many solutions";
+        text = "Row " + (d0 + 1) + " of the triangle is entirely zero, and so is its right-hand side. " +
+               "The row reads 0 = 0, which says nothing at all: one unknown is free, and every choice " +
+               "of it gives a solution.";
+      } else {
+        title = "Zero pivot on the diagonal";
+        text = "A(" + (d0 + 1) + "," + (d0 + 1) + ") is zero, so back substitution would divide by zero, " +
+               "but the row is not all zero. There is nothing left below to swap in: this matrix is singular.";
+      }
+      push({ kind: "breakdown", k: n - 1, phase: "back", cost: null, warn: true,
+             title: title, text: text, line: 11 });
+      broke = true;
+    }
+  }
+
+  if (!broke) {
+    push({ kind: "bsstart", phase: "back", cost: null,
+           title: "Forward elimination finished",
+           text: "The array is upper triangular. Back substitution reads it from the bottom up.",
+           line: 11 });
+
+    x[n - 1] = qdiv(b[n - 1], A[n - 1][n - 1]);
+    flops.div += 1;
+    push({ kind: "bs", i: n - 1, phase: "back", cost: { mul: 0, div: 1, add: 0 },
+           title: "The last row has one unknown",
+           mathline: "x(" + n + ") = b(" + n + ") / A(" + n + "," + n + ") = " +
+                     fmt(b[n - 1]) + " / " + fmt(A[n - 1][n - 1]) + " = " + fmt(x[n - 1]),
+           text: "One division, and the first unknown is known.",
+           line: 12 });
+
+    for (var ii = n - 2; ii >= 0; ii--) {
+      var acc = zeroVal(), terms = [];
+      for (var jj = ii + 1; jj < n; jj++) {
+        acc = qadd(acc, qmul(A[ii][jj], x[jj]));
+        terms.push(fmt(A[ii][jj]) + "&middot;" + fmt(x[jj]));
+      }
+      x[ii] = qdiv(qsub(b[ii], acc), A[ii][ii]);
+      var t = n - 1 - ii;
+      flops.mul += t; flops.add += t; flops.div += 1;
+      push({ kind: "bs", i: ii, phase: "back", cost: { mul: t, div: 1, add: t },
+             title: "Row " + (ii + 1) + ": one unknown left",
+             mathline: "x(" + (ii + 1) + ") = ( b(" + (ii + 1) + ") &minus; [" + terms.join(" + ") + "] ) / A(" +
+                       (ii + 1) + "," + (ii + 1) + ") = " + fmt(x[ii]),
+             text: "The bracket is the dot product A(" + (ii + 1) + "," + (ii + 2) + ":" + n + ")&middot;x(" +
+                   (ii + 2) + ":" + n + "): " + t + " multiplication" + (t === 1 ? "" : "s") + ", " +
+                   t + " addition" + (t === 1 ? "" : "s") + " counting the subtraction, one division.",
+             line: 13 });
+    }
+
+    push({ kind: "done", phase: "done", cost: null,
+           title: "Solved",
+           text: "Every unknown is known. The total below is the whole cost of the solve.",
+           line: 15 });
+  }
+
+  return { ev: ev, n: n, broke: broke, flops: flops };
+}
+
+/* exact solution, for comparison (always exact rationals) */
+function exactSolve(Atxt, btxt, n) {
+  var save = MODE; MODE = "exact";
+  var A = [], b = [];
+  for (var i = 0; i < n; i++) {
+    A.push([]);
+    for (var j = 0; j < n; j++) A[i].push(parseVal(Atxt[i][j]));
+    b.push(parseVal(btxt[i]));
+  }
+  var run = buildRun(A, b, true);
+  MODE = save;
+  var last = run.ev[run.ev.length - 1];
+  return run.broke ? null : last.x;
+}
+
+/* ==================================================================
+   5.  Rendering the board
+   ================================================================== */
+
+function cur() { return S.events[S.at] || null; }
+
+function renderBoard() {
+  var e = cur(); if (!e) return;
+  var n = S.n, board = $("board");
+  var g = document.createElement("div");
+  g.className = "grid";
+  g.style.gridTemplateColumns = "auto repeat(" + n + ", auto) auto";
+
+  function cell(txt, cls) {
+    var d = document.createElement("div");
+    d.className = "cell " + (cls || "");
+    d.innerHTML = txt;
+    return d;
+  }
+
+  /* header row */
+  g.appendChild(cell("", "rlab"));
+  for (var j = 0; j < n; j++) g.appendChild(cell(String(j + 1), "hdr"));
+  g.appendChild(cell("b", "hdr bsep"));
+
+  var k = e.k === undefined ? -1 : e.k;
+  var blockFrom = (e.phase === "fwd" && e.kind !== "init") ? k : (e.kind === "init" ? 0 : -1);
+
+  for (var i = 0; i < n; i++) {
+    g.appendChild(cell(String(i + 1), "rlab"));
+    for (var jj = 0; jj < n; jj++) {
+      var cls = [];
+      var v = e.A[i][jj];
+      if (qzero(v)) cls.push("zero");
+      if (e.phase === "fwd") {
+        if (i < blockFrom) cls.push("fin");
+        if (e.kind === "mult" || e.kind === "rowop") {
+          if (i === k && jj >= k) cls.push("pivrow");
+          if (i === e.i && jj >= k) cls.push("trow");
+          if (i === k && jj === k) cls.push("piv");
+          if (e.kind === "mult" && i === e.i && jj === k) cls.push("kill");
+          if (e.kind === "rowop" && i === e.i && jj >= k &&
+              fmt(e.before[jj]) !== fmt(e.A[i][jj])) cls.push("chg");
+        } else if (e.kind === "search" || e.kind === "noswap" || e.kind === "swap") {
+          if (jj === k && i >= k) cls.push("trow");
+          if (i === (e.kind === "swap" ? k : e.p) && jj === k) cls.push("piv");
+        } else if (e.kind === "breakdown") {
+          if (i === k && jj === k) cls.push("kill");
+        }
+      } else if (e.phase === "back" && e.kind === "bs") {
+        if (i === e.i && jj === e.i) cls.push("piv");
+        if (i === e.i && jj > e.i) cls.push("dot");
+        if (i === e.i) cls.push("trow");
+      }
+      g.appendChild(cell(fmt(v), cls.join(" ")));
+    }
+    var bcls = ["bsep"];
+    if (qzero(e.b[i])) bcls.push("zero");
+    if (e.phase === "fwd" && i < blockFrom) bcls.push("fin");
+    if ((e.kind === "mult" || e.kind === "rowop") && i === k) bcls.push("pivrow");
+    if ((e.kind === "mult" || e.kind === "rowop") && i === e.i) bcls.push("trow");
+    if (e.kind === "rowop" && i === e.i && fmt(e.bbefore) !== fmt(e.b[i])) bcls.push("chg");
+    if (e.phase === "back" && e.kind === "bs" && i === e.i) bcls.push("trow");
+    g.appendChild(cell(fmt(e.b[i]), bcls.join(" ")));
+  }
+
+  /* the solution column, once there is one */
+  var anyx = e.x.some(function (v) { return v !== null; });
+  if (anyx) {
+    g.style.gridTemplateColumns = "auto repeat(" + n + ", auto) auto auto";
+    var kids = g.children, perRow = n + 2, out = [];
+    /* rebuild with an extra column: simplest is to append at row ends */
+    var ng = document.createElement("div");
+    ng.className = "grid";
+    ng.style.gridTemplateColumns = "auto repeat(" + n + ", auto) auto auto";
+    var idx = 0;
+    for (var rr = 0; rr <= n; rr++) {
+      for (var cc = 0; cc < perRow; cc++) ng.appendChild(kids[0]);
+      if (rr === 0) ng.appendChild(cell("x", "hdr bsep"));
+      else {
+        var xv = e.x[rr - 1];
+        ng.appendChild(cell(xv === null ? "&middot;" : fmt(xv),
+          "bsep " + (xv === null ? "zero" : "sol")));
+      }
+    }
+    g = ng;
+  }
+
+  board.innerHTML = "";
+  board.appendChild(g);
+
+  /* active-block outline */
+  if (e.phase === "fwd" && blockFrom >= 0 && blockFrom < n) {
+    requestAnimationFrame(function () { drawBlock(board, g, blockFrom, n, anyx); });
+  }
+  $("arrTag").innerHTML = "";
+}
+
+function drawBlock(board, g, k, n, hasX) {
+  var perRow = n + 2 + (hasX ? 1 : 0);
+  var kids = g.children;
+  function at(r, c) { return kids[r * perRow + c]; }
+  var tl = at(k + 1, k + 1), br = at(n, n + 1);
+  if (!tl || !br) return;
+  var gb = g.getBoundingClientRect();
+  var a = tl.getBoundingClientRect(), bb = br.getBoundingClientRect();
+  var box = document.createElement("div");
+  box.className = "blockbox";
+  box.style.left = (a.left - gb.left - 3) + "px";
+  box.style.top = (a.top - gb.top - 3) + "px";
+  box.style.width = (bb.right - a.left + 6) + "px";
+  box.style.height = (bb.bottom - a.top + 6) + "px";
+  g.appendChild(box);
+  var tag = document.createElement("div");
+  tag.className = "blocktag";
+  tag.textContent = "active block " + (n - k) + " × " + (n - k + 1);
+  tag.style.left = (a.left - gb.left - 3) + "px";
+  tag.style.top = (bb.bottom - gb.top + 8) + "px";
+  g.appendChild(tag);
+}
+
+function renderEquations() {
+  var e = cur(); if (!e) return;
+  var n = S.n;
+  var g = document.createElement("div");
+  g.className = "eqs";
+  g.style.gridTemplateColumns = "repeat(" + (2 * n) + ", auto) auto auto";
+  var k = e.k === undefined ? -1 : e.k;
+  for (var i = 0; i < n; i++) {
+    var hl = "";
+    if ((e.kind === "mult" || e.kind === "rowop") && i === e.i) hl = "hl";
+    else if ((e.kind === "mult" || e.kind === "rowop") && i === k) hl = "hlp";
+    else if (e.phase === "back" && e.kind === "bs" && i === e.i) hl = "hl";
+    for (var j = 0; j < n; j++) {
+      var v = e.A[i][j], zero = qzero(v), neg = qnum(v) < 0;
+      var shown = fmt(neg ? qsub(zeroVal(), v) : v);      // magnitude
+      var op = document.createElement("div");
+      op.className = "q op " + hl;
+      op.innerHTML = j === 0 ? (neg ? "&minus;" : "") : (neg ? "&minus;" : "+");
+      g.appendChild(op);
+      var q = document.createElement("div");
+      q.className = "q " + hl + (zero ? " vx" : "");
+      q.innerHTML = (zero ? "<span style='opacity:.4'>0</span>" : shown) +
+                    "<span class='vx'>x<sub>" + (j + 1) + "</sub></span>";
+      g.appendChild(q);
+    }
+    var eq = document.createElement("div");
+    eq.className = "q op " + hl; eq.innerHTML = "=";
+    g.appendChild(eq);
+    var rh = document.createElement("div");
+    rh.className = "q rhs " + hl; rh.innerHTML = fmt(e.b[i]);
+    g.appendChild(rh);
+  }
+  $("eqs").innerHTML = "";
+  $("eqs").appendChild(g);
+}
+
+var CODE_FWD = [
+  "for k = 1:n-1",
+  "    [~, p] = max(abs(A(k:n,k)));   <span class='cm'>% largest in the column</span>",
+  "    p = p + k - 1;",
+  "    if p ~= k",
+  "        A([k p],:) = A([p k],:);   <span class='cm'>% swap rows, in A ...</span>",
+  "        b([k p])   = b([p k]);     <span class='cm'>% ... and in b</span>",
+  "    end",
+  "    for i = k+1:n",
+  "        m        = A(i,k)/A(k,k);",
+  "        A(i,k:n) = A(i,k:n) - m*A(k,k:n);",
+  "        b(i)     = b(i)     - m*b(k);",
+  "    end",
+  "end",
+  "",
+  "x    = zeros(n,1);                 <span class='cm'>% back substitution</span>",
+  "x(n) = b(n)/A(n,n);",
+  "for i = n-1:-1:1",
+  "    x(i) = ( b(i) - A(i,i+1:n)*x(i+1:n) ) / A(i,i);",
+  "end"
+];
+/* map engine line ids onto code lines */
+var LINEMAP = { 0: [0], 1: [1, 2], 2: [3], 3: [4, 5], 6: [8], 7: [9, 10],
+                11: [14, 15], 12: [15], 13: [16, 17], 15: [18] };
+
+function renderCode() {
+  var e = cur(); if (!e) return;
+  var on = LINEMAP[e.line] || [];
+  var html = CODE_FWD.map(function (l, idx) {
+    var cls = on.indexOf(idx) >= 0 ? "ln on" : "ln";
+    var skip = (!S.pivoting && idx >= 1 && idx <= 6);
+    return "<span class='" + cls + "'" + (skip ? " style='opacity:.33'" : "") + ">" +
+           (l === "" ? "&nbsp;" : l) + "</span>";
+  }).join("");
+  var pre = $("code");
+  pre.innerHTML = html;
+  var live = pre.querySelector(".ln.on");
+  if (live) {
+    var want = live.offsetTop - pre.clientHeight / 2 + live.offsetHeight / 2;
+    pre.scrollTop = Math.max(0, want);
+  }
+}
+
+function renderNarration() {
+  var e = cur(); if (!e) return;
+  var ph = $("phase");
+  var pill = e.phase === "fwd" ? "<span class='pill fwd'>Forward elimination</span>"
+           : e.phase === "back" ? "<span class='pill back'>Back substitution</span>"
+           : "<span class='pill done'>Done</span>";
+  if (e.warn) pill = "<span class='pill warn'>Breakdown</span>";
+  var kk = (e.phase === "fwd" && e.k !== undefined && e.kind !== "init")
+      ? "step k = " + (e.k + 1) + " of " + (S.n - 1) : "";
+  ph.innerHTML = pill + (kk ? "<span>" + kk + "</span>" : "");
+
+  var html = "<b>" + e.title + "</b>";
+  if (e.mathline) html += "<span class='big'>" + e.mathline + "</span>";
+  $("narr").innerHTML = html;
+  $("subnarr").innerHTML = e.text || "";
+
+  /* warning banner */
+  var wb = $("warnBanner"); wb.innerHTML = "";
+  var msg = "";
+  if (e.kind === "mult" || e.kind === "rowop") {
+    var mm = Math.abs(qnum(e.m));
+    if (!isFinite(mm) || isNaN(mm)) {
+      msg = "<p class='banner'><b>Division by a zero pivot.</b> " +
+        "MATLAB does not stop; everything after this is Inf or NaN.</p>";
+    } else if (mm > 100) {
+      msg = "<p class='banner amber'><b>Large multiplier: " + fmt(e.m) + ".</b> " +
+        (isQ(e.m)
+          ? "Exact arithmetic survives it. Floating point would not &mdash; try the 3-digit setting."
+          : "Row " + (e.i + 1) + " is being swamped by a multiple of row " + (e.k + 1) +
+            ", and whatever it carried of its own can be rounded away.") + "</p>";
+    }
+    if (e.swamped) {
+      msg += "<p class='banner'><b>Information destroyed.</b> b(" + (e.i + 1) + ") was " +
+        e.swamped + ", and after the update it is " + fmt(e.b[e.i]) + " &mdash; exactly what it would " +
+        "have been had that entry been 0. Equation " + (e.i + 1) +
+        " has been rounded out of the problem.</p>";
+    }
+  }
+  if (!msg && e.warn) {
+    msg = "<p class='banner'><b>" + e.title + ".</b> " + e.text + "</p>";
+  }
+  wb.innerHTML = msg;
+}
+
+function renderFlops() {
+  var e = cur(); if (!e) return;
+  var n = S.n;
+  var tot = e.cum.mul + e.cum.div + e.cum.add;
+  var h = "";
+  function row(k, v, cls) {
+    return "<div class='rrow " + (cls || "") + "'><span class='k'>" + k +
+           "</span><span class='v'>" + v + "</span></div>";
+  }
+  if (e.cost) {
+    var c = e.cost.mul + e.cost.div + e.cost.add;
+    h += row("this operation", c + " flop" + (c === 1 ? "" : "s"), "piv");
+    h += row("&nbsp;&nbsp;&times; &nbsp;&divide;&nbsp; &plusmn;",
+             e.cost.mul + " &nbsp; " + e.cost.div + " &nbsp; " + e.cost.add);
+  } else {
+    h += row("this operation", "&mdash;");
+  }
+  h += row("running total", tot + " flops", "big");
+  h += row("&times; &nbsp; &divide; &nbsp; &plusmn; so far",
+           e.cum.mul + " &nbsp; " + e.cum.div + " &nbsp; " + e.cum.add);
+  var fe = 0;
+  for (var k = 1; k <= n - 1; k++) fe += 2 * (n - k) * (n - k + 2) + (n - k);
+  h += row("whole solve, counted exactly", (fe + n * n) + " flops &nbsp;<span style='color:var(--ink-faint)'>= " +
+           fe + " + " + n * n + "</span>");
+  h += row("&#8532;n&sup3; + n&sup2; for n = " + n,
+           Math.round(2 / 3 * n * n * n + n * n) + " flops");
+  $("flops").innerHTML = h;
+}
+
+function renderResult() {
+  var e = cur(), n = S.n;
+  var h = "", last = S.events[S.events.length - 1];
+  function row(k, v, cls) {
+    return "<div class='rrow " + (cls || "") + "'><span class='k'>" + k +
+           "</span><span class='v'>" + v + "</span></div>";
+  }
+  if (last.kind !== "done") {
+    h = "<p class='hint' style='margin:0'>No unique solution: the run stops at the breakdown above.</p>";
+  } else {
+    var xs = last.x.map(function (v, i) { return "x<sub>" + (i + 1) + "</sub> = " + fmt(v); });
+    h += row("computed solution", xs.join("&nbsp;&nbsp; "), "big");
+    var sys = readSystem();
+    var res = 0;
+    for (var i = 0; i < n; i++) {
+      var s = 0;
+      for (var j = 0; j < n; j++) s += qnum(sys.A[i][j]) * qnum(last.x[j]);
+      res = Math.max(res, Math.abs(s - qnum(sys.b[i])));
+    }
+    h += row("residual &#8214;Ax &minus; b&#8214;<sub>&infin;</sub>",
+             fmtSci(res), res < 1e-10 ? "good" : "bad");
+    var ex = exactSolve(S.Atxt, S.btxt, n);
+    if (ex) {
+      var err = 0;
+      for (var q = 0; q < n; q++) err = Math.max(err, Math.abs(qnum(last.x[q]) - qnum(ex[q])));
+      h += row("error &#8214;x &minus; x*&#8214;<sub>&infin;</sub>",
+               fmtSci(err), err < 1e-10 ? "good" : "bad");
+      h += row("exact solution", ex.map(function (v) { return fmt(v); }).join("&nbsp;&nbsp; "));
+    }
+  }
+  $("result").innerHTML = h;
+}
+
+function fmtSci(x) {
+  if (x === 0) return "0";
+  if (!isFinite(x) || isNaN(x)) return "NaN";
+  return x.toExponential(2);
+}
+
+function renderCompare() {
+  if (S.tab !== "pivot") { $("compareCard").classList.add("hidden"); return; }
+  $("compareCard").classList.remove("hidden");
+  var n = S.n, sys = readSystem();
+  var runOff = buildRun(sys.A, sys.b, false);
+  var runOn = buildRun(sys.A, sys.b, true);
+  var ex = exactSolve(S.Atxt, S.btxt, n);
+  function finish(run) {
+    var l = run.ev[run.ev.length - 1];
+    return l.kind === "done" ? l.x : null;
+  }
+  var xo = finish(runOff), xp = finish(runOn);
+  function errOf(x) {
+    if (!x || !ex) return null;
+    var e = 0;
+    for (var i = 0; i < n; i++) e = Math.max(e, Math.abs(qnum(x[i]) - qnum(ex[i])));
+    return e;
+  }
+  var h = "<table class='tb'><tr><th>&nbsp;</th>";
+  for (var i = 0; i < n; i++) h += "<th>x<sub>" + (i + 1) + "</sub></th>";
+  h += "<th>max error</th></tr>";
+  function line(name, x) {
+    var s = "<tr><td>" + name + "</td>";
+    for (var i = 0; i < n; i++) s += "<td>" + (x ? fmt(x[i]) : "&mdash;") + "</td>";
+    var e = errOf(x);
+    s += "<td class='" + (e === null ? "" : (e < 1e-8 ? "good" : "bad")) + "'>" +
+         (e === null ? "&mdash;" : fmtSci(e)) + "</td></tr>";
+    return s;
+  }
+  h += line("no pivoting", xo);
+  h += line("partial pivoting", xp);
+  h += line("exact", ex);
+  h += "</table>";
+  h += "<p class='hint' style='margin-top:12px'>Both rows are the same algorithm on the same system, " +
+       "differing only in whether rows are swapped, and both are computed in the arithmetic selected above.</p>";
+  $("compare").innerHTML = h;
+}
+
+/* ==================================================================
+   6.  Transport
+   ================================================================== */
+
+function renderAll() {
+  renderBoard(); renderEquations(); renderCode();
+  renderNarration(); renderFlops(); renderResult();
+  var e = cur();
+  $("progBar").style.width = (100 * S.at / Math.max(1, S.events.length - 1)) + "%";
+  $("progCount").textContent = (S.at + 1) + " / " + S.events.length;
+  $("btnPrev").disabled = S.at === 0;
+  $("btnFirst").disabled = S.at === 0;
+  $("btnNext").disabled = S.at >= S.events.length - 1;
+  $("btnEnd").disabled = S.at >= S.events.length - 1;
+  $("btnStep").disabled = S.at >= S.events.length - 1;
+}
+
+function rebuild(keepAt) {
+  var sys = readSystem();
+  var run = buildRun(sys.A, sys.b, S.pivoting);
+  S.events = run.ev;
+  S.at = keepAt ? Math.min(S.at, S.events.length - 1) : 0;
+  renderAll();
+  renderCompare();
+}
+
+function go(d) {
+  S.at = Math.max(0, Math.min(S.events.length - 1, S.at + d));
+  renderAll();
+}
+function nextK() {
+  var k0 = S.events[S.at].k, i = S.at + 1;
+  while (i < S.events.length - 1 && S.events[i].k === k0 && S.events[i].phase === "fwd") i++;
+  S.at = i; renderAll();
+}
+function play(on) {
+  S.playing = on === undefined ? !S.playing : on;
+  if (S.playing && S.at >= S.events.length - 1) S.at = 0;
+  $("btnPlay").textContent = S.playing ? "Pause" : "Play";
+  clearInterval(S.timer);
+  if (S.playing) {
+    S.timer = setInterval(function () {
+      if (S.at >= S.events.length - 1) { play(false); return; }
+      go(1);
+    }, 1100);
+  }
+}
+
+/* ==================================================================
+   7.  Editor
+   ================================================================== */
+
+function buildEditor() {
+  var n = S.n, g = document.createElement("div");
+  g.className = "editgrid";
+  g.style.gridTemplateColumns = "repeat(" + n + ", auto) auto";
+  for (var i = 0; i < n; i++) {
+    for (var j = 0; j < n; j++) {
+      (function (i, j) {
+        var inp = document.createElement("input");
+        inp.type = "text"; inp.value = S.Atxt[i][j];
+        inp.setAttribute("aria-label", "A(" + (i + 1) + "," + (j + 1) + ")");
+        inp.oninput = function () { S.Atxt[i][j] = inp.value; rebuild(false); };
+        g.appendChild(inp);
+      })(i, j);
+    }
+    (function (i) {
+      var inp = document.createElement("input");
+      inp.type = "text"; inp.value = S.btxt[i]; inp.className = "bcol";
+      inp.setAttribute("aria-label", "b(" + (i + 1) + ")");
+      inp.oninput = function () { S.btxt[i] = inp.value; rebuild(false); };
+      g.appendChild(inp);
+    })(i);
+  }
+  $("editGrid").innerHTML = "";
+  $("editGrid").appendChild(g);
+
+  var ss = $("sizeSeg"); ss.innerHTML = "";
+  [2, 3, 4, 5, 6].forEach(function (k) {
+    var b = document.createElement("button");
+    b.type = "button"; b.textContent = k;
+    b.setAttribute("aria-pressed", k === n ? "true" : "false");
+    b.onclick = function () { resize(k); };
+    ss.appendChild(b);
+  });
+}
+
+function resize(k) {
+  var A = [], b = [];
+  for (var i = 0; i < k; i++) {
+    A.push([]);
+    for (var j = 0; j < k; j++)
+      A[i].push((S.Atxt[i] && S.Atxt[i][j] !== undefined) ? S.Atxt[i][j] : (i === j ? "1" : "0"));
+    b.push(S.btxt[i] !== undefined ? S.btxt[i] : "0");
+  }
+  S.n = k; S.Atxt = A; S.btxt = b;
+  buildEditor(); rebuild(false);
+}
+
+function randomise() {
+  var n = S.n;
+  var x = [], i, j;
+  for (i = 0; i < n; i++) x.push(Math.floor(Math.random() * 7) - 3);
+  for (i = 0; i < n; i++) {
+    for (j = 0; j < n; j++) {
+      var v = Math.floor(Math.random() * 9) - 4;
+      if (i === j && v === 0) v = 2;
+      S.Atxt[i][j] = String(v);
+    }
+  }
+  for (i = 0; i < n; i++) {                 // choose b so the answer is the integer x
+    var s = 0;
+    for (j = 0; j < n; j++) s += parseFloat(S.Atxt[i][j]) * x[j];
+    S.btxt[i] = String(s);
+  }
+  $("sysHint").innerHTML = "Random integer system, built so that the exact answer is (" +
+    x.join(", ") + ").";
+  buildEditor(); rebuild(false);
+}
+
+/* ==================================================================
+   8.  Structure and cost
+   ================================================================== */
+
+var SP = { pattern: "dense", n: 12 };
+
+function makePattern(kind, n) {
+  var P = [], i, j;
+  for (i = 0; i < n; i++) { P.push([]); for (j = 0; j < n; j++) P[i].push(false); }
+  for (i = 0; i < n; i++) for (j = 0; j < n; j++) {
+    if (kind === "dense") P[i][j] = true;
+    else if (kind === "tri") P[i][j] = Math.abs(i - j) <= 1;
+    else if (kind === "arrow") P[i][j] = (Math.abs(i - j) <= 1) || i === 0 || j === 0;
+    else P[i][j] = (i === j) || (Math.random() < 0.13);
+  }
+  return P;
+}
+
+function runPattern(P0) {
+  var n = P0.length, P = P0.map(function (r) { return r.slice(); });
+  var fill = 0, updates = 0, touched = [];
+  for (var k = 0; k < n - 1; k++) {
+    for (var i = k + 1; i < n; i++) {
+      if (!P[i][k]) continue;
+      for (var j = k + 1; j < n; j++) {
+        if (!P[k][j]) continue;
+        updates++;
+        if (!P[i][j]) { P[i][j] = true; fill++; touched.push([i, j]); }
+      }
+      P[i][k] = false;
+    }
+  }
+  var nz = 0;
+  for (var a = 0; a < n; a++) for (var b = 0; b < n; b++) if (P[a][b]) nz++;
+  return { P: P, fill: fill, updates: updates, nz: nz, fills: touched };
+}
+
+function renderStruct() {
+  var n = SP.n;
+  var P0 = makePattern(SP.pattern, n);
+  var r = runPattern(P0);
+  var spy = $("spy");
+  spy.innerHTML = "";
+  spy.style.gridTemplateColumns = "repeat(" + n + ", auto)";
+  var isFill = {};
+  r.fills.forEach(function (p) { isFill[p[0] + "," + p[1]] = true; });
+  for (var i = 0; i < n; i++) for (var j = 0; j < n; j++) {
+    var d = document.createElement("div");
+    if (isFill[i + "," + j]) d.className = "fill";
+    else if (P0[i][j] && j >= i) d.className = "nz";
+    else if (P0[i][j] && j < i) d.className = "gone";
+    d.title = "A(" + (i + 1) + "," + (j + 1) + ")";
+    spy.appendChild(d);
+  }
+
+  var nz0 = 0;
+  for (var a = 0; a < n; a++) for (var b = 0; b < n; b++) if (P0[a][b]) nz0++;
+  var dense = 0;
+  for (var k = 1; k <= n - 1; k++) dense += (n - k) * (n - k);
+  function row(k2, v, cls) {
+    return "<div class='rrow " + (cls || "") + "'><span class='k'>" + k2 +
+           "</span><span class='v'>" + v + "</span></div>";
+  }
+  var h = "";
+  h += row("non-zeros to start with", nz0 + " of " + (n * n));
+  h += row("fill-in created", r.fill, r.fill === 0 ? "good" : "bad");
+  h += row("entry updates performed", r.updates, "big");
+  h += row("a dense matrix would need", dense);
+  var sav = dense === 0 ? 0 : 100 * (1 - r.updates / dense);
+  h += row("work saved against dense", (dense === 0 ? "&mdash;" : sav.toFixed(1) + "%"),
+           sav > 1 ? "good" : "");
+  var verdict;
+  if (SP.pattern === "dense") verdict = "Nothing to exploit: every entry is in play from the start.";
+  else if (r.fill === 0) verdict = "No fill-in at all. The structure survives the elimination intact, " +
+    "which is what licenses throwing the matrix away and keeping the diagonals.";
+  else if (r.updates >= dense) verdict = "Complete fill-in. The first step uses a full pivot row to update " +
+    "every row below it, so the whole trailing block becomes non-zero and the sparsity buys nothing. " +
+    "Moving that row and column to the end avoids it entirely.";
+  else verdict = "Partial fill-in: some zeros are lost, but the elimination still does far less work " +
+    "than on a dense matrix.";
+  h += "<p class='hint' style='margin:12px 0 0'>" + verdict + "</p>";
+  $("spyOut").innerHTML = h;
+}
+
+function fmtTime(s) {
+  if (s < 1e-6) return (s * 1e9).toFixed(1) + " ns";
+  if (s < 1e-3) return (s * 1e6).toFixed(1) + " &micro;s";
+  if (s < 1) return (s * 1e3).toFixed(1) + " ms";
+  if (s < 90) return s.toFixed(1) + " s";
+  if (s < 5400) return (s / 60).toFixed(1) + " min";
+  if (s < 2 * 86400) return (s / 3600).toFixed(1) + " hours";
+  if (s < 3 * 3.15e7) return (s / 86400).toFixed(1) + " days";
+  return (s / 3.15e7).toPrecision(3) + " years";
+}
+function fmtBytes(x) {
+  if (x < 1e3) return x.toFixed(0) + " B";
+  if (x < 1e6) return (x / 1e3).toFixed(1) + " kB";
+  if (x < 1e9) return (x / 1e6).toFixed(1) + " MB";
+  if (x < 1e12) return (x / 1e9).toFixed(1) + " GB";
+  return (x / 1e12).toPrecision(3) + " TB";
+}
+function fmtBig(x) {
+  if (x < 1e4) return x.toFixed(0);
+  return x.toExponential(2);
+}
+
+function renderCost() {
+  var e = parseInt($("ncost").value, 10) / 10;   // 1.0 ... 6.0
+  var n = Math.round(Math.pow(10, e));
+  $("ncostval").textContent = n.toLocaleString("en-NZ");
+  var dense = 2 / 3 * n * n * n, tri = 8 * n;
+  var h = "<tr><th>&nbsp;</th><th>flops</th><th>time</th><th>memory</th></tr>";
+  h += "<tr><td>dense elimination</td><td>" + fmtBig(dense) + "</td><td>" +
+       fmtTime(dense / 1e10) + "</td><td>" + fmtBytes(8 * n * n) + "</td></tr>";
+  h += "<tr><td>Thomas (tridiagonal)</td><td>" + fmtBig(tri) + "</td><td>" +
+       fmtTime(tri / 1e10) + "</td><td>" + fmtBytes(8 * 3 * n) + "</td></tr>";
+  h += "<tr><td>ratio</td><td class='good'>" + fmtBig(dense / tri) +
+       "&times;</td><td class='good'>" + fmtBig(dense / tri) + "&times;</td><td class='good'>" +
+       fmtBig((n * n) / (3 * n)) + "&times;</td></tr>";
+  $("costTable").innerHTML = h;
+}
+
+/* ==================================================================
+   9.  Wiring
+   ================================================================== */
+
+function selectTab(t) {
+  S.tab = t;
+  $("tabSolve").setAttribute("aria-selected", t === "solve");
+  $("tabPivot").setAttribute("aria-selected", t === "pivot");
+  $("tabStruct").setAttribute("aria-selected", t === "struct");
+  var solveish = (t !== "struct");
+  $("sysControls").classList.toggle("hidden", !solveish);
+  $("boardWrap").classList.toggle("hidden", !solveish);
+  $("transport").classList.toggle("hidden", !solveish);
+  $("structPanel").classList.toggle("hidden", solveish);
+  $("editCard").classList.add("hidden");
+  $("arithField").classList.toggle("hidden", false);
+  if (t === "pivot") {
+    var p = PRESETS[1];
+    loadPreset(p);
+    setArith("3"); setPiv(false);
+    $("preset").value = p.id;
+    buildEditor();
+  }
+  if (t === "struct") renderStruct();
+  rebuild(false);
+}
+
+function setPiv(v) {
+  S.pivoting = !!v;
+  Array.prototype.forEach.call($("pivSeg").children, function (b) {
+    b.setAttribute("aria-pressed", (b.dataset.v === "1") === S.pivoting ? "true" : "false");
+  });
+  rebuild(false);
+}
+function setArith(v) {
+  MODE = v;
+  Array.prototype.forEach.call($("arithSeg").children, function (b) {
+    b.setAttribute("aria-pressed", b.dataset.v === v ? "true" : "false");
+  });
+  rebuild(false);
+}
+
+function init() {
+  var sel = $("preset");
+  PRESETS.forEach(function (p) {
+    var o = document.createElement("option");
+    o.value = p.id; o.innerHTML = p.name;
+    sel.appendChild(o);
+  });
+  sel.onchange = function () {
+    var p = PRESETS.filter(function (q) { return q.id === sel.value; })[0];
+    loadPreset(p); buildEditor(); rebuild(false); play(false);
+  };
+  loadPreset(PRESETS[0]);
+  buildEditor();
+
+  Array.prototype.forEach.call($("pivSeg").children, function (b) {
+    b.onclick = function () { setPiv(b.dataset.v === "1"); };
+  });
+  Array.prototype.forEach.call($("arithSeg").children, function (b) {
+    b.onclick = function () { setArith(b.dataset.v); };
+  });
+  Array.prototype.forEach.call($("patSeg").children, function (b) {
+    b.onclick = function () {
+      SP.pattern = b.dataset.v;
+      Array.prototype.forEach.call($("patSeg").children, function (c) {
+        c.setAttribute("aria-pressed", c === b ? "true" : "false");
+      });
+      renderStruct();
+    };
+  });
+
+  $("btnEdit").onclick = function () { $("editCard").classList.toggle("hidden"); };
+  $("btnEditClose").onclick = function () { $("editCard").classList.add("hidden"); };
+  $("btnRand").onclick = randomise;
+
+  $("btnNext").onclick = function () { play(false); go(1); };
+  $("btnPrev").onclick = function () { play(false); go(-1); };
+  $("btnFirst").onclick = function () { play(false); S.at = 0; renderAll(); };
+  $("btnEnd").onclick = function () { play(false); S.at = S.events.length - 1; renderAll(); };
+  $("btnStep").onclick = function () { play(false); nextK(); };
+  $("btnPlay").onclick = function () { play(); };
+
+  $("tabSolve").onclick = function () { selectTab("solve"); };
+  $("tabPivot").onclick = function () { selectTab("pivot"); };
+  $("tabStruct").onclick = function () { selectTab("struct"); };
+
+  $("nspy").oninput = function () {
+    SP.n = parseInt($("nspy").value, 10);
+    $("nspyval").textContent = SP.n;
+    renderStruct();
+  };
+  $("ncost").oninput = renderCost;
+
+  $("btnPresent").onclick = function () {
+    var on = document.documentElement.getAttribute("data-present") === "1";
+    document.documentElement.setAttribute("data-present", on ? "0" : "1");
+    renderAll();
+  };
+
+  document.addEventListener("keydown", function (ev) {
+    if (/input|select|textarea/i.test(ev.target.tagName)) return;
+    if (S.tab === "struct") return;
+    if (ev.key === "ArrowRight") { play(false); go(1); ev.preventDefault(); }
+    else if (ev.key === "ArrowLeft") { play(false); go(-1); ev.preventDefault(); }
+    else if (ev.key === "ArrowDown") { play(false); nextK(); ev.preventDefault(); }
+    else if (ev.key === " ") { play(); ev.preventDefault(); }
+    else if (ev.key === "r" || ev.key === "R") { play(false); S.at = 0; renderAll(); }
+    else if (ev.key === "e" || ev.key === "E") { play(false); S.at = S.events.length - 1; renderAll(); }
+    else if (ev.key === "p" || ev.key === "P") { setPiv(!S.pivoting); }
+  });
+
+  window.addEventListener("resize", function () { renderBoard(); });
+
+
+  renderStruct(); renderCost();
+  rebuild(false);
+}
+
+init();
+})();
+</script>
+</body>
+</html>
